@@ -1,0 +1,3 @@
+BasedOnStyle: Google
+AlignConsecutiveDeclarations: true
+StatementAttributeLikeMacros: [spider_emit]
