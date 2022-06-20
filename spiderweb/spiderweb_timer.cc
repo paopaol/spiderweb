@@ -38,6 +38,8 @@ Timer::Timer(Base *parent) : Base(parent), d(new Private(this, parent)) {}
 
 Timer::~Timer() = default;
 
+void Timer::SetInterval(uint32_t timeout_ms) { d->timeoutms = timeout_ms; }
+
 void Timer::SetSingalShot(bool flag) { d->singal_shot = flag; }
 
 void Timer::Start(const uint64_t timeout_ms) {

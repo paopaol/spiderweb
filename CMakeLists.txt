@@ -10,3 +10,4 @@ set(BENCHMARK_ENABLE_TESTING FALSE)
 add_subdirectory(benchmark)
 
 add_subdirectory(spiderweb)
+add_subdirectory(Qt)
