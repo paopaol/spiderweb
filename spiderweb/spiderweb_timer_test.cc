@@ -5,7 +5,7 @@
 
 spiderweb::EventLoop *g_loop = nullptr;
 
-class Reciver : public spiderweb::Base {
+class Reciver : public spiderweb::Object {
  public:
   void ontimeout() { g_loop->Quit(); }
 };
@@ -19,8 +19,8 @@ TEST(spiderweb_timer, connect) {
 
   bool called = false;
 
-  spiderweb::Base::Connect(timer.timeout, &reciver, [&]() { called = true; });
-  spiderweb::Base::Connect(timer.timeout, &reciver, &Reciver::ontimeout);
+  spiderweb::Object::Connect(timer.timeout, &reciver, [&]() { called = true; });
+  spiderweb::Object::Connect(timer.timeout, &reciver, &Reciver::ontimeout);
 
   timer.Start(1000);
 

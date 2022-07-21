@@ -8,7 +8,7 @@ static void BM_EventSignalConnectLambda(benchmark::State& state) {
   static const auto f = [](const std::string& a, int b, float c) {};
 
   for (auto _ : state) {
-    spiderweb::Base::Connect(voidEvent, &loop, f);
+    spiderweb::Object::Connect(voidEvent, &loop, f);
   }
 }
 BENCHMARK(BM_EventSignalConnectLambda);
@@ -17,8 +17,8 @@ static void BM_EventSignalConnectClassMethod(benchmark::State& state) {
   spiderweb::EventSignal<void(const std::string& a, int b, float c)> voidEvent;
   spiderweb::EventLoop                                               loop;
 
-  struct Struct : public spiderweb::Base {
-    Struct(spiderweb::Base* parent = nullptr) : Base(parent) {}
+  struct Struct : public spiderweb::Object {
+    Struct(spiderweb::Object* parent = nullptr) : Object(parent) {}
 
     void myslot(const std::string& a, int b, float c) { ++count; }
 
@@ -27,7 +27,7 @@ static void BM_EventSignalConnectClassMethod(benchmark::State& state) {
 
   Struct reciver;
   for (auto _ : state) {
-    spiderweb::Base::Connect(voidEvent, &reciver, &Struct::myslot);
+    spiderweb::Object::Connect(voidEvent, &reciver, &Struct::myslot);
   }
 }
 BENCHMARK(BM_EventSignalConnectClassMethod);

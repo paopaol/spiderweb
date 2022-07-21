@@ -14,10 +14,13 @@ class EventSignal : protected eventpp::CallbackList<Prototype_> {
 
   void operator()(Args... args) const { super::operator()(args...); }
 
+ private:
   void append(const typename eventpp::internal_::CallbackListBase<
               Prototype_, eventpp::DefaultPolicies>::Callback &call) {
     super::append(call);
   }
+
+  friend class Object;
 };
 }  // namespace spiderweb
 

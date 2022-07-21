@@ -8,23 +8,23 @@ namespace spiderweb {
 
 thread_local EventLoop *current_loop = nullptr;
 
-class Base::Private {
+class Object::Private {
  public:
-  Private(EventLoop *_loop, Base *_parent)
+  Private(EventLoop *_loop, Object *_parent)
       : id(std::this_thread::get_id()), loop(_loop), parent(_parent) {}
 
   std::thread::id id;
   EventLoop      *loop = nullptr;
-  Base           *parent = nullptr;
+  Object           *parent = nullptr;
 };
 
-Base::Base(Base *parent) : d(new Private(GetLoop(parent), parent)) {}
+Object::Object(Object *parent) : d(new Private(GetLoop(parent), parent)) {}
 
-Base::Base(EventLoop *loop, Base *parent) : d(new Private(loop, parent)) {}
+Object::Object(EventLoop *loop, Object *parent) : d(new Private(loop, parent)) {}
 
-Base::~Base() = default;
+Object::~Object() = default;
 
-spiderweb::EventLoop *Base::ownerEventLoop() { return d->loop; }
+spiderweb::EventLoop *Object::ownerEventLoop() { return d->loop; }
 
 class EventLoop::Private {
  public:
@@ -44,7 +44,7 @@ class EventLoop::Private {
   EventLoop             *q = nullptr;
 };
 
-EventLoop::EventLoop(Base *parent) : Base(this, parent), d(new Private(this)) {
+EventLoop::EventLoop(Object *parent) : Object(this, parent), d(new Private(this)) {
   assert(current_loop);
 }
 

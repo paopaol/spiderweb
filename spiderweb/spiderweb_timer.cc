@@ -3,7 +3,7 @@
 namespace spiderweb {
 class Timer::Private {
  public:
-  Private(Timer *qq, Base *parent)
+  Private(Timer *qq, Object *parent)
       : q(qq), timer(GetLoop(parent)->IoService()) {}
 
   asio::steady_timer timer;
@@ -34,7 +34,7 @@ class Timer::Private {
   }
 };
 
-Timer::Timer(Base *parent) : Base(parent), d(new Private(this, parent)) {}
+Timer::Timer(Object *parent) : Object(parent), d(new Private(this, parent)) {}
 
 Timer::~Timer() = default;
 

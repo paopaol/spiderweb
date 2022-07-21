@@ -20,9 +20,9 @@ namespace spiderweb {
  *
  * created in A thread, must be used in A thread.
  */
-class Timer : public Base {
+class Timer : public Object {
  public:
-  Timer(Base *parent = nullptr);
+  Timer(Object *parent = nullptr);
   ~Timer();
 
   /**

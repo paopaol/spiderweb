@@ -14,20 +14,21 @@ namespace spiderweb {
 template <typename Type, typename... Args>
 static inline std::function<void(Args...)> createFunctor(
     Type *instance, void (Type::*method)(Args... args)) {
-  return [=](Args &&...args) { (instance->*method)(args...); };
+  return
+      [=](Args &&...args) { (instance->*method)(std::forward<Args>(args)...); };
 }
 
 class EventLoop;
-class Base {
+class Object {
  public:
-  Base(Base *parent = nullptr);
+  Object(Object *parent = nullptr);
 
-  ~Base();
+  ~Object();
 
   template <typename Reciver, typename... Args>
   static void Connect(EventSignal<void(Args... args)> &signal, Reciver *reciver,
                       void (Reciver::*method)(Args... args)) {
-    static_assert(std::is_base_of<Base, Reciver>::value,
+    static_assert(std::is_base_of<Object, Reciver>::value,
                   "Reciver must derived from Base");
     signal.append(createFunctor(reciver, method));
   }
@@ -36,15 +37,16 @@ class Base {
             typename F = std::function<void(Args...)>>
   static void Connect(EventSignal<void(Args... args)> &signal, Reciver *reciver,
                       const F &f) {
-    static_assert(std::is_base_of<Base, Reciver>::value,
+    static_assert(std::is_base_of<Object, Reciver>::value,
                   "Reciver must derived from Base");
-    signal.append([reciver, f](Args... args) { f(args...); });
+    signal.append(
+        [reciver, f](Args &&...args) { f(std::forward<Args>(args)...); });
   }
 
   EventLoop *ownerEventLoop();
 
  private:
-  Base(EventLoop *loop, Base *parent = nullptr);
+  Object(EventLoop *loop, Object *parent = nullptr);
 
   class Private;
   std::unique_ptr<Private> d;
@@ -52,9 +54,9 @@ class Base {
   friend class EventLoop;
 };
 
-class EventLoop : public Base {
+class EventLoop : public Object {
  public:
-  EventLoop(Base *parent = nullptr);
+  EventLoop(Object *parent = nullptr);
   ~EventLoop();
 
   int Exec();
@@ -72,7 +74,7 @@ class EventLoop : public Base {
   std::unique_ptr<Private> d;
 };
 
-inline EventLoop *GetLoop(Base *base) {
+inline EventLoop *GetLoop(Object *base) {
   if (base) {
     return base->ownerEventLoop();
   }
