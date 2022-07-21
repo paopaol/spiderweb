@@ -7,19 +7,19 @@
 #include "spiderweb_eventloop.h"
 
 TEST(spiderweb_BinaryWriter, Size) {
-  spiderweb::DefaultStreamer                          output;
-  spiderweb::BinaryWriter<spiderweb::DefaultStreamer> writer(output);
+  spiderweb::io::DefaultStreamer                              output;
+  spiderweb::io::BinaryWriter<spiderweb::io::DefaultStreamer> writer(output);
 
   const auto size = writer.Size(spiderweb::arch::BigEndian<2>(123), "123");
   EXPECT_EQ(size, 5);
 }
 
 TEST(spiderweb_BinaryWriter, Write) {
-  spiderweb::DefaultStreamer output;
+  spiderweb::io::DefaultStreamer output;
 
   output.PreAllocate(2);
 
-  spiderweb::BinaryWriter<spiderweb::DefaultStreamer> writer(output);
+  spiderweb::io::BinaryWriter<spiderweb::io::DefaultStreamer> writer(output);
 
   const auto size = writer.Write(spiderweb::arch::BigEndian<2>(123), "123");
   EXPECT_EQ(size, 5);

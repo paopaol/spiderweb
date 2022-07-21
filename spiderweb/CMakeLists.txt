@@ -2,9 +2,15 @@ add_library(spiderweb)
 
 target_sources(
   spiderweb
-  PRIVATE spiderweb_eventsignal.h spiderweb_eventloop.cc spiderweb_eventloop.h
-          spiderweb_timer.cc spiderweb_timer.h spiderweb_binary_writer.hpp)
-target_include_directories(spiderweb PUBLIC asio-1.22.1/include eventpp/include)
+  PRIVATE spiderweb_eventsignal.h
+          spiderweb_eventloop.cc
+          spiderweb_eventloop.h
+          spiderweb_timer.cc
+          spiderweb_timer.h
+          arch/spiderweb_arch.hpp
+          io/spiderweb_binary_writer.hpp)
+target_include_directories(spiderweb PUBLIC asio-1.22.1/include eventpp/include
+                                            ${CMAKE_CURRENT_SOURCE_DIR})
 # we do not use any bosst components
 target_compile_definitions(
   spiderweb
@@ -21,7 +27,7 @@ target_compile_definitions(
 add_executable(spiderweb_test)
 target_sources(
   spiderweb_test PRIVATE spiderweb_eventloop_test.cc spiderweb_timer_test.cc
-                         spiderweb_binary_writer_test.cc)
+                         io/spiderweb_binary_writer_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark
