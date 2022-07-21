@@ -17,11 +17,13 @@ TEST(spiderweb_timer, connect) {
   spiderweb::Timer timer;
   Reciver          reciver;
 
-  spiderweb::Base::Connect(timer.timeout, &reciver,
-                           []() { printf("timeout\n"); });
+  bool called = false;
+
+  spiderweb::Base::Connect(timer.timeout, &reciver, [&]() { called = true; });
   spiderweb::Base::Connect(timer.timeout, &reciver, &Reciver::ontimeout);
 
-  timer.Start(5000);
+  timer.Start(1000);
 
   loop.Exec();
+  EXPECT_EQ(called, true);
 }

@@ -1,8 +1,9 @@
 add_library(spiderweb)
 
 target_sources(
-  spiderweb PRIVATE spiderweb_eventsignal.h spiderweb_eventloop.cc
-                    spiderweb_eventloop.h spiderweb_timer.cc spiderweb_timer.h)
+  spiderweb
+  PRIVATE spiderweb_eventsignal.h spiderweb_eventloop.cc spiderweb_eventloop.h
+          spiderweb_timer.cc spiderweb_timer.h spiderweb_binary_writer.hpp)
 target_include_directories(spiderweb PUBLIC asio-1.22.1/include eventpp/include)
 # we do not use any bosst components
 target_compile_definitions(
@@ -18,9 +19,10 @@ target_compile_definitions(
 
 # unit test
 add_executable(spiderweb_test)
-target_sources(spiderweb_test PRIVATE spiderweb_eventloop_test.cc
-                                      spiderweb_timer_test.cc)
-target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest)
+target_sources(
+  spiderweb_test PRIVATE spiderweb_eventloop_test.cc spiderweb_timer_test.cc
+                         spiderweb_binary_writer_test.cc)
+target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark
 add_executable(spiderweb_benchmark)
