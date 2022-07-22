@@ -2,9 +2,9 @@
 
 #include <gmock/gmock-matchers.h>
 
+#include "core/spiderweb_eventloop.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "spiderweb_eventloop.h"
 
 TEST(spiderweb_BinaryWriter, Size) {
   spiderweb::io::DefaultStreamer                              output;

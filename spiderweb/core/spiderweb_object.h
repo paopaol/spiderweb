@@ -2,8 +2,12 @@
 #ifndef SPIDERWEB_OBJECT_H
 #define SPIDERWEB_OBJECT_H
 
+#include <functional>
+#include <memory>
 #include <thread>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 
 #include "asio-1.22.1/include/asio/io_service.hpp"
 #include "index_sequence.hpp"
@@ -31,7 +35,7 @@ struct MoveTupleWrapper {
 
   template <typename T, typename... Params>
   void Apply(void (T::*member)(Params...), T &object) const {
-    ApplyHelper(member, object, index_sequence_for<Args...>());
+    ApplyHelper(member, object, index_sequence_for<Params...>());
   }
 
   template <typename F>

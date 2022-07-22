@@ -2,16 +2,16 @@ add_library(spiderweb)
 
 target_sources(
   spiderweb
-  PRIVATE spiderweb_eventsignal.h
-          spiderweb_eventloop.cc
-          spiderweb_eventloop.h
-          spiderweb_object.cc
-          spiderweb_object.h
-          spiderweb_timer.cc
-          spiderweb_timer.h
+  PRIVATE core/spiderweb_eventsignal.h
+          core/spiderweb_eventloop.cc
+          core/spiderweb_eventloop.h
+          core/spiderweb_object.cc
+          core/spiderweb_object.h
+          core/spiderweb_timer.cc
+          core/spiderweb_timer.h
+          core/index_sequence.hpp
           arch/spiderweb_arch.hpp
-          io/spiderweb_binary_writer.hpp
-          index_sequence.hpp)
+          io/spiderweb_binary_writer.hpp)
 target_include_directories(spiderweb PUBLIC asio-1.22.1/include eventpp/include
                                             ${CMAKE_CURRENT_SOURCE_DIR})
 # we do not use any bosst components
@@ -29,13 +29,15 @@ target_compile_definitions(
 # unit test
 add_executable(spiderweb_test)
 target_sources(
-  spiderweb_test PRIVATE spiderweb_eventloop_test.cc spiderweb_timer_test.cc
-                         io/spiderweb_binary_writer_test.cc)
+  spiderweb_test
+  PRIVATE core/spiderweb_eventloop_test.cc core/spiderweb_timer_test.cc
+          io/spiderweb_binary_writer_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark
 add_executable(spiderweb_benchmark)
-target_sources(spiderweb_benchmark PRIVATE spiderweb_eventsignal_benchmark.cc
-                                           spiderweb_timer_benchmark.cc)
+target_sources(
+  spiderweb_benchmark PRIVATE core/spiderweb_eventsignal_benchmark.cc
+                              core/spiderweb_timer_benchmark.cc)
 target_link_libraries(spiderweb_benchmark PRIVATE spiderweb benchmark
                                                   benchmark_main)
