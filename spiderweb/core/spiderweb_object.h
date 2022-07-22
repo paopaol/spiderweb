@@ -99,6 +99,9 @@ class Object {
 
   ~Object();
 
+  Object(const Object &other) = delete;
+  Object &operator=(const Object &other) = delete;
+
   template <typename Reciver, typename... Args>
   static void Connect(EventSignal<void(Args... args)> &signal, Reciver *reciver,
                       void (Reciver::*method)(Args... args)) {
