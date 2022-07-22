@@ -1,4 +1,3 @@
-
 #ifndef SPIDERWEB_OBJECT_H
 #define SPIDERWEB_OBJECT_H
 
@@ -10,7 +9,7 @@
 #include <utility>
 
 #include "asio-1.22.1/include/asio/io_service.hpp"
-#include "index_sequence.hpp"
+#include "internal/move_tuple_wrapper.h"
 #include "spiderweb_eventsignal.h"
 
 #define SPIDER_EMIT
@@ -19,50 +18,6 @@
 #endif
 
 namespace spiderweb {
-template <typename T>
-using decay_t = typename std::decay<T>::type;
-
-template <typename... Args>
-struct MoveTupleWrapper {
-  MoveTupleWrapper(std::tuple<Args...> &&tuple) : tuple_(std::move(tuple)) {}
-
-  MoveTupleWrapper(const MoveTupleWrapper &other)
-      : tuple_(std::move(other.tuple_)) {}
-
-  MoveTupleWrapper &operator=(const MoveTupleWrapper &other) {
-    tuple_ = std::move(other.tuple_);
-  }
-
-  template <typename T, typename... Params>
-  void Apply(void (T::*member)(Params...), T &object) const {
-    ApplyHelper(member, object, index_sequence_for<Params...>());
-  }
-
-  template <typename F>
-  void Apply(F &f) const {
-    ApplyHelper2(f, index_sequence_for<Args...>());
-  }
-
-  template <typename T, typename... Params, size_t... Is>
-  void ApplyHelper(void (T::*member)(Params...), T &object,
-                   index_sequence<Is...>) const {
-    (object.*member)(std::move(std::get<Is>(tuple_))...);
-  }
-
-  template <typename F, size_t... Is>
-  void ApplyHelper2(F &f, index_sequence<Is...>) const {
-    f(std::move(std::get<Is>(tuple_))...);
-  }
-
- private:
-  mutable std::tuple<Args...> tuple_;
-};
-
-template <typename... Ts>
-auto MoveTuple(Ts &&...objects) -> MoveTupleWrapper<decay_t<Ts>...> {
-  return std::make_tuple(std::forward<Ts>(objects)...);
-}
-
 template <typename Type, typename... Args>
 static inline std::function<void(Args...)> create_class_member_functor(
     Type *instance, void (Type::*method)(Args... args)) {

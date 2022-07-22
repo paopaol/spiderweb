@@ -112,3 +112,18 @@ TEST(spiderweb_EventLoop, multithread_emit_event_lambda) {
   EXPECT_TRUE(called);
   EXPECT_TRUE(calledInAppThread);
 }
+
+class MyObject : public spiderweb::Object {
+ public:
+  MyObject(spiderweb::Object *parent = nullptr) : spiderweb::Object(parent) {
+    timer_.reset(new spiderweb::Timer(this));
+  }
+
+  std::unique_ptr<spiderweb::Timer> timer_;
+};
+
+TEST(spiderweb_EventLoop, destory) {
+  spiderweb::EventLoop loop;
+
+  MyObject object;
+}
