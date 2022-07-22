@@ -12,7 +12,10 @@ class EventSignal : protected eventpp::CallbackList<Prototype_> {
  public:
   using super = eventpp::CallbackList<Prototype_, eventpp::DefaultPolicies>;
 
-  void operator()(Args... args) const { super::operator()(args...); }
+  template <typename... Fargs>
+  void operator()(Fargs... args) const {
+    super::operator()(args...);
+  }
 
  private:
   void append(const typename eventpp::internal_::CallbackListBase<

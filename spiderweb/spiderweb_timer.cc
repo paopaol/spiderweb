@@ -42,10 +42,7 @@ void Timer::SetInterval(uint32_t timeout_ms) { d->timeoutms = timeout_ms; }
 
 void Timer::SetSingalShot(bool flag) { d->singal_shot = flag; }
 
-void Timer::Start(const uint64_t timeout_ms) {
-  d->timeoutms = timeout_ms;
-  Reset(timeout_ms);
-}
+void Timer::Start() { Reset(d->timeoutms); }
 
 void Timer::Stop() {
   d->is_running = false;

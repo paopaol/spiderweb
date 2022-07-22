@@ -5,10 +5,13 @@ target_sources(
   PRIVATE spiderweb_eventsignal.h
           spiderweb_eventloop.cc
           spiderweb_eventloop.h
+          spiderweb_object.cc
+          spiderweb_object.h
           spiderweb_timer.cc
           spiderweb_timer.h
           arch/spiderweb_arch.hpp
-          io/spiderweb_binary_writer.hpp)
+          io/spiderweb_binary_writer.hpp
+          index_sequence.hpp)
 target_include_directories(spiderweb PUBLIC asio-1.22.1/include eventpp/include
                                             ${CMAKE_CURRENT_SOURCE_DIR})
 # we do not use any bosst components

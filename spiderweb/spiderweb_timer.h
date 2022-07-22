@@ -39,7 +39,7 @@ class Timer : public Object {
    */
   void SetSingalShot(bool flag);
 
-  void Start(const uint64_t timeout_ms = 3000);
+  void Start();
 
   void Stop();
 

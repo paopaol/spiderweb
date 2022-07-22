@@ -31,3 +31,17 @@ static void BM_EventSignalConnectClassMethod(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_EventSignalConnectClassMethod);
+
+static void BM_EventSignalCall(benchmark::State& state) {
+  spiderweb::EventLoop                                               loop;
+  spiderweb::EventSignal<void(const std::string& a, int b, float c)> voidEvent;
+
+  uint64_t          called = 0;
+  static const auto f = [&](const std::string& a, int b, float c) { called++; };
+  spiderweb::Object::Connect(voidEvent, &loop, f);
+
+  for (auto _ : state) {
+    voidEvent("123", 2, float(3.33));
+  }
+}
+BENCHMARK(BM_EventSignalCall);

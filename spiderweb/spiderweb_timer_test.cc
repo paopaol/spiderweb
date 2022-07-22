@@ -22,7 +22,7 @@ TEST(spiderweb_timer, connect) {
   spiderweb::Object::Connect(timer.timeout, &reciver, [&]() { called = true; });
   spiderweb::Object::Connect(timer.timeout, &reciver, &Reciver::ontimeout);
 
-  timer.Start(1000);
+  timer.Start();
 
   loop.Exec();
   EXPECT_EQ(called, true);
