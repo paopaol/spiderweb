@@ -31,7 +31,7 @@ target_compile_definitions(
 add_executable(spiderweb_test)
 target_sources(
   spiderweb_test
-  PRIVATE core/spiderweb_eventloop_test.cc core/spiderweb_timer_test.cc
+  PRIVATE core/spiderweb_timer_test.cc core/spiderweb_eventloop_test.cc
           io/spiderweb_binary_writer_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 

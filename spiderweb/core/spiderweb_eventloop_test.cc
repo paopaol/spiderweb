@@ -1,7 +1,7 @@
-#include "spiderweb_eventloop.h"
+#include "core/spiderweb_eventloop.h"
 
+#include "core/spiderweb_timer.h"
 #include "gtest/gtest.h"
-#include "spiderweb_timer.h"
 
 TEST(spiderweb_EventLoop, construct) { spiderweb::EventLoop loop; }
 
@@ -69,7 +69,7 @@ TEST(spiderweb_EventLoop, multithread_emit_event_class_member) {
   std::thread subthread([&]() {
     test.SetState(true);
 
-    timer.Start();
+    app.QueueTask([&]() { timer.Start(); });
   });
 
   app.Exec();
@@ -102,7 +102,7 @@ TEST(spiderweb_EventLoop, multithread_emit_event_lambda) {
   std::thread subthread([&]() {
     test.SetState(true);
 
-    timer.Start();
+    app.QueueTask([&]() { timer.Start(); });
   });
 
   app.Exec();
