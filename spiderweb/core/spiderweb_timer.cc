@@ -40,6 +40,8 @@ Timer::~Timer() = default;
 
 void Timer::SetInterval(uint32_t timeout_ms) { d->timeoutms = timeout_ms; }
 
+uint32_t Timer::Interval() const { return d->timeoutms; }
+
 void Timer::SetSingalShot(bool flag) { d->singal_shot = flag; }
 
 void Timer::Start() { Reset(d->timeoutms); }
@@ -50,6 +52,8 @@ void Timer::Stop() {
 }
 
 void Timer::Reset(const uint64_t timeout_ms) {
+  assert(ThreadId() == std::this_thread::get_id());
+
   d->is_running = true;
   d->doSetExpired(timeout_ms);
 }

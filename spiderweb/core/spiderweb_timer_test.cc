@@ -10,7 +10,21 @@ class Reciver : public spiderweb::Object {
   void ontimeout() { g_loop->Quit(); }
 };
 
-TEST(spiderweb_timer, connect) {
+TEST(spiderweb_timer, State) {
+  spiderweb::EventLoop loop;
+
+  spiderweb::Timer timer;
+
+  timer.SetInterval(10000);
+
+  EXPECT_FALSE(timer.IsRunning());
+  EXPECT_EQ(timer.Interval(), 10000);
+
+  timer.Start();
+  EXPECT_TRUE(timer.IsRunning());
+}
+
+TEST(spiderweb_timer, Timeout) {
   spiderweb::EventLoop loop;
   g_loop = &loop;
 
@@ -26,4 +40,18 @@ TEST(spiderweb_timer, connect) {
 
   loop.Exec();
   EXPECT_EQ(called, true);
+}
+
+TEST(spiderweb_timer, Stop) {
+  spiderweb::EventLoop loop;
+  g_loop = &loop;
+
+  spiderweb::Timer timer;
+
+  timer.SetInterval(3000);
+  timer.Start();
+
+  timer.Stop();
+
+  EXPECT_FALSE(timer.IsRunning());
 }

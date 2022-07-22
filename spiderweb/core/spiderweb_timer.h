@@ -19,6 +19,8 @@ namespace spiderweb {
  * timer instace can not be used call across threads.
  *
  * created in A thread, must be used in A thread.
+ *
+ * defualt interval is 3000ms
  */
 class Timer : public Object {
  public:
@@ -31,6 +33,13 @@ class Timer : public Object {
    * @param timeout_ms
    */
   void SetInterval(uint32_t timeout_ms);
+
+  /**
+   * @brief return interval of the timer
+   *
+   * @return
+   */
+  uint32_t Interval() const;
 
   /**
    * @brief if set true, the timer will only triggered once

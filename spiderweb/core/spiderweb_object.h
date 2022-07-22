@@ -72,7 +72,7 @@ static inline std::function<void(Args...)> create_class_member_functor(
     } else {
       auto tuple = MoveTuple(std::forward<Args>(args)...);
 
-      instance->RunInloop(
+      instance->QueueTask(
           [instance, method, tuple]() { tuple.Apply(method, *instance); });
     }
   };
@@ -80,14 +80,14 @@ static inline std::function<void(Args...)> create_class_member_functor(
 
 template <typename Reciver, typename... Args, typename F>
 static inline std::function<void(Args...)> create_none_class_member_functor(
-    Reciver *instance, F &&f) {
+    Reciver *reciver, F &&f) {
   return [=](Args &&...args) {
-    if (std::this_thread::get_id() == instance->ThreadId()) {
+    if (std::this_thread::get_id() == reciver->ThreadId()) {
       f(std::forward<Args>(args)...);
     } else {
       auto tuple = MoveTuple(std::forward<Args>(args)...);
 
-      instance->RunInloop([tuple, f]() { tuple.Apply(f); });
+      reciver->QueueTask([tuple, f]() { tuple.Apply(f); });
     }
   };
 }
@@ -118,7 +118,7 @@ class Object {
 
   EventLoop *ownerEventLoop();
 
-  void RunInloop(const std::function<void()> &f) const;
+  void QueueTask(const std::function<void()> &f) const;
 
   std::thread::id ThreadId() const;
 

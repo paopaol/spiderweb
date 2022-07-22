@@ -24,7 +24,7 @@ Object::~Object() = default;
 
 spiderweb::EventLoop *Object::ownerEventLoop() { return d->loop; }
 
-void Object::RunInloop(const std::function<void()> &f) const {
+void Object::QueueTask(const std::function<void()> &f) const {
   d->loop->IoService().post(f);
 }
 
