@@ -109,7 +109,7 @@ class Object {
     static_assert(std::is_base_of<Object, Reciver>::value,
                   "Reciver must derived from Base");
     signal.append(create_none_class_member_functor<Reciver, decay_t<Args>...>(
-        reciver, f));
+        reciver, std::forward<F>(f)));
   }
 
   EventLoop *ownerEventLoop();
