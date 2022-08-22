@@ -52,7 +52,7 @@ class Object {
  public:
   Object(Object *parent = nullptr);
 
-  ~Object();
+  virtual ~Object();
 
   Object(const Object &other) = delete;
 
@@ -93,6 +93,8 @@ class Object {
   void QueueTask(std::function<void()> &&f) const;
 
   std::thread::id ThreadId() const;
+
+  void DeleteLater();
 
  private:
   Object(EventLoop *loop, Object *parent = nullptr);

@@ -5,6 +5,17 @@
 #include "spiderweb_eventloop.h"
 
 namespace spiderweb {
+namespace detail {
+struct ObjectDleter {
+  ObjectDleter(Object *ptr) : ptr_(ptr) {}
+
+  void operator()() { delete ptr_; }
+
+ private:
+  Object *ptr_{nullptr};
+};
+}  // namespace detail
+
 class Object::Private {
  public:
   Private(EventLoop *_loop, Object *_parent)
@@ -29,4 +40,7 @@ void Object::QueueTask(std::function<void()> &&f) const {
 }
 
 std::thread::id Object::ThreadId() const { return d->id; }
+
+void Object::DeleteLater() { QueueTask(detail::ObjectDleter(this)); }
+
 }  // namespace spiderweb
