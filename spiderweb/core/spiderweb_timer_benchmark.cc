@@ -19,7 +19,7 @@ static void BM_TimerAdd(benchmark::State &state) {
 
     timer->SetSingalShot(true);
     timer->SetInterval(1);
-    timer->Connect(timer->timeout, &loop, f);
+    spiderweb::Object::Connect(timer, &spiderweb::Timer::timeout, &loop, f);
     ++count;
     timer->Start();
   }

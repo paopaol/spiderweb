@@ -33,8 +33,10 @@ TEST(spiderweb_timer, Timeout) {
 
   bool called = false;
 
-  spiderweb::Object::Connect(timer.timeout, &reciver, [&]() { called = true; });
-  spiderweb::Object::Connect(timer.timeout, &reciver, &Reciver::ontimeout);
+  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &reciver,
+                             [&]() { called = true; });
+  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &reciver,
+                             &Reciver::ontimeout);
 
   timer.Start();
 

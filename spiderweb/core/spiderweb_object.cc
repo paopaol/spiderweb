@@ -24,8 +24,8 @@ Object::~Object() = default;
 
 spiderweb::EventLoop *Object::ownerEventLoop() { return d->loop; }
 
-void Object::QueueTask(const std::function<void()> &f) const {
-  d->loop->IoService().post(f);
+void Object::QueueTask(std::function<void()> &&f) const {
+  d->loop->IoService().post(std::forward<decltype(f)>(f));
 }
 
 std::thread::id Object::ThreadId() const { return d->id; }

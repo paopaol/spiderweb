@@ -59,12 +59,14 @@ TEST(spiderweb_EventLoop, multithread_emit_event_class_member) {
   TestObject    test;
   ReciverObject reciver;
 
-  test.Connect(test.statedChanged, &reciver, &ReciverObject::SetValue);
+  spiderweb::Object::Connect(&test, &TestObject::statedChanged, &reciver,
+                             &ReciverObject::SetValue);
 
   spiderweb::Timer timer;
   timer.SetInterval(100);
 
-  timer.Connect(timer.timeout, &app, [&]() { app.Quit(); });
+  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &app,
+                             [&]() { app.Quit(); });
 
   std::thread subthread([&]() {
     test.SetState(true);
@@ -89,15 +91,17 @@ TEST(spiderweb_EventLoop, multithread_emit_event_lambda) {
 
   bool called = false;
   bool calledInAppThread = false;
-  test.Connect(test.statedChanged, &test, [&](bool state) {
-    called = true;
-    calledInAppThread = test.ThreadId() == std::this_thread::get_id();
-  });
+  spiderweb::Object::Connect(
+      &test, &TestObject::statedChanged, &test, [&](bool state) {
+        called = true;
+        calledInAppThread = test.ThreadId() == std::this_thread::get_id();
+      });
 
   spiderweb::Timer timer;
   timer.SetInterval(100);
 
-  timer.Connect(timer.timeout, &app, [&]() { app.Quit(); });
+  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &app,
+                             [&]() { app.Quit(); });
 
   std::thread subthread([&]() {
     test.SetState(true);

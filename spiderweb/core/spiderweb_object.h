@@ -55,28 +55,42 @@ class Object {
   ~Object();
 
   Object(const Object &other) = delete;
+
   Object &operator=(const Object &other) = delete;
 
-  template <typename Reciver, typename... Args>
-  static void Connect(EventSignal<void(Args... args)> &signal, Reciver *reciver,
-                      void (Reciver::*method)(Args... args)) {
+  template <typename Sender, typename SenderU, typename Reciver,
+            typename... Args>
+  static void Connect(Sender                         *sender,
+                      EventSignal<void(Args... args)> SenderU::*signal,
+                      Reciver *reciver, void (Reciver::*method)(Args... args)) {
     static_assert(std::is_base_of<Object, Reciver>::value,
                   "Reciver must derived from Base");
-    signal.append(create_class_member_functor(reciver, method));
+
+    static_assert(std::is_base_of<Object, Sender>::value,
+                  "Sender must derived from Base");
+
+    (sender->*signal).append(create_class_member_functor(reciver, method));
   }
 
-  template <typename Reciver, typename... Args, typename F>
-  static void Connect(EventSignal<void(Args... args)> &signal, Reciver *reciver,
-                      F &&f) {
+  template <typename Sender, typename SenderU, typename Reciver,
+            typename... Args, typename F>
+  static void Connect(Sender                         *sender,
+                      EventSignal<void(Args... args)> SenderU::*signal,
+                      Reciver *reciver, F &&f) {
     static_assert(std::is_base_of<Object, Reciver>::value,
                   "Reciver must derived from Base");
-    signal.append(create_none_class_member_functor<Reciver, decay_t<Args>...>(
-        reciver, std::forward<F>(f)));
+
+    static_assert(std::is_base_of<Object, Sender>::value,
+                  "Sender must derived from Base");
+
+    (sender->*signal)
+        .append(create_none_class_member_functor<Reciver, decay_t<Args>...>(
+            reciver, std::forward<F>(f)));
   }
 
   EventLoop *ownerEventLoop();
 
-  void QueueTask(const std::function<void()> &f) const;
+  void QueueTask(std::function<void()> &&f) const;
 
   std::thread::id ThreadId() const;
 

@@ -9,9 +9,10 @@ target_sources(
           core/spiderweb_object.h
           core/spiderweb_timer.cc
           core/spiderweb_timer.h
-          core/index_sequence.hpp
           arch/spiderweb_arch.hpp
-          io/spiderweb_binary_writer.hpp)
+          io/spiderweb_binary_writer.hpp
+  PRIVATE core/internal/index_sequence.hpp)
+
 target_include_directories(
   spiderweb PUBLIC asio-1.22.1/include core/eventpp/include
                    ${CMAKE_CURRENT_SOURCE_DIR})
@@ -32,7 +33,7 @@ add_executable(spiderweb_test)
 target_sources(
   spiderweb_test
   PRIVATE core/spiderweb_timer_test.cc core/spiderweb_eventloop_test.cc
-          io/spiderweb_binary_writer_test.cc)
+          core/spiderweb_event_spy_test.cc io/spiderweb_binary_writer_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark
