@@ -25,6 +25,7 @@ namespace spiderweb {
 class Timer : public Object {
  public:
   Timer(Object *parent = nullptr);
+
   ~Timer();
 
   /**

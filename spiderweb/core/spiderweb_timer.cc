@@ -12,7 +12,7 @@ class Timer::Private {
   bool               singal_shot = false;
   Timer             *q = nullptr;
 
-  void DoSetExpired(const uint64_t timeout_ms) {
+  void SetExpired(const uint64_t timeout_ms) {
     if (!is_running) {
       return;
     }
@@ -29,7 +29,7 @@ class Timer::Private {
         is_running = false;
         return;
       }
-      DoSetExpired(timeout_ms);
+      SetExpired(timeout_ms);
     });
   }
 };
@@ -55,7 +55,7 @@ void Timer::Reset(const uint64_t timeout_ms) {
   assert(ThreadId() == std::this_thread::get_id());
 
   d->is_running = true;
-  d->DoSetExpired(timeout_ms);
+  d->SetExpired(timeout_ms);
 }
 
 bool Timer::IsRunning() const { return d->is_running; }
