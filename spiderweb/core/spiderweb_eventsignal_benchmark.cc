@@ -51,3 +51,13 @@ static void BM_EventSignalCall(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_EventSignalCall);
+
+static void BM_CallDirectly(benchmark::State& state) {
+  uint64_t          called = 0;
+  static const auto f = [&](const std::string& a, int b, float c) { called++; };
+  std::function<void(const std::string& a, int b, float c)> s = f;
+  for (auto _ : state) {
+    s("123", 2, float(3.33));
+  }
+}
+BENCHMARK(BM_CallDirectly);

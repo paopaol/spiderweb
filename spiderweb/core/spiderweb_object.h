@@ -84,7 +84,7 @@ class Object {
                   "Sender must derived from Base");
 
     (sender->*signal)
-        .append(create_none_class_member_functor<Reciver, decay_t<Args>...>(
+        .append(create_none_class_member_functor<Reciver, Args...>(
             reciver, std::forward<F>(f)));
   }
 

@@ -10,11 +10,10 @@ TEST(spiderweb_event_spy, capture) {
 
   spiderweb::EventSpy spy(&timer, &spiderweb::Timer::timeout);
 
-  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &loop,
-                             [&]() { loop.Quit(); });
-
   timer.Start();
   spy.Wait();
+
+  loop.QueueTask([&]() { loop.Quit(); });
 
   loop.Exec();
 
