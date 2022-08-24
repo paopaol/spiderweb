@@ -1,9 +1,8 @@
 #ifndef SPIDERWEB_EVENTSIGNAL_H
 #define SPIDERWEB_EVENTSIGNAL_H
 
+#include <functional>
 #include <memory>
-
-#include "eventpp/callbacklist.h"
 
 namespace spiderweb {
 

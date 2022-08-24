@@ -13,9 +13,8 @@ target_sources(
           io/spiderweb_binary_writer.hpp
   PRIVATE core/internal/index_sequence.hpp)
 
-target_include_directories(
-  spiderweb PUBLIC asio-1.22.1/include core/eventpp/include
-                   ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(spiderweb PUBLIC asio-1.22.1/include
+                                            ${CMAKE_CURRENT_SOURCE_DIR})
 # we do not use any bosst components
 target_compile_definitions(
   spiderweb
