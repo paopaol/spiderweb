@@ -48,7 +48,7 @@ class DefaultStreamer : public Streamer<DefaultStreamer> {
 
   template <typename Beg, typename End>
   inline std::size_t Write(Beg beg, End end) {
-    vec_.insert(vec_.end(), beg, end);
+    std::copy(beg, end, std::back_inserter(vec_));
     return preallocated_;
   }
 

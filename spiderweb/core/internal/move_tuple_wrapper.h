@@ -12,11 +12,18 @@ struct MoveTupleWrapper {
   MoveTupleWrapper(std::tuple<Args...> &&tuple) : tuple_(std::move(tuple)) {
   }
 
-  MoveTupleWrapper(const MoveTupleWrapper &other) : tuple_(std::move(other.tuple_)) {
+  MoveTupleWrapper(const MoveTupleWrapper &other) noexcept : tuple_(std::move(other.tuple_)) {
+  }
+
+  MoveTupleWrapper(MoveTupleWrapper &&other) noexcept : tuple_(std::move(other.tuple_)) {
   }
 
   MoveTupleWrapper &operator=(const MoveTupleWrapper &other) {
+    if (this == &other) {
+      return *this;
+    }
     tuple_ = std::move(other.tuple_);
+    return *this;
   }
 
   template <typename T, typename... Params>
