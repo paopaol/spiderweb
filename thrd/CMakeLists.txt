@@ -15,3 +15,9 @@ FetchContent_Declare(benchmark
                      URL file:///${CMAKE_CURRENT_SOURCE_DIR}/benchmark)
 set(BENCHMARK_ENABLE_TESTING FALSE)
 FetchContent_MakeAvailable(benchmark)
+
+# absl
+FetchContent_Declare(
+  absl
+  URL https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.0.tar.gz)
+FetchContent_MakeAvailable(absl)

@@ -1,6 +1,7 @@
 #ifndef SPIDERWEB_EVENTSIGNAL_H
 #define SPIDERWEB_EVENTSIGNAL_H
 
+#include <cassert>
 #include <functional>
 #include <memory>
 
