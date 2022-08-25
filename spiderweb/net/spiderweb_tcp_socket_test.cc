@@ -30,7 +30,7 @@ TEST(spiderweb_tcp_socket, ConnectToHostFailed1) {
 
   socket.ConnectToHost("127.0.0.1", 5555);
 
-  spy.Wait(1000);
+  spy.Wait(1000, 10);
 
   EXPECT_EQ(spy.Count(), 1);
 
