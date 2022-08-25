@@ -23,7 +23,7 @@ class EventSpy : public Object {
 
     do {
       std::error_code ec;
-      ownerEventLoop()->IoService().run_one_for(std::chrono::milliseconds(10));
+      ownerEventLoop()->IoService().run_for(std::chrono::milliseconds(10));
       left -= 10;
     } while (left > 0);
   }
