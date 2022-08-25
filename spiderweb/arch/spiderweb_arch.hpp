@@ -13,8 +13,8 @@ namespace arch {
  * @brief convert host value to BigEndian or HostEndian
  */
 template <std::size_t N, typename T,
-          typename = typename std::enable_if<std::is_integral<T>::value &&
-                                             (N == 2 || N == 4)>::type>
+          typename =
+              typename std::enable_if<std::is_integral<T>::value && (N == 2 || N == 4)>::type>
 class EndianConvertor {
  public:
   enum class ArchType {
@@ -24,7 +24,8 @@ class EndianConvertor {
   explicit EndianConvertor(ArchType type, const T value) : type_(type) {
     if (type_ == ArchType::kBig) {
       converted_.value = (N == 2 ? htons(value) : htonl(value));
-    } else {
+      return;
+    } else if (type_ == ArchType::kHost) {
       converted_.value = (N == 2 ? ntohs(value) : ntohl(value));
     }
   }
@@ -32,17 +33,23 @@ class EndianConvertor {
   /**
    * @brief retuurn size of encoded
    */
-  inline std::size_t Size() const { return N; }
+  inline std::size_t Size() const {
+    return N;
+  }
 
   /**
    * @brief beginning of encoded data
    */
-  inline const uint8_t *Begin() const { return converted_.ch; }
+  inline const uint8_t *Begin() const {
+    return converted_.ch;
+  }
 
   /**
    * @brief end of encoded data
    */
-  inline const uint8_t *End() const { return converted_.ch + N; }
+  inline const uint8_t *End() const {
+    return converted_.ch + N;
+  }
 
  private:
   ArchType type_;

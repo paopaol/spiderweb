@@ -18,14 +18,16 @@ namespace io {
 template <typename T>
 class Streamer {
  public:
-  ~Streamer() {}
+  ~Streamer() = default;
 
   template <typename Beg, typename End>
   inline std::size_t Write(Beg beg, End end) {
     return static_cast<T &>(*this).Write(beg, end);
   }
 
-  inline void Reset() { static_cast<T &>(*this).Reset(); }
+  inline void Reset() {
+    static_cast<T &>(*this).Reset();
+  }
 
   template <typename U>
   inline const U &Stream() const {
@@ -50,9 +52,13 @@ class DefaultStreamer : public Streamer<DefaultStreamer> {
     return preallocated_;
   }
 
-  inline void Reset() { vec_.clear(); }
+  inline void Reset() {
+    vec_.clear();
+  }
 
-  inline const std::vector<uint8_t> &Stream() const { return vec_; }
+  inline const std::vector<uint8_t> &Stream() const {
+    return vec_;
+  }
 
   template <typename Beg, typename End>
   inline std::size_t Preppend(Beg beg, End end) {
@@ -91,7 +97,8 @@ class DefaultStreamer : public Streamer<DefaultStreamer> {
 template <typename StreamerType>
 class BinaryWriter {
  public:
-  BinaryWriter(Streamer<StreamerType> &stream) : stream_(stream) {}
+  explicit BinaryWriter(Streamer<StreamerType> &stream) : stream_(stream) {
+  }
 
   /**
    * @brief return encoded size;
@@ -101,7 +108,9 @@ class BinaryWriter {
     return Size(arg) + Size(std::forward<Args>(args)...);
   }
 
-  inline std::size_t Size(const char *data) { return strlen(data); }
+  inline std::size_t Size(const char *data) {
+    return strlen(data);
+  }
 
   template <std::size_t N, typename T>
   inline std::size_t Size(const arch::EndianConvertor<N, T> &data) {
@@ -168,7 +177,9 @@ class BinaryWriter {
   /**
    * @brief reset the streamer for reuse
    */
-  inline void Reset() { stream_.Reset(); }
+  inline void Reset() {
+    stream_.Reset();
+  }
 
  private:
   Streamer<StreamerType> &stream_;

@@ -24,9 +24,9 @@ namespace spiderweb {
  */
 class Timer : public Object {
  public:
-  Timer(Object *parent = nullptr);
+  explicit Timer(Object *parent = nullptr);
 
-  ~Timer();
+  ~Timer() override;
 
   /**
    * @brief set timer tick based on milliseconds

@@ -13,8 +13,9 @@
 namespace spiderweb {
 class EventLoop : public Object {
  public:
-  EventLoop(Object *parent = nullptr);
-  ~EventLoop();
+  explicit EventLoop(Object *parent = nullptr);
+
+  ~EventLoop() override;
 
   int Exec();
 

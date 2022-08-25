@@ -10,7 +10,7 @@ thread_local EventLoop *current_loop = nullptr;
 
 class EventLoop::Private {
  public:
-  Private(EventLoop *qq) : work(io), q(qq) {
+  explicit Private(EventLoop *qq) : work(io), q(qq) {
     assert(!current_loop);
     current_loop = q;
   }
@@ -26,27 +26,32 @@ class EventLoop::Private {
   EventLoop             *q = nullptr;
 };
 
-EventLoop::EventLoop(Object *parent)
-    : Object(this, parent), d(new Private(this)) {
+EventLoop::EventLoop(Object *parent) : Object(this, parent), d(new Private(this)) {
   assert(current_loop);
 }
 
-EventLoop::~EventLoop() {}
+EventLoop::~EventLoop() = default;
 
 int EventLoop::Exec() {
   d->io.run();
   return d->exit_code;
 }
 
-void EventLoop::Quit() { d->io.stop(); }
+void EventLoop::Quit() {
+  d->io.stop();
+}
 
 void EventLoop::Exit(int code) {
   d->exit_code = code;
   d->io.stop();
 }
 
-spiderweb::EventLoop *EventLoop::LoopOfCurrentThread() { return current_loop; }
+spiderweb::EventLoop *EventLoop::LoopOfCurrentThread() {
+  return current_loop;
+}
 
-asio::io_service &EventLoop::IoService() { return d->io; }
+asio::io_service &EventLoop::IoService() {
+  return d->io;
+}
 
 }  // namespace spiderweb

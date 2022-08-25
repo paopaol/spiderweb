@@ -7,7 +7,9 @@ spiderweb::EventLoop *g_loop = nullptr;
 
 class Reciver : public spiderweb::Object {
  public:
-  void ontimeout() { g_loop->Quit(); }
+  void ontimeout() {
+    g_loop->Quit();
+  }
 };
 
 TEST(spiderweb_timer, State) {
@@ -33,11 +35,10 @@ TEST(spiderweb_timer, Timeout) {
 
   bool called = false;
 
-  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &reciver,
-                             [&]() {
-                               called = true;
-                               g_loop->Quit();
-                             });
+  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &reciver, [&]() {
+    called = true;
+    g_loop->Quit();
+  });
 
   timer.Start();
 

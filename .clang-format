@@ -1,3 +1,5 @@
 BasedOnStyle: Google
 AlignConsecutiveDeclarations: true
-StatementAttributeLikeMacros: [spider_emit]
+StatementAttributeLikeMacros: [spider_notify]
+ColumnLimit: 100
+AllowShortFunctionsOnASingleLine: false

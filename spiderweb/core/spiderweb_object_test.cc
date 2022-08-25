@@ -6,9 +6,12 @@
 
 class Sender : public spiderweb::Object {
  public:
-  Sender(spiderweb::Object *parent = nullptr) : spiderweb::Object(parent) {}
+  explicit Sender(spiderweb::Object *parent = nullptr) : spiderweb::Object(parent) {
+  }
 
-  ~Sender() { std::cout << "Sender deleted" << std::endl; }
+  ~Sender() override {
+    std::cout << "Sender deleted" << std::endl;
+  }
 
   spiderweb::EventSignal<void()> a_event;
 };

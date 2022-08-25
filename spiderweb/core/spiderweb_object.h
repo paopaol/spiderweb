@@ -27,15 +27,14 @@ static inline std::function<void(Args...)> create_class_member_functor(
     } else {
       auto tuple = MoveTuple(std::forward<Args>(args)...);
 
-      instance->QueueTask(
-          [instance, method, tuple]() { tuple.Apply(method, *instance); });
+      instance->QueueTask([instance, method, tuple]() { tuple.Apply(method, *instance); });
     }
   };
 }
 
 template <typename Reciver, typename... Args, typename F>
-static inline std::function<void(Args...)> create_none_class_member_functor(
-    Reciver *reciver, F &&f) {
+static inline std::function<void(Args...)> create_none_class_member_functor(Reciver *reciver,
+                                                                            F      &&f) {
   return [=](Args &&...args) {
     if (std::this_thread::get_id() == reciver->ThreadId()) {
       f(std::forward<Args>(args)...);
@@ -50,7 +49,7 @@ static inline std::function<void(Args...)> create_none_class_member_functor(
 class EventLoop;
 class Object {
  public:
-  Object(Object *parent = nullptr);
+  explicit Object(Object *parent = nullptr);
 
   virtual ~Object();
 
@@ -58,34 +57,25 @@ class Object {
 
   Object &operator=(const Object &other) = delete;
 
-  template <typename Sender, typename SenderU, typename Reciver,
-            typename... Args>
-  static void Connect(Sender                         *sender,
-                      EventSignal<void(Args... args)> SenderU::*signal,
+  template <typename Sender, typename SenderU, typename Reciver, typename... Args>
+  static void Connect(Sender *sender, EventSignal<void(Args... args)> SenderU::*signal,
                       Reciver *reciver, void (Reciver::*method)(Args... args)) {
-    static_assert(std::is_base_of<Object, Reciver>::value,
-                  "Reciver must derived from Base");
+    static_assert(std::is_base_of<Object, Reciver>::value, "Reciver must derived from Base");
 
-    static_assert(std::is_base_of<Object, Sender>::value,
-                  "Sender must derived from Base");
+    static_assert(std::is_base_of<Object, Sender>::value, "Sender must derived from Base");
 
     (sender->*signal).append(create_class_member_functor(reciver, method));
   }
 
-  template <typename Sender, typename SenderU, typename Reciver,
-            typename... Args, typename F>
-  static void Connect(Sender                         *sender,
-                      EventSignal<void(Args... args)> SenderU::*signal,
+  template <typename Sender, typename SenderU, typename Reciver, typename... Args, typename F>
+  static void Connect(Sender *sender, EventSignal<void(Args... args)> SenderU::*signal,
                       Reciver *reciver, F &&f) {
-    static_assert(std::is_base_of<Object, Reciver>::value,
-                  "Reciver must derived from Base");
+    static_assert(std::is_base_of<Object, Reciver>::value, "Reciver must derived from Base");
 
-    static_assert(std::is_base_of<Object, Sender>::value,
-                  "Sender must derived from Base");
+    static_assert(std::is_base_of<Object, Sender>::value, "Sender must derived from Base");
 
     (sender->*signal)
-        .append(create_none_class_member_functor<Reciver, Args...>(
-            reciver, std::forward<F>(f)));
+        .append(create_none_class_member_functor<Reciver, Args...>(reciver, std::forward<F>(f)));
   }
 
   EventLoop *ownerEventLoop();
@@ -97,7 +87,7 @@ class Object {
   void DeleteLater();
 
  private:
-  Object(EventLoop *loop, Object *parent = nullptr);
+  explicit Object(EventLoop *loop, Object *parent = nullptr);
 
   class Private;
   std::unique_ptr<Private> d;

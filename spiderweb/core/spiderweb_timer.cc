@@ -3,8 +3,8 @@
 namespace spiderweb {
 class Timer::Private {
  public:
-  Private(Timer *qq, Object *parent)
-      : q(qq), timer(GetLoop(parent)->IoService()) {}
+  Private(Timer *qq, Object *parent) : q(qq), timer(GetLoop(parent)->IoService()) {
+  }
 
   asio::steady_timer timer;
   uint32_t           timeoutms = 3000;
@@ -34,17 +34,26 @@ class Timer::Private {
   }
 };
 
-Timer::Timer(Object *parent) : Object(parent), d(new Private(this, parent)) {}
+Timer::Timer(Object *parent) : Object(parent), d(new Private(this, parent)) {
+}
 
 Timer::~Timer() = default;
 
-void Timer::SetInterval(uint32_t timeout_ms) { d->timeoutms = timeout_ms; }
+void Timer::SetInterval(uint32_t timeout_ms) {
+  d->timeoutms = timeout_ms;
+}
 
-uint32_t Timer::Interval() const { return d->timeoutms; }
+uint32_t Timer::Interval() const {
+  return d->timeoutms;
+}
 
-void Timer::SetSingalShot(bool flag) { d->singal_shot = flag; }
+void Timer::SetSingalShot(bool flag) {
+  d->singal_shot = flag;
+}
 
-void Timer::Start() { Reset(d->timeoutms); }
+void Timer::Start() {
+  Reset(d->timeoutms);
+}
 
 void Timer::Stop() {
   d->is_running = false;
@@ -58,6 +67,8 @@ void Timer::Reset(const uint64_t timeout_ms) {
   d->SetExpired(timeout_ms);
 }
 
-bool Timer::IsRunning() const { return d->is_running; }
+bool Timer::IsRunning() const {
+  return d->is_running;
+}
 
 }  // namespace spiderweb

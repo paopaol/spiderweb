@@ -23,17 +23,19 @@ static void BM_EventSignalConnectClassMethod(benchmark::State& state) {
   MyObject             obj;
 
   struct Struct : public spiderweb::Object {
-    Struct(spiderweb::Object* parent = nullptr) : Object(parent) {}
+    explicit Struct(spiderweb::Object* parent = nullptr) : Object(parent) {
+    }
 
-    void myslot(const std::string& a, int b, float c) { ++count; }
+    void myslot(const std::string& /*a*/, int /*b*/, float /*c*/) {
+      ++count;
+    }
 
     int count = 0;
   };
 
   Struct reciver;
   for (auto _ : state) {
-    spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &reciver,
-                               &Struct::myslot);
+    spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &reciver, &Struct::myslot);
   }
 }
 BENCHMARK(BM_EventSignalConnectClassMethod);
@@ -43,21 +45,25 @@ static void BM_EventSignalCall(benchmark::State& state) {
   MyObject             obj;
 
   uint64_t          called = 0;
-  static const auto f = [&](const std::string& a, int b, float c) { called++; };
+  static const auto f = [&](const std::string& /*a*/, int /*b*/, float /*c*/) { called++; };
   spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &loop, f);
 
   for (auto _ : state) {
-    obj.voidEvent("123", 2, float(3.33));
+    obj.voidEvent("123", 2, static_cast<float>(3.33));
   }
 }
 BENCHMARK(BM_EventSignalCall);
 
 static void BM_CallDirectly(benchmark::State& state) {
-  uint64_t          called = 0;
-  static const auto f = [&](const std::string& a, int b, float c) { called++; };
-  std::function<void(const std::string& a, int b, float c)> s = f;
+  uint64_t                                                  called = 0;
+  std::function<void(const std::string& a, int b, float c)> s;
+
+  static const auto f = [&](const std::string& /*a*/, int /*b*/, float /*c*/) { called++; };
+
+  s = f;
+
   for (auto _ : state) {
-    s("123", 2, float(3.33));
+    s("123", 2, static_cast<float>(3.33));
   }
 }
 BENCHMARK(BM_CallDirectly);

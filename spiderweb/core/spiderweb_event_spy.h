@@ -11,11 +11,12 @@ class EventSpy : public Object {
  public:
   template <typename T, typename T2, typename Ret, typename... Args>
   explicit EventSpy(T *instance, EventSignal<Ret, Args...> T2::*event) {
-    Object::Connect(instance, event, instance,
-                    [this](Args &&...) { ++count_; });
+    Object::Connect(instance, event, instance, [this](Args &&...) { ++count_; });
   }
 
-  inline uint64_t Count() const { return count_; }
+  inline uint64_t Count() const {
+    return count_;
+  }
 
   void Wait(int ms = 3000) {
     auto left = ms;

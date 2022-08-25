@@ -9,10 +9,11 @@ using decay_t = typename std::decay<T>::type;
 
 template <typename... Args>
 struct MoveTupleWrapper {
-  MoveTupleWrapper(std::tuple<Args...> &&tuple) : tuple_(std::move(tuple)) {}
+  MoveTupleWrapper(std::tuple<Args...> &&tuple) : tuple_(std::move(tuple)) {
+  }
 
-  MoveTupleWrapper(const MoveTupleWrapper &other)
-      : tuple_(std::move(other.tuple_)) {}
+  MoveTupleWrapper(const MoveTupleWrapper &other) : tuple_(std::move(other.tuple_)) {
+  }
 
   MoveTupleWrapper &operator=(const MoveTupleWrapper &other) {
     tuple_ = std::move(other.tuple_);
@@ -29,8 +30,7 @@ struct MoveTupleWrapper {
   }
 
   template <typename T, typename... Params, size_t... Is>
-  void ApplyHelper(void (T::*member)(Params...), T &object,
-                   index_sequence<Is...>) const {
+  void ApplyHelper(void (T::*member)(Params...), T &object, index_sequence<Is...>) const {
     (object.*member)(std::move(std::get<Is>(tuple_))...);
   }
 
