@@ -71,11 +71,11 @@ void Buffer::UnReadBytes(size_t n /*,error &e*/) {
 }
 
 // return unreaded data size
-size_t Buffer::Len() {
+size_t Buffer::Len() const {
   return widx - ridx;
 }
 
-size_t Buffer::Cap() {
+size_t Buffer::Cap() const {
   return b.size();
 }
 
