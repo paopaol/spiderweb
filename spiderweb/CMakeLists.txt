@@ -18,9 +18,8 @@ target_sources(
   PRIVATE core/internal/index_sequence.hpp)
 
 target_include_directories(
-  spiderweb
-  PUBLIC asio-1.22.1/include ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}
-         ${PROJECT_SOURCE_DIR}/thrd/filesystem/include)
+  spiderweb PUBLIC asio-1.22.1/include ${CMAKE_CURRENT_SOURCE_DIR}
+                   ${PROJECT_SOURCE_DIR})
 # we do not use any bosst components
 target_compile_definitions(
   spiderweb
@@ -33,7 +32,8 @@ target_compile_definitions(
          ASIO_HAS_STD_SHARED_PTR
          ASIO_HAS_STD_FUNCTION)
 
-target_link_libraries(spiderweb PUBLIC absl::any)
+target_link_libraries(spiderweb PUBLIC absl::any ghc_filesystem fmt spdlog
+                                       restinio)
 
 # unit test
 add_executable(spiderweb_test)
