@@ -39,17 +39,15 @@ class EventSignal<Ret(Args...)> {
     }
   }
 
-  // private:
-  // template <typename ReturnType, typename... Fargs>
   void append(std::function<Ret(Args...)> &&f) {
-    assert(!f);
+    assert(!f_ && "EventSignal only support append once");
     f_ = std::forward<decltype(f)>(f);
   }
 
   friend class Object;
 
  private:
-  std::function<Ret(Args...)> f_;
+  std::function<Ret(Args...)> f_{nullptr};
 };
 }  // namespace spiderweb
 
