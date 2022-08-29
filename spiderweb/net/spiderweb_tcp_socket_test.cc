@@ -90,9 +90,7 @@ TEST(spiderweb_tcp_socket, WriteClosedSocket) {
   socket.Write(data.data(), data.size());
 
   spy.Wait(3000, 100000);
-  EXPECT_EQ(spy.Count(), 1);
-
-  std::cout << std::get<0>(spy.LastResult<const std::error_code &>()).message() << std::endl;
+  ASSERT_EQ(spy.Count(), 0);
 
   loop.QueueTask([&]() { loop.Quit(); });
 
@@ -107,20 +105,25 @@ TEST(spiderweb_tcp_socket, SafeDelete) {
 
   std::vector<uint8_t> data{0x30, 0x31, 0x32, 0x33, 0x34};
 
+  /**
+   * @brief the actual delete operation(it's Private) should called after all write operations are
+   *
+   * done
+   */
+  socket->ConnectToHost("127.0.0.1", 12345);
   socket->Write(data.data(), data.size());
   socket->DeleteLater();
   socket->Write(data.data(), data.size());
   socket->Write(data.data(), data.size());
   socket = nullptr;
 
-  /**
-   * @brief the actual delete operation(it's Private) should called after all write operations are
-   *
-   * done
-   */
-
   spy.Wait(3000, 100000);
-  EXPECT_EQ(spy.Count(), 1);
+  /**
+   * @brief because DeleteLater will delete the socket,before all write operations done,
+   *
+   * so, no any Error emited
+   */
+  EXPECT_EQ(spy.Count(), 0);
 
   loop.QueueTask([&]() { loop.Quit(); });
 

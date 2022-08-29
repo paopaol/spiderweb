@@ -19,7 +19,16 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
   ~Private() = default;
 
+  bool IsStopped() const {
+    return stopped;
+  }
+
   void StartConnect(const asio::ip::tcp::endpoint &endpoint) {
+    if (socket.is_open()) {
+      return;
+    }
+
+    stopped = false;
     socket.async_connect(
         endpoint, std::bind(&Private::HandleConnect, shared_from_this(), std::placeholders::_1));
   }
@@ -30,12 +39,12 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
     }
 
     if (ec) {
-      socket.close();
-      spider_emit q->Error(ec);
+      Stop();
+      spider_emit Object::Emit(q, &TcpSocket::Error, ec);
       return;
     }
     StartRead();
-    spider_emit q->ConnectionEstablished();
+    spider_emit Object::Emit(q, &TcpSocket::ConnectionEstablished);
   }
 
   void StartRead() {
@@ -46,15 +55,20 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
     /**
      * @brief
      *
-     * Since we use our own custom buffer as the receive buffer. There are many reasons to use your
+     * Since we use our own custom buffer as the receive buffer. There are many
+     * reasons to use your
      *
-     * own buffer. For example, it can be easily read and written, and the user does not have to
+     * own buffer. For example, it can be easily read and written, and the user
+     * does not have to
      *
-     * care about the management of the buffer size. But asio has its own asynchronous read and
+     * care about the management of the buffer size. But asio has its own
+     * asynchronous read and
      *
-     * write method, although we can use a buffer of constant size to temporarily receive, and then
+     * write method, although we can use a buffer of constant size to
+     * temporarily receive, and then
      *
-     * copy the data to our own buffer every time we receive data. Looks fine, just one more copy.
+     * copy the data to our own buffer every time we receive data. Looks fine,
+     * just one more copy.
      *
      * So we can avoid it as much as possible.
      *
@@ -82,11 +96,11 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
       if (ec) {
         Stop();
-        spider_emit q->Error(ec);
+        spider_emit Object::Emit(q, &TcpSocket::Error, ec);
         return;
       }
-      recv_buffer.CommitWrite(n);
 
+      recv_buffer.CommitWrite(n);
       StartRead();
       spider_emit q->BytesRead(io::BufferReader(recv_buffer));
     });
@@ -111,7 +125,7 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
     if (ec) {
       Stop();
-      spider_emit q->Error(ec);
+      spider_emit Object::Emit(q, &TcpSocket::Error, ec);
       return;
     }
 
@@ -137,7 +151,7 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
   }
 
   TcpSocket               *q = nullptr;
-  bool                     stopped = false;
+  bool                     stopped = true;
   asio::ip::tcp::socket    socket;
   io::Buffer               recv_buffer;
   io::Buffer               send_buffer;
@@ -145,12 +159,12 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
   bool                     close_called = false;
 };
 
-TcpSocket::TcpSocket(Object *parent)
-    : Object(parent), d(std::move(std::make_shared<Private>(this))) {
+TcpSocket::TcpSocket(Object *parent) : Object(parent), d(std::make_shared<Private>(this)) {
 }
 
 TcpSocket::~TcpSocket() {
   CALL_THREAD_CHECK(TcpSocket::~TcpSocket);
+  d->q = nullptr;
 }
 
 void TcpSocket::ConnectToHost(const std::string &ip, uint16_t port) {
@@ -170,7 +184,7 @@ bool TcpSocket::IsClosed() const {
   /**
    * @brief note that default construct IsClosed is false;
    */
-  return d->stopped;
+  return d->IsStopped();
 }
 
 void TcpSocket::Write(const uint8_t *data, std::size_t size) {
