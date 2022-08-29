@@ -40,6 +40,9 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
     if (ec) {
       Stop();
+      /**
+       * @brief we use Object::Emit here, beause maybe `q` has gone.
+       */
       spider_emit Object::Emit(q, &TcpSocket::Error, ec);
       return;
     }
@@ -96,6 +99,9 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
       if (ec) {
         Stop();
+        /**
+         * @brief we use Object::Emit here, beause maybe `q` has gone.
+         */
         spider_emit Object::Emit(q, &TcpSocket::Error, ec);
         return;
       }
@@ -125,6 +131,9 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
     if (ec) {
       Stop();
+      /**
+       * @brief we use Object::Emit here, beause maybe `q` has gone.
+       */
       spider_emit Object::Emit(q, &TcpSocket::Error, ec);
       return;
     }
