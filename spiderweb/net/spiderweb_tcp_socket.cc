@@ -4,6 +4,7 @@
 
 #include "asio.hpp"
 #include "core/spiderweb_eventloop.h"
+#include "spdlog/spdlog.h"
 #include "spiderweb/io/spiderweb_buffer.h"
 
 namespace spiderweb {
@@ -25,6 +26,7 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
   void StartConnect(const asio::ip::tcp::endpoint &endpoint) {
     if (socket.is_open()) {
+      spdlog::warn("TcpSocket({}) alreay connected or connecting", fmt::ptr(q));
       return;
     }
 
@@ -114,6 +116,7 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
   void StartWrite(const uint8_t *data, std::size_t size) {
     if (stopped) {
+      spdlog::warn("TcpSocket({}) stopped", fmt::ptr(q));
       return;
     }
 
