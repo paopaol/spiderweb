@@ -98,3 +98,31 @@ TEST(spiderweb_tcp_socket, WriteClosedSocket) {
 
   loop.Exec();
 }
+
+TEST(spiderweb_tcp_socket, SafeDelete) {
+  spiderweb::EventLoop loop;
+
+  auto               *socket = new spiderweb::net::TcpSocket;
+  spiderweb::EventSpy spy(socket, &spiderweb::net::TcpSocket::Error);
+
+  std::vector<uint8_t> data{0x30, 0x31, 0x32, 0x33, 0x34};
+
+  socket->Write(data.data(), data.size());
+  socket->DeleteLater();
+  socket->Write(data.data(), data.size());
+  socket->Write(data.data(), data.size());
+  socket = nullptr;
+
+  /**
+   * @brief the actual delete operation(it's Private) should called after all write operations are
+   *
+   * done
+   */
+
+  spy.Wait(3000, 100000);
+  EXPECT_EQ(spy.Count(), 1);
+
+  loop.QueueTask([&]() { loop.Quit(); });
+
+  loop.Exec();
+}

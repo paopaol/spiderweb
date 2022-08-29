@@ -9,16 +9,19 @@
 namespace spiderweb {
 namespace net {
 
-#define THREAD_CHECK(name) \
+#define CALL_THREAD_CHECK(name) \
   assert(std::this_thread::get_id() == ThreadId() && "can not call " #name " In other thread")
 
-class TcpSocket::Private {
+class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Private> {
  public:
   explicit Private(TcpSocket *qq) : q(qq), socket(qq->ownerEventLoop()->IoService()) {
   }
 
+  ~Private() = default;
+
   void StartConnect(const asio::ip::tcp::endpoint &endpoint) {
-    socket.async_connect(endpoint, std::bind(&Private::HandleConnect, this, std::placeholders::_1));
+    socket.async_connect(
+        endpoint, std::bind(&Private::HandleConnect, shared_from_this(), std::placeholders::_1));
   }
 
   void HandleConnect(const asio::error_code &ec) {
@@ -71,7 +74,8 @@ class TcpSocket::Private {
 
     const auto &buffer = asio::buffer(recv_buffer.beginWrite(), recv_buffer.leftSpace());
 
-    socket.async_read_some(buffer, [this](const asio::error_code ec, std::size_t n) {
+    auto self = shared_from_this();
+    socket.async_read_some(buffer, [this, self](const asio::error_code ec, std::size_t n) {
       if (stopped) {
         return;
       }
@@ -97,7 +101,7 @@ class TcpSocket::Private {
 
     asio::async_write(socket, asio::buffer(send_buffer.lastRead(), send_buffer.Len()),
                       asio::transfer_all(),
-                      std::bind(&Private::HanleWrite, this, std::placeholders::_1));
+                      std::bind(&Private::HanleWrite, shared_from_this(), std::placeholders::_1));
   }
 
   void HanleWrite(const asio::error_code &ec) {
@@ -141,13 +145,16 @@ class TcpSocket::Private {
   bool                     close_called = false;
 };
 
-TcpSocket::TcpSocket(Object *parent) : Object(parent), d(new Private(this)) {
+TcpSocket::TcpSocket(Object *parent)
+    : Object(parent), d(std::move(std::make_shared<Private>(this))) {
 }
 
-TcpSocket::~TcpSocket() = default;
+TcpSocket::~TcpSocket() {
+  CALL_THREAD_CHECK(TcpSocket::~TcpSocket);
+}
 
 void TcpSocket::ConnectToHost(const std::string &ip, uint16_t port) {
-  THREAD_CHECK(TcpSocket::ConnectToHost);
+  CALL_THREAD_CHECK(TcpSocket::ConnectToHost);
 
   asio::ip::tcp::endpoint endpoint(asio::ip::make_address(ip), port);
 
@@ -155,8 +162,7 @@ void TcpSocket::ConnectToHost(const std::string &ip, uint16_t port) {
 }
 
 void TcpSocket::DisConnectFromHost() {
-  THREAD_CHECK(TcpSocket::DisConnectFromHost);
-
+  CALL_THREAD_CHECK(TcpSocket::DisConnectFromHost);
   d->CloseSocket();
 }
 
@@ -168,8 +174,7 @@ bool TcpSocket::IsClosed() const {
 }
 
 void TcpSocket::Write(const uint8_t *data, std::size_t size) {
-  THREAD_CHECK(TcpSocket::Write);
-
+  CALL_THREAD_CHECK(TcpSocket::Write);
   d->StartWrite(data, size);
 }
 

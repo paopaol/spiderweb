@@ -20,6 +20,11 @@ class TcpSocket : public Object {
   bool IsClosed() const;
 
   /**
+   * @brief
+   */
+  // bool EnableReconnectWhenLost(bool flag, uint32_t delay_ms);
+
+  /**
    * @brief Write something to the remote peer.
    *
    * Note that the write is asynchronous though. But it does not support multiple calls to write.
@@ -38,9 +43,16 @@ class TcpSocket : public Object {
 
   EventSignal<void(std::size_t n)> BytesWritten;
 
+  /**
+   * @brief when enable reconnect, if the connection is lost,
+   *
+   * TcpSocket will emit this signal to notify the user, it will reconnect.
+   */
+  EventSignal<void()> ReconnectEvent;
+
  private:
   class Private;
-  std::unique_ptr<Private> d;
+  std::shared_ptr<Private> d;
 };
 }  // namespace net
 
