@@ -1,4 +1,4 @@
-#ifndef SPIDERWEB_OBJECT_H
+﻿#ifndef SPIDERWEB_OBJECT_H
 #define SPIDERWEB_OBJECT_H
 
 #include <functional>
@@ -76,6 +76,13 @@ class Object {
 
     (sender->*signal)
         .append(create_none_class_member_functor<Reciver, Args...>(reciver, std::forward<F>(f)));
+  }
+
+  template <typename T, typename T2, typename Ret, typename... Args>
+  static void Emit(T *instance, EventSignal<Ret(Args...)> T2::*event, Args &&...args) {
+    if (instance) {
+      (instance->*event)(std::forward<Args>(args)...);
+    }
   }
 
   EventLoop *ownerEventLoop();
