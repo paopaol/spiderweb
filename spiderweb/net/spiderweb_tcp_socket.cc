@@ -1,11 +1,16 @@
 #include "spiderweb_tcp_socket.h"
 
+#include <thread>
+
 #include "asio.hpp"
 #include "core/spiderweb_eventloop.h"
 #include "spiderweb/io/spiderweb_buffer.h"
 
 namespace spiderweb {
 namespace net {
+
+#define THREAD_CHECK(name) \
+  assert(std::this_thread::get_id() == ThreadId() && "can not call " #name " In other thread")
 
 class TcpSocket::Private {
  public:
@@ -31,6 +36,10 @@ class TcpSocket::Private {
   }
 
   void StartRead() {
+    if (stopped) {
+      return;
+    }
+
     /**
      * @brief
      *
@@ -75,7 +84,7 @@ class TcpSocket::Private {
       recv_buffer.CommitWrite(n);
 
       StartRead();
-      spider_emit q->BytesRead(recv_buffer);
+      spider_emit q->BytesRead(io::BufferReader(recv_buffer));
     });
   }
 
@@ -84,11 +93,7 @@ class TcpSocket::Private {
       return;
     }
 
-    bool shouldWrite = send_buffer.Len() == 0;
-
     send_buffer.Write(reinterpret_cast<const char *>(data), size);
-
-    assert(shouldWrite);
 
     asio::async_write(socket, asio::buffer(send_buffer.lastRead(), send_buffer.Len()),
                       asio::transfer_all(),
@@ -115,7 +120,16 @@ class TcpSocket::Private {
 
   void Stop() {
     stopped = true;
+    CloseSocket();
+  }
+
+  void CloseSocket() {
+    if (close_called) {
+      return;
+    }
+
     socket.close();
+    close_called = true;
   }
 
   TcpSocket               *q = nullptr;
@@ -124,6 +138,7 @@ class TcpSocket::Private {
   io::Buffer               recv_buffer;
   io::Buffer               send_buffer;
   static const std::size_t kSpaceGrowSize = 8192;
+  bool                     close_called = false;
 };
 
 TcpSocket::TcpSocket(Object *parent) : Object(parent), d(new Private(this)) {
@@ -132,16 +147,29 @@ TcpSocket::TcpSocket(Object *parent) : Object(parent), d(new Private(this)) {
 TcpSocket::~TcpSocket() = default;
 
 void TcpSocket::ConnectToHost(const std::string &ip, uint16_t port) {
+  THREAD_CHECK(TcpSocket::ConnectToHost);
+
   asio::ip::tcp::endpoint endpoint(asio::ip::make_address(ip), port);
 
   d->StartConnect(endpoint);
 }
 
 void TcpSocket::DisConnectFromHost() {
-  d->Stop();
+  THREAD_CHECK(TcpSocket::DisConnectFromHost);
+
+  d->CloseSocket();
+}
+
+bool TcpSocket::IsClosed() const {
+  /**
+   * @brief note that default construct IsClosed is false;
+   */
+  return d->stopped;
 }
 
 void TcpSocket::Write(const uint8_t *data, std::size_t size) {
+  THREAD_CHECK(TcpSocket::Write);
+
   d->StartWrite(data, size);
 }
 

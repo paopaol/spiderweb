@@ -17,14 +17,26 @@ class TcpSocket : public Object {
 
   void DisConnectFromHost();
 
+  bool IsClosed() const;
+
+  /**
+   * @brief Write something to the remote peer.
+   *
+   * Note that the write is asynchronous though. But it does not support multiple calls to write.
+   *
+   * When you initiate a write call, it is not allowed to write again until the write operation is
+   *
+   * completed(see BytesWritten). The behavior of multiple writes is undefined.
+   */
   void Write(const uint8_t *data, std::size_t size);
 
   EventSignal<void()> ConnectionEstablished;
 
   EventSignal<void(const std::error_code &ec)> Error;
 
-  EventSignal<void(const io::Buffer &buffer)> BytesRead;
-  EventSignal<void(std::size_t n)>            BytesWritten;
+  EventSignal<void(const io::BufferReader &buffer)> BytesRead;
+
+  EventSignal<void(std::size_t n)> BytesWritten;
 
  private:
   class Private;

@@ -41,3 +41,60 @@ TEST(spiderweb_tcp_socket, ConnectToHostFailed1) {
 
   loop.Exec();
 }
+
+TEST(spiderweb_tcp_socket, WriteSuccess) {
+  spiderweb::EventLoop loop;
+
+  spiderweb::net::TcpSocket socket;
+
+  spiderweb::EventSpy spy(&socket, &spiderweb::net::TcpSocket::BytesWritten);
+
+  spiderweb::Object::Connect(&socket, &spiderweb::net::TcpSocket::ConnectionEstablished, &loop,
+                             [&] {
+                               std::vector<uint8_t> data{0x30, 0x31, 0x32, 0x33, 0x34};
+                               socket.Write(data.data(), data.size());
+                             });
+
+  spiderweb::Object::Connect(&socket, &spiderweb::net::TcpSocket::BytesRead, &loop,
+                             [&](const spiderweb::io::BufferReader &buffer) {
+                               std::cout << buffer.Len() << std::endl;
+
+                               std::vector<char> data;
+                               buffer.PeekAt(data, 0, buffer.Len());
+
+                               socket.Write(reinterpret_cast<const uint8_t *>(data.data()),
+                                            data.size());
+                             });
+  spiderweb::Object::Connect(
+      &socket, &spiderweb::net::TcpSocket::Error, &loop,
+      [&](const std::error_code &ec) { std::cout << ec.message() << std::endl; });
+
+  socket.ConnectToHost("127.0.0.1", 6666);
+
+  spy.Wait(3000, 100000);
+  EXPECT_TRUE(spy.Count() > 0);
+
+  loop.QueueTask([&]() { loop.Quit(); });
+
+  loop.Exec();
+}
+
+TEST(spiderweb_tcp_socket, WriteClosedSocket) {
+  spiderweb::EventLoop loop;
+
+  spiderweb::net::TcpSocket socket;
+
+  spiderweb::EventSpy spy(&socket, &spiderweb::net::TcpSocket::Error);
+
+  std::vector<uint8_t> data{0x30, 0x31, 0x32, 0x33, 0x34};
+  socket.Write(data.data(), data.size());
+
+  spy.Wait(3000, 100000);
+  EXPECT_EQ(spy.Count(), 1);
+
+  std::cout << std::get<0>(spy.LastResult<const std::error_code &>()).message() << std::endl;
+
+  loop.QueueTask([&]() { loop.Quit(); });
+
+  loop.Exec();
+}
