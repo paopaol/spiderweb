@@ -1,4 +1,4 @@
-#ifndef SPIDERWEB_EVENT_SPY_H
+﻿#ifndef SPIDERWEB_EVENT_SPY_H
 #define SPIDERWEB_EVENT_SPY_H
 
 #include "absl/types/any.h"

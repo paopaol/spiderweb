@@ -7,6 +7,7 @@
 
 namespace spiderweb {
 namespace net {
+class TcpServer;
 class TcpSocket : public Object {
  public:
   explicit TcpSocket(Object *parent = nullptr);
@@ -18,6 +19,10 @@ class TcpSocket : public Object {
   void DisConnectFromHost();
 
   bool IsClosed() const;
+
+  std::string LocalStringAddress() const;
+
+  std::string RemoteStringAddress() const;
 
   /**
    * @brief
@@ -51,8 +56,12 @@ class TcpSocket : public Object {
   EventSignal<void()> ReconnectEvent;
 
  private:
+  explicit TcpSocket(TcpServer *parent);
+
   class Private;
   std::shared_ptr<Private> d;
+
+  friend class TcpServer;
 };
 }  // namespace net
 

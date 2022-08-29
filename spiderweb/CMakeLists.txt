@@ -2,7 +2,8 @@ add_library(spiderweb)
 
 target_sources(
   spiderweb
-  PRIVATE core/spiderweb_eventsignal.h
+  PRIVATE core/spiderweb_event_spy.h
+          core/spiderweb_eventsignal.h
           core/spiderweb_eventloop.cc
           core/spiderweb_eventloop.h
           core/spiderweb_object.cc
@@ -15,7 +16,11 @@ target_sources(
           io/spiderweb_buffer.h
           net/spiderweb_tcp_socket.cc
           net/spiderweb_tcp_socket.h
-  PRIVATE core/internal/index_sequence.hpp)
+          net/spiderweb_tcp_server.cc
+          net/spiderweb_tcp_server.h
+  PRIVATE core/internal/index_sequence.hpp core/internal/thread_check.h
+          core/internal/move_tuple_wrapper.h
+          net/private/spiderweb_tcp_socket_private.h)
 
 target_include_directories(
   spiderweb PUBLIC asio-1.22.1/include ${CMAKE_CURRENT_SOURCE_DIR}
@@ -39,9 +44,13 @@ target_link_libraries(spiderweb PUBLIC absl::any ghc_filesystem fmt spdlog
 add_executable(spiderweb_test)
 target_sources(
   spiderweb_test
-  PRIVATE core/spiderweb_object_test.cc core/spiderweb_timer_test.cc
-          core/spiderweb_eventloop_test.cc core/spiderweb_event_spy_test.cc
-          io/spiderweb_binary_writer_test.cc net/spiderweb_tcp_socket_test.cc)
+  PRIVATE core/spiderweb_object_test.cc
+          core/spiderweb_timer_test.cc
+          core/spiderweb_eventloop_test.cc
+          core/spiderweb_event_spy_test.cc
+          io/spiderweb_binary_writer_test.cc
+          net/spiderweb_tcp_socket_test.cc
+          net/spiderweb_tcp_server_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark

@@ -78,10 +78,10 @@ class Object {
         .append(create_none_class_member_functor<Reciver, Args...>(reciver, std::forward<F>(f)));
   }
 
-  template <typename T, typename T2, typename Ret, typename... Args>
-  static void Emit(T *instance, EventSignal<Ret(Args...)> T2::*event, Args &&...args) {
+  template <typename Sender, typename SenderU, typename... Args>
+  static void Emit(Sender *instance, EventSignal<void(Args...)> SenderU::*signal, Args &&...args) {
     if (instance) {
-      (instance->*event)(std::forward<Args>(args)...);
+      (instance->*signal)(std::forward<Args>(args)...);
     }
   }
 
