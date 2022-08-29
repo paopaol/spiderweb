@@ -18,8 +18,9 @@ target_sources(
   PRIVATE core/internal/index_sequence.hpp)
 
 target_include_directories(
-  spiderweb PUBLIC asio-1.22.1/include ${CMAKE_CURRENT_SOURCE_DIR}
-                   ${PROJECT_SOURCE_DIR})
+  spiderweb
+  PUBLIC asio-1.22.1/include ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}
+         ${PROJECT_SOURCE_DIR}/thrd/filesystem/include)
 # we do not use any bosst components
 target_compile_definitions(
   spiderweb
