@@ -51,7 +51,7 @@ TcpServer::TcpServer(uint16_t port, Object *parent)
 }
 
 TcpServer::~TcpServer() {
-  CALL_THREAD_CHECK(TcpServer::~TcpServer);
+  SPIDERWEB_CALL_THREAD_CHECK(TcpServer::~TcpServer);
   d->q = nullptr;
 }
 

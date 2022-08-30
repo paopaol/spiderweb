@@ -26,8 +26,8 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
     }
 
     stopped = false;
-    socket.async_connect(
-        endpoint, std::bind(&Private::HandleConnect, shared_from_this(), std::placeholders::_1));
+    socket.async_connect(endpoint, std::bind(&Private::HandleConnect, this->shared_from_this(),
+                                             std::placeholders::_1));
   }
 
   void HandleConnect(const asio::error_code &ec) {
@@ -72,7 +72,7 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
      *
      * So we can avoid it as much as possible.
      *
-     * The Write process of io::Buffer is:
+     * The Write process of @ref io::Buffer is:
      *
      * 1. PrepareWrite
      *
@@ -88,7 +88,7 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
     const auto &buffer = asio::buffer(recv_buffer.beginWrite(), recv_buffer.leftSpace());
 
-    auto self = shared_from_this();
+    auto self = this->shared_from_this();
     socket.async_read_some(buffer, [this, self](const asio::error_code ec, std::size_t n) {
       if (stopped) {
         return;
@@ -115,11 +115,28 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
       return;
     }
 
+    const bool should_write = send_buffer.Len() == 0;
+
     send_buffer.Write(reinterpret_cast<const char *>(data), size);
 
-    asio::async_write(socket, asio::buffer(send_buffer.lastRead(), send_buffer.Len()),
-                      asio::transfer_all(),
-                      std::bind(&Private::HanleWrite, shared_from_this(), std::placeholders::_1));
+    if (should_write) {
+      StartWrite();
+    }
+  }
+
+  void StartWrite() {
+    if (stopped) {
+      spdlog::warn("TcpSocket({}) stopped", fmt::ptr(q));
+      return;
+    }
+
+    if (send_buffer.Len() == 0) {
+      return;
+    }
+
+    asio::async_write(
+        socket, asio::buffer(send_buffer.lastRead(), send_buffer.Len()), asio::transfer_all(),
+        std::bind(&Private::HanleWrite, this->shared_from_this(), std::placeholders::_1));
   }
 
   void HanleWrite(const asio::error_code &ec) {
@@ -138,7 +155,9 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
 
     char       *ptr = nullptr;
     std::size_t written = send_buffer.Len();
+
     send_buffer.ZeroCopyRead(ptr, send_buffer.Len());
+    StartWrite();
 
     spider_emit q->BytesWritten(written);
   }

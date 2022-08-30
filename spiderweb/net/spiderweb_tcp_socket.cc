@@ -18,12 +18,12 @@ TcpSocket::TcpSocket(TcpServer *parent) : TcpSocket(static_cast<Object *>(parent
 }
 
 TcpSocket::~TcpSocket() {
-  CALL_THREAD_CHECK(TcpSocket::~TcpSocket);
+  SPIDERWEB_CALL_THREAD_CHECK(TcpSocket::~TcpSocket);
   d->q = nullptr;
 }
 
 void TcpSocket::ConnectToHost(const std::string &ip, uint16_t port) {
-  CALL_THREAD_CHECK(TcpSocket::ConnectToHost);
+  SPIDERWEB_CALL_THREAD_CHECK(TcpSocket::ConnectToHost);
 
   asio::ip::tcp::endpoint endpoint(asio::ip::make_address(ip), port);
 
@@ -31,13 +31,13 @@ void TcpSocket::ConnectToHost(const std::string &ip, uint16_t port) {
 }
 
 void TcpSocket::DisConnectFromHost() {
-  CALL_THREAD_CHECK(TcpSocket::DisConnectFromHost);
+  SPIDERWEB_CALL_THREAD_CHECK(TcpSocket::DisConnectFromHost);
   d->CloseSocket();
 }
 
 bool TcpSocket::IsClosed() const {
   /**
-   * @brief note that default construct IsClosed is false;
+   * @brief note that default construct IsClosed is true;
    */
   return d->IsStopped();
 }
@@ -57,7 +57,7 @@ std::string TcpSocket::RemoteStringAddress() const {
 }
 
 void TcpSocket::Write(const uint8_t *data, std::size_t size) {
-  CALL_THREAD_CHECK(TcpSocket::Write);
+  SPIDERWEB_CALL_THREAD_CHECK(TcpSocket::Write);
   d->StartWrite(data, size);
 }
 

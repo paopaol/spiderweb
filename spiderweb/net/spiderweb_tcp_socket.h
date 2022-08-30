@@ -7,6 +7,7 @@
 
 namespace spiderweb {
 namespace net {
+
 class TcpServer;
 class TcpSocket : public Object {
  public:
