@@ -109,7 +109,8 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
     });
   }
 
-  void StartWrite(const uint8_t *data, std::size_t size) {
+  template <typename AsyncStream>
+  void StartWrite(AsyncStream &stream, const uint8_t *data, std::size_t size) {
     if (stopped) {
       spdlog::warn("TcpSocket({}) stopped", fmt::ptr(q));
       return;
@@ -120,11 +121,12 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
     send_buffer.Write(reinterpret_cast<const char *>(data), size);
 
     if (should_write) {
-      StartWrite();
+      StartWrite(stream);
     }
   }
 
-  void StartWrite() {
+  template <typename AsyncStream>
+  void StartWrite(AsyncStream &stream) {
     if (stopped) {
       spdlog::warn("TcpSocket({}) stopped", fmt::ptr(q));
       return;
@@ -134,12 +136,16 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
       return;
     }
 
-    asio::async_write(
-        socket, asio::buffer(send_buffer.lastRead(), send_buffer.Len()), asio::transfer_all(),
-        std::bind(&Private::HanleWrite, this->shared_from_this(), std::placeholders::_1));
+    auto self = shared_from_this();
+    asio::async_write(stream, asio::buffer(send_buffer.lastRead(), send_buffer.Len()),
+                      asio::transfer_all(),
+                      [this, self, &stream](const asio::error_code &ec, std::size_t size) {
+                        HandleWrite(stream, ec, size);
+                      });
   }
 
-  void HanleWrite(const asio::error_code &ec) {
+  template <typename AsyncStream>
+  void HandleWrite(AsyncStream &stream, const asio::error_code &ec, std::size_t size) {
     if (stopped) {
       return;
     }
@@ -153,13 +159,11 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
       return;
     }
 
-    char       *ptr = nullptr;
-    std::size_t written = send_buffer.Len();
+    char *ptr = nullptr;
+    send_buffer.ZeroCopyRead(ptr, size);
+    StartWrite(stream);
 
-    send_buffer.ZeroCopyRead(ptr, send_buffer.Len());
-    StartWrite();
-
-    spider_emit q->BytesWritten(written);
+    spider_emit q->BytesWritten(size);
   }
 
   inline void Stop() {

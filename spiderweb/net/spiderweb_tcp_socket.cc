@@ -58,7 +58,7 @@ std::string TcpSocket::RemoteStringAddress() const {
 
 void TcpSocket::Write(const uint8_t *data, std::size_t size) {
   SPIDERWEB_CALL_THREAD_CHECK(TcpSocket::Write);
-  d->StartWrite(data, size);
+  d->StartWrite(d->socket, data, size);
 }
 
 }  // namespace net
