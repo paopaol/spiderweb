@@ -3,3 +3,4 @@ AlignConsecutiveDeclarations: true
 StatementAttributeLikeMacros: [spider_notify]
 ColumnLimit: 100
 AllowShortFunctionsOnASingleLine: false
+BeforeLambdaBody: true
