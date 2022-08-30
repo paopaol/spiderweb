@@ -10,10 +10,11 @@
 namespace spiderweb {
 namespace net {
 
-TcpSocket::TcpSocket(Object *parent) : Object(parent), d(std::make_shared<Private>(this)) {
-}
+TcpSocket::TcpSocket(Object *parent)
+    : Object(parent), d(std::make_shared<Private>(this)) {}
 
-TcpSocket::TcpSocket(TcpServer *parent) : TcpSocket(static_cast<Object *>(parent)) {
+TcpSocket::TcpSocket(TcpServer *parent)
+    : TcpSocket(static_cast<Object *>(parent)) {
   d->stopped = false;
 }
 
@@ -27,7 +28,7 @@ void TcpSocket::ConnectToHost(const std::string &ip, uint16_t port) {
 
   asio::ip::tcp::endpoint endpoint(asio::ip::make_address(ip), port);
 
-  d->StartConnect(endpoint);
+  d->StartConnect(d->socket, endpoint);
 }
 
 void TcpSocket::DisConnectFromHost() {
@@ -44,14 +45,14 @@ bool TcpSocket::IsClosed() const {
 
 std::string TcpSocket::LocalStringAddress() const {
   asio::error_code ec;
-  const auto      &endpoint = d->socket.local_endpoint(ec);
+  const auto &endpoint = d->socket.local_endpoint(ec);
 
   return fmt::format("{}:{}", endpoint.address().to_string(), endpoint.port());
 }
 
 std::string TcpSocket::RemoteStringAddress() const {
   asio::error_code ec;
-  const auto      &endpoint = d->socket.remote_endpoint(ec);
+  const auto &endpoint = d->socket.remote_endpoint(ec);
 
   return fmt::format("{}:{}", endpoint.address().to_string(), endpoint.port());
 }
@@ -61,5 +62,5 @@ void TcpSocket::Write(const uint8_t *data, std::size_t size) {
   d->StartWrite(d->socket, data, size);
 }
 
-}  // namespace net
-}  // namespace spiderweb
+} // namespace net
+} // namespace spiderweb

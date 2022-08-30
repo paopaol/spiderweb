@@ -11,6 +11,9 @@ namespace net {
 class TcpServer;
 class TcpSocket : public Object {
  public:
+  class Private;
+  std::shared_ptr<Private> d;
+
   explicit TcpSocket(Object *parent = nullptr);
 
   ~TcpSocket() override;
@@ -58,9 +61,6 @@ class TcpSocket : public Object {
 
  private:
   explicit TcpSocket(TcpServer *parent);
-
-  class Private;
-  std::shared_ptr<Private> d;
 
   friend class TcpServer;
 };
