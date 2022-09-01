@@ -44,6 +44,8 @@ class TcpSocket : public Object {
    */
   void Write(const uint8_t *data, std::size_t size);
 
+  void Write(const std::vector<uint8_t> &data);
+
   EventSignal<void()> ConnectionEstablished;
 
   EventSignal<void(const std::error_code &ec)> Error;

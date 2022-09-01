@@ -1,4 +1,4 @@
-#ifndef SPIDERWEB_TCP_SOCKET_PRIVATE_H
+﻿#ifndef SPIDERWEB_TCP_SOCKET_PRIVATE_H
 #define SPIDERWEB_TCP_SOCKET_PRIVATE_H
 
 #include "asio.hpp"
@@ -8,19 +8,19 @@
 
 namespace spiderweb {
 namespace net {
-class TcpSocket::Private
-    : public std::enable_shared_from_this<TcpSocket::Private> {
-public:
-  explicit Private(TcpSocket *qq)
-      : q(qq), socket(qq->ownerEventLoop()->IoService()) {}
+class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Private> {
+ public:
+  explicit Private(TcpSocket *qq) : q(qq), socket(qq->ownerEventLoop()->IoService()) {
+  }
 
   ~Private() = default;
 
-  inline bool IsStopped() const { return stopped; }
+  inline bool IsStopped() const {
+    return stopped;
+  }
 
   template <typename AsyncStream>
-  void StartConnect(AsyncStream &stream,
-                    const asio::ip::tcp::endpoint &endpoint) {
+  void StartConnect(AsyncStream &stream, const asio::ip::tcp::endpoint &endpoint) {
     if (stream.is_open()) {
       spdlog::warn("TcpSocket({}) alreay connected or connecting", fmt::ptr(q));
       return;
@@ -29,10 +29,8 @@ public:
     stopped = false;
     auto self = shared_from_this();
 
-    stream.async_connect(endpoint,
-                         [this, self, &stream](const asio::error_code &ec) {
-                           HandleConnect(stream, ec);
-                         });
+    stream.async_connect(
+        endpoint, [this, self, &stream](const asio::error_code &ec) { HandleConnect(stream, ec); });
   }
 
   template <typename AsyncStream>
@@ -53,7 +51,8 @@ public:
     spider_emit Object::Emit(q, &TcpSocket::ConnectionEstablished);
   }
 
-  template <typename AsyncStream> void StartRead(AsyncStream &stream) {
+  template <typename AsyncStream>
+  void StartRead(AsyncStream &stream) {
     if (stopped) {
       return;
     }
@@ -92,30 +91,38 @@ public:
       recv_buffer.PrepareWrite(kSpaceGrowSize);
     }
 
-    const auto &buffer =
-        asio::buffer(recv_buffer.beginWrite(), recv_buffer.leftSpace());
+    const auto &buffer = asio::buffer(recv_buffer.beginWrite(), recv_buffer.leftSpace());
 
     auto self = this->shared_from_this();
-    stream.async_read_some(
-        buffer,
-        [this, self, &stream](const asio::error_code &ec, std::size_t n) {
-          if (stopped) {
-            return;
-          }
+    stream.async_read_some(buffer,
+                           [this, self, &stream](const asio::error_code &ec, std::size_t n) {
+                             if (stopped) {
+                               return;
+                             }
 
-          if (ec) {
-            Stop();
-            /**
-             * @brief we use Object::Emit here, beause maybe `q` has gone.
-             */
-            spider_emit Object::Emit(q, &TcpSocket::Error, ec);
-            return;
-          }
+                             if (ec) {
+                               Stop();
+                               /**
+                                * @brief we use Object::Emit here, beause maybe `q` has gone.
+                                */
+                               spider_emit Object::Emit(q, &TcpSocket::Error, ec);
+                               return;
+                             }
 
-          recv_buffer.CommitWrite(n);
-          StartRead(stream);
-          spider_emit q->BytesRead(io::BufferReader(recv_buffer));
-        });
+                             recv_buffer.CommitWrite(n);
+                             StartRead(stream);
+                             spider_emit q->BytesRead(io::BufferReader(recv_buffer));
+                           });
+  }
+
+  template <typename AsyncStream>
+  void StartWrite(AsyncStream &stream, const std::vector<uint8_t> &data) {
+    StartWrite(stream, data.data(), data.size());
+  }
+
+  template <typename AsyncStream>
+  void StartWrite(AsyncStream &stream, const std::string &data) {
+    StartWrite(stream, reinterpret_cast<const uint8_t *>(data.data()), data.size());
   }
 
   template <typename AsyncStream>
@@ -134,7 +141,8 @@ public:
     }
   }
 
-  template <typename AsyncStream> void StartWrite(AsyncStream &stream) {
+  template <typename AsyncStream>
+  void StartWrite(AsyncStream &stream) {
     if (stopped) {
       spdlog::warn("TcpSocket({}) stopped", fmt::ptr(q));
       return;
@@ -145,17 +153,15 @@ public:
     }
 
     auto self = shared_from_this();
-    asio::async_write(
-        stream, asio::buffer(send_buffer.lastRead(), send_buffer.Len()),
-        asio::transfer_all(),
-        [this, self, &stream](const asio::error_code &ec, std::size_t size) {
-          HandleWrite(stream, ec, size);
-        });
+    asio::async_write(stream, asio::buffer(send_buffer.lastRead(), send_buffer.Len()),
+                      asio::transfer_all(),
+                      [this, self, &stream](const asio::error_code &ec, std::size_t size) {
+                        HandleWrite(stream, ec, size);
+                      });
   }
 
   template <typename AsyncStream>
-  void HandleWrite(AsyncStream &stream, const asio::error_code &ec,
-                   std::size_t size) {
+  void HandleWrite(AsyncStream &stream, const asio::error_code &ec, std::size_t size) {
     if (stopped) {
       return;
     }
@@ -190,16 +196,16 @@ public:
     close_called = true;
   }
 
-  TcpSocket *q = nullptr;
-  bool stopped = true;
-  asio::ip::tcp::socket socket;
-  io::Buffer recv_buffer;
-  io::Buffer send_buffer;
+  TcpSocket               *q = nullptr;
+  bool                     stopped = true;
+  asio::ip::tcp::socket    socket;
+  io::Buffer               recv_buffer;
+  io::Buffer               send_buffer;
   static const std::size_t kSpaceGrowSize = 8192;
-  bool close_called = false;
+  bool                     close_called = false;
 };
 
-} // namespace net
-} // namespace spiderweb
+}  // namespace net
+}  // namespace spiderweb
 
 #endif

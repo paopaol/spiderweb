@@ -12,9 +12,10 @@ class EventSpy : public Object {
  public:
   template <typename T, typename T2, typename Ret, typename... Args>
   explicit EventSpy(T *instance, EventSignal<Ret(Args...)> T2::*event) {
-    Object::Connect(instance, event, instance, [this](Args &&...args) {
+    Object::Connect(instance, event, instance, [this](Args... args) {
       ++count_;
-      results_.emplace_back(std::move(std::forward_as_tuple(args...)));
+      std::tuple<decay_t<Args>...> t(std::forward<Args>(args)...);
+      results_.emplace_back(std::move(t));
     });
   }
 
