@@ -18,9 +18,11 @@ target_sources(
           net/spiderweb_tcp_socket.h
           net/spiderweb_tcp_server.cc
           net/spiderweb_tcp_server.h
-  PRIVATE core/internal/index_sequence.hpp core/internal/thread_check.h
+  PRIVATE core/internal/index_sequence.hpp
+          core/internal/thread_check.h
           core/internal/move_tuple_wrapper.h
-          net/private/spiderweb_tcp_socket_private.h)
+          net/private/spiderweb_tcp_socket_private.h
+          net/private/spiderweb_tcp_server_private.h)
 
 target_include_directories(
   spiderweb PUBLIC asio-1.22.1/include ${CMAKE_CURRENT_SOURCE_DIR}
