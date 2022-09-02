@@ -61,23 +61,18 @@ class TcpSocket::Private : public std::enable_shared_from_this<TcpSocket::Privat
      * @brief
      *
      * Since we use our own custom buffer as the receive buffer. There are many
-     * reasons to use your
      *
-     * own buffer. For example, it can be easily read and written, and the user
-     * does not have to
+     * reasons to use your own buffer. For example, it can be easily read and written,
      *
-     * care about the management of the buffer size. But asio has its own
-     * asynchronous read and
+     * and the user does not have to care about the management of the buffer size. But
      *
-     * write method, although we can use a buffer of constant size to
-     * temporarily receive, and then
+     * asio has its own asynchronous read and write method, although we can use a buffer
      *
-     * copy the data to our own buffer every time we receive data. Looks fine,
-     * just one more copy.
+     * of constant size to temporarily receive, and then copy the data to our own buffer
      *
-     * So we can avoid it as much as possible.
+     * every time we receive data. Looks fine, just one more copy. So we can avoid it
      *
-     * The Write process of @ref io::Buffer is:
+     * as much as possible. The Write process of @ref io::Buffer is:
      *
      * 1. PrepareWrite
      *
