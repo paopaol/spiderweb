@@ -25,14 +25,14 @@ class test_stream {
   // void next_read_length(size_t length) {
   //   next_read_length_ = length;
   // }
-  // template <typename Mutable_Buffers>
-  // size_t read_some(const Mutable_Buffers& buffers) {
-  //   size_t n =
-  //       asio::buffer_copy(buffers, asio::buffer(data_, length_) + position_,
-  //       next_read_length_);
-  //   position_ += n;
-  //   return n;
-  // }
+
+  template <typename Mutable_Buffers>
+  size_t read_some(const Mutable_Buffers &buffers) {
+    size_t n =
+        asio::buffer_copy(buffers, asio::buffer(data_, length_) + position_, next_read_length_);
+    position_ += n;
+    return n;
+  }
   //
   // template <typename Mutable_Buffers>
   // size_t read_some(const Mutable_Buffers& buffers, asio::error_code& ec) {
