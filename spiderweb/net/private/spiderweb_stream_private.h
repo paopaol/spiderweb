@@ -10,6 +10,24 @@
 namespace spiderweb {
 namespace net {
 
+/**
+ * @brief an asio async stream delegate.
+ *
+ * It mainly adds a high-level encapsulation to asio's async stream, so that users don't have to
+ *
+ * care about the size adjustment of the send buffer and the receive buffer. At the same time,
+ *
+ * events such as sending, receiving, and errors will be notified to the user. Since the template is
+ *
+ * used here, it also means that the specific operation of the stream needs to be implemented by the
+ *
+ * template user. For example, tcpsocket needs to call async_read_some, async_write_some and so on.
+ *
+ * Since the processing flow of asio's tcp udp, pipe serial, etc. is basically the same, this
+ *
+ * unified use will be extracted.
+ *
+ */
 template <typename IoImpl>
 class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
  public:
@@ -89,7 +107,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
       recv_buffer.PrepareWrite(kSpaceGrowSize);
     }
 
-    const auto &buffer = asio::buffer(recv_buffer.beginWrite(), recv_buffer.leftSpace());
+    const auto buffer = asio::buffer(recv_buffer.beginWrite(), recv_buffer.leftSpace());
 
     auto self = this->shared_from_this();
     impl.Read(stream, buffer, [this, self, &stream](const asio::error_code &ec, std::size_t n) {
