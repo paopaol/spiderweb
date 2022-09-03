@@ -1,4 +1,4 @@
-﻿#ifndef SPIDERWEB_STREAM_PRIVATE_H
+#ifndef SPIDERWEB_STREAM_PRIVATE_H
 #define SPIDERWEB_STREAM_PRIVATE_H
 
 #include "asio.hpp"
