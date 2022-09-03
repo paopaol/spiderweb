@@ -66,6 +66,9 @@ class test_stream {
   MOCK_METHOD(void, async_write_some,
               (const asio::const_buffers_1 &buffers, const WriteHandler &handler));
 
+  void close() {
+  }
+
  private:
   asio::io_context &io_context_;
   enum { max_length = 8192 };

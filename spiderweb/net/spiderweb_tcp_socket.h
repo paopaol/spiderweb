@@ -8,11 +8,13 @@
 namespace spiderweb {
 namespace net {
 
+template <typename IoImpl>
+class IoPrivate;
+
 class TcpServer;
 class TcpSocket : public Object {
  public:
   class Private;
-  std::shared_ptr<Private> d;
 
   explicit TcpSocket(Object *parent = nullptr);
 
@@ -63,6 +65,8 @@ class TcpSocket : public Object {
 
  private:
   explicit TcpSocket(TcpServer *parent);
+
+  std::shared_ptr<IoPrivate<Private>> d;
 
   friend class TcpServer;
 };

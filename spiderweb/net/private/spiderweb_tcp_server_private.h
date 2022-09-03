@@ -3,6 +3,7 @@
 
 #include "asio.hpp"
 #include "fmt/format.h"
+#include "net/private/spiderweb_stream_private.h"
 #include "spdlog/spdlog.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/net/spiderweb_tcp_server.h"
@@ -31,10 +32,11 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
     }
 
     auto *client = new TcpSocket(q);
-    tcp_acceptor.async_accept(client->d->socket, [this, self = shared_from_this(), &tcp_acceptor,
-                                                  client](const asio::error_code &ec) {
-      HandleAccept(tcp_acceptor, client, ec);
-    });
+    tcp_acceptor.async_accept(
+        client->d->impl.socket,
+        [this, self = shared_from_this(), &tcp_acceptor, client](const asio::error_code &ec) {
+          HandleAccept(tcp_acceptor, client, ec);
+        });
   }
 
   template <typename Acceptor>
@@ -47,7 +49,7 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
       return;
     }
 
-    client->d->StartRead(client->d->socket);
+    client->d->StartRead(client->d->impl.socket);
     spider_emit Object::Emit(q, &TcpServer::InComingConnection, std::forward<TcpSocket *>(client));
   }
 

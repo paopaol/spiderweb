@@ -21,6 +21,7 @@ target_sources(
   PRIVATE core/internal/index_sequence.hpp
           core/internal/thread_check.h
           core/internal/move_tuple_wrapper.h
+          net/private/spiderweb_stream_private.h
           net/private/spiderweb_tcp_socket_private.h
           net/private/spiderweb_tcp_server_private.h)
 

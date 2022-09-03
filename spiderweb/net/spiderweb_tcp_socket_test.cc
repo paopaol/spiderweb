@@ -5,8 +5,11 @@
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_event_spy.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
+#include "spiderweb/net/private/spiderweb_stream_private.h"
 #include "spiderweb/net/private/spiderweb_tcp_socket_private.h"
 #include "spiderweb/test/spiderweb_test_stream.hpp"
+
+using TestIoPrivate = spiderweb::net::IoPrivate<spiderweb::net::TcpSocket::Private>;
 
 class MockSocket : public spiderweb::Object {
  public:
@@ -14,11 +17,11 @@ class MockSocket : public spiderweb::Object {
       : spiderweb::Object(parent),
         event_loop(loop),
         stream(loop.IoService()),
-        d(std::make_shared<spiderweb::net::TcpSocket::Private>(&socket)) {
+        d(std::make_shared<TestIoPrivate>(&socket)) {
   }
 
   ~MockSocket() override {
-    d->q = nullptr;
+    d->impl.q = nullptr;
   }
 
   void SimulateConnectSuccess() {
@@ -69,11 +72,11 @@ class MockSocket : public spiderweb::Object {
                                const test_stream::WriteHandler &handler) {});
   }
 
-  spiderweb::EventLoop                               &event_loop;
-  test_stream                                         stream;
-  spiderweb::net::TcpSocket                           socket;
-  asio::ip::tcp::endpoint                             endpoint;
-  std::shared_ptr<spiderweb::net::TcpSocket::Private> d;
+  spiderweb::EventLoop          &event_loop;
+  test_stream                    stream;
+  spiderweb::net::TcpSocket      socket;
+  asio::ip::tcp::endpoint        endpoint;
+  std::shared_ptr<TestIoPrivate> d;
 };
 
 TEST(spiderweb_tcp_socket, ConnectToHostSuccess) {
@@ -85,7 +88,7 @@ TEST(spiderweb_tcp_socket, ConnectToHostSuccess) {
   mocker.SimulateConnectSuccess();
   mocker.ShouldCallReadWhenConnectSuccess();
 
-  mocker.d->StartConnect(mocker.stream, mocker.endpoint);
+  mocker.d->StartOpen(mocker.stream, mocker.endpoint);
   spy.Wait();
   EXPECT_EQ(spy.Count(), 1);
 }
@@ -98,7 +101,7 @@ TEST(spiderweb_tcp_socket, ConnectToHostFailed_ConnectionRefused) {
 
   mocker.SimulateConnectFailed(asio::error::connection_refused);
 
-  mocker.d->StartConnect(mocker.stream, mocker.endpoint);
+  mocker.d->StartOpen(mocker.stream, mocker.endpoint);
   spy.Wait();
   EXPECT_EQ(spy.Count(), 1);
   auto error_code = std::get<0>(spy.LastResult<std::error_code>());
@@ -114,8 +117,8 @@ TEST(spiderweb_tcp_socket, CloseConnectingSocket) {
 
   mocker.SimulateConnectFailed(asio::error::connection_aborted);
 
-  mocker.d->StartConnect(mocker.stream, mocker.endpoint);
-  mocker.d->CloseSocket();
+  mocker.d->StartOpen(mocker.stream, mocker.endpoint);
+  mocker.d->Close(mocker.stream);
   spy.Wait();
   EXPECT_EQ(spy.Count(), 1);
   auto error_code = std::get<0>(spy.LastResult<std::error_code>());
@@ -136,7 +139,7 @@ TEST(spiderweb_tcp_socket, WriteSuccess) {
   mocker.ShouldCallReadWhenConnectSuccess();
   mocker.SimulateWriteSuccess();
 
-  mocker.d->StartConnect(mocker.stream, mocker.endpoint);
+  mocker.d->StartOpen(mocker.stream, mocker.endpoint);
   on_conn.Wait();
   EXPECT_EQ(on_conn.Count(), 1);
   mocker.d->StartWrite(mocker.stream, "1234");
@@ -173,7 +176,7 @@ TEST(spiderweb_tcp_socket, MultiWrite) {
             loop.QueueTask([handler, buffers]() { handler(asio::error_code(), buffers.size()); });
           });
 
-  mocker.d->StartConnect(mocker.stream, mocker.endpoint);
+  mocker.d->StartOpen(mocker.stream, mocker.endpoint);
   on_conn.Wait();
   EXPECT_EQ(on_conn.Count(), 1);
 
@@ -213,7 +216,7 @@ TEST(spiderweb_tcp_socket, ReadSuccess) {
       .WillOnce(
           [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {});
 
-  mocker.d->StartConnect(mocker.stream, mocker.endpoint);
+  mocker.d->StartOpen(mocker.stream, mocker.endpoint);
   spy.Wait(500, 10);
   EXPECT_EQ(spy.Count(), 2);
 
@@ -240,7 +243,7 @@ TEST(spiderweb_tcp_socket, ReadFailed) {
             loop.QueueTask([hander]() { hander(asio::error::connection_aborted, 0); });
           });
 
-  mocker.d->StartConnect(mocker.stream, mocker.endpoint);
+  mocker.d->StartOpen(mocker.stream, mocker.endpoint);
   spy.Wait();
 
   EXPECT_EQ(spy.Count(), 1);
@@ -311,7 +314,7 @@ TEST(spiderweb_tcp_socket, SafeDelete) {
   mocker->ShouldCallReadWhenConnectSuccess();
   mocker->SimulatePendingWrite();
 
-  mocker->d->StartConnect(mocker->stream, mocker->endpoint);
+  mocker->d->StartOpen(mocker->stream, mocker->endpoint);
   mocker->d->StartWrite(mocker->stream, "1234");
   mocker->DeleteLater();
   mocker->d->StartWrite(mocker->stream, "1234");
