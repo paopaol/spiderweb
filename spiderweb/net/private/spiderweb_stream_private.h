@@ -25,7 +25,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   template <typename AsyncStream, typename... Args>
   void StartOpen(AsyncStream &stream, Args &&...args) {
     if (stream.is_open()) {
-      spdlog::warn("TcpSocket({}) alreay connected or connecting", fmt::ptr(impl.q));
+      spdlog::warn("{}({}) alreay connected or connecting", impl.Description(), fmt::ptr(impl.q));
       return;
     }
 
@@ -125,7 +125,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   template <typename AsyncStream>
   void StartWrite(AsyncStream &stream, const uint8_t *data, std::size_t size) {
     if (stopped) {
-      spdlog::warn("TcpSocket({}) stopped", fmt::ptr(impl.q));
+      spdlog::warn("{}({}) stopped", impl.Description(), fmt::ptr(impl.q));
       return;
     }
 
@@ -141,7 +141,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   template <typename AsyncStream>
   void StartWrite(AsyncStream &stream) {
     if (stopped) {
-      spdlog::warn("TcpSocket({}) stopped", fmt::ptr(impl.q));
+      spdlog::warn("{}({}) stopped", impl.Description(), fmt::ptr(impl.q));
       return;
     }
 

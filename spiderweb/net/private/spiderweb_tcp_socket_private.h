@@ -11,9 +11,6 @@ struct TcpSocket::Private {
   explicit Private(TcpSocket *qq) : q(qq), socket(qq->ownerEventLoop()->IoService()) {
   }
 
-  TcpSocket            *q = nullptr;
-  asio::ip::tcp::socket socket;
-
   template <typename AsyncStream, typename Handler>
   void Open(AsyncStream &stream, const asio::ip::tcp::endpoint &endpoint, Handler &&handler) {
     stream.async_connect(endpoint, std::forward<Handler>(handler));
@@ -49,6 +46,13 @@ struct TcpSocket::Private {
   void Readden(const io::BufferReader &reader) {
     spider_emit q->BytesRead(reader);
   }
+
+  inline const char *Description() const {
+    return "TcpSocket";
+  }
+
+  TcpSocket            *q = nullptr;
+  asio::ip::tcp::socket socket;
 };
 }  // namespace net
 }  // namespace spiderweb
