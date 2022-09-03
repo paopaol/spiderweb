@@ -6,10 +6,12 @@
 #include "io/spiderweb_buffer.h"
 
 namespace spiderweb {
-namespace net {
-
+namespace io {
 template <typename IoImpl>
 class IoPrivate;
+
+}
+namespace net {
 
 class TcpServer;
 class TcpSocket : public Object {
@@ -66,7 +68,7 @@ class TcpSocket : public Object {
  private:
   explicit TcpSocket(TcpServer *parent);
 
-  std::shared_ptr<IoPrivate<Private>> d;
+  std::shared_ptr<io::IoPrivate<Private>> d;
 
   friend class TcpServer;
 };

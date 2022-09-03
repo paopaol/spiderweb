@@ -3,7 +3,7 @@
 #include <thread>
 
 #include "core/internal/thread_check.h"
-#include "net/private/spiderweb_stream_private.h"
+#include "io/private/spiderweb_stream_private.h"
 #include "net/private/spiderweb_tcp_socket_private.h"
 #include "spiderweb/io/spiderweb_buffer.h"
 #include "spiderweb_tcp_server.h"
@@ -12,7 +12,7 @@ namespace spiderweb {
 namespace net {
 
 TcpSocket::TcpSocket(Object *parent)
-    : Object(parent), d(std::make_shared<IoPrivate<Private>>(this)) {
+    : Object(parent), d(std::make_shared<io::IoPrivate<Private>>(this)) {
 }
 
 TcpSocket::TcpSocket(TcpServer *parent) : TcpSocket(static_cast<Object *>(parent)) {

@@ -3,7 +3,7 @@
 
 #include "asio.hpp"
 #include "fmt/format.h"
-#include "net/private/spiderweb_stream_private.h"
+#include "io/private/spiderweb_stream_private.h"
 #include "spdlog/spdlog.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/net/spiderweb_tcp_server.h"

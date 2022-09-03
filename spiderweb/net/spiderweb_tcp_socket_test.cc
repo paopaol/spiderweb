@@ -5,11 +5,11 @@
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_event_spy.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
-#include "spiderweb/net/private/spiderweb_stream_private.h"
+#include "spiderweb/io/private/spiderweb_stream_private.h"
 #include "spiderweb/net/private/spiderweb_tcp_socket_private.h"
 #include "spiderweb/test/spiderweb_test_stream.hpp"
 
-using TestIoPrivate = spiderweb::net::IoPrivate<spiderweb::net::TcpSocket::Private>;
+using TestIoPrivate = spiderweb::io::IoPrivate<spiderweb::net::TcpSocket::Private>;
 
 class MockSocket : public spiderweb::Object {
  public:

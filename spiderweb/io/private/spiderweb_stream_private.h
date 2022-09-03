@@ -4,11 +4,10 @@
 #include "asio.hpp"
 #include "core/spiderweb_eventloop.h"
 #include "io/spiderweb_buffer.h"
-#include "net/spiderweb_tcp_socket.h"
 #include "spdlog/spdlog.h"
 
 namespace spiderweb {
-namespace net {
+namespace io {
 
 /**
  * @brief an asio async stream delegate.
@@ -31,7 +30,8 @@ namespace net {
 template <typename IoImpl>
 class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
  public:
-  explicit IoPrivate(TcpSocket *qq) : impl(qq) {
+  template <typename Delegated>
+  explicit IoPrivate(Delegated *qq) : impl(qq) {
   }
 
   ~IoPrivate() = default;
@@ -220,7 +220,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   bool                     close_called = false;
 };
 
-}  // namespace net
+}  // namespace io
 }  // namespace spiderweb
 
 #endif
