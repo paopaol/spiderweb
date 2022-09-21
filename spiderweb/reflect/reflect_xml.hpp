@@ -381,7 +381,7 @@ class XmlWriter {
 
 #define REFLECT_XML(Type, ATTRS, ...)                              \
   template <typename T>                                            \
-  struct reflect::XmlMeta<T, Type> {                               \
+  struct spiderweb::reflect::XmlMeta<T, Type> {                    \
     using XmlValue = T;                                            \
     using struct_type = Type;                                      \
     static void Read(const XmlValue &node, struct_type &result) {  \

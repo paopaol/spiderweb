@@ -10,7 +10,6 @@
 #include "unordered_map"
 
 namespace spiderweb {
-
 namespace reflect {
 namespace json {
 
@@ -274,7 +273,7 @@ struct Writer {
 
 #define REFLECT_JSON(Type, ...)                                          \
   template <typename JsonNodeType>                                       \
-  struct reflect::json::Meta<Type, JsonNodeType> {                       \
+  struct spiderweb::reflect::json::Meta<Type, JsonNodeType> {            \
     static constexpr bool IsMeta = true;                                 \
     using struct_type = Type;                                            \
     using jsonnode_type = JsonNodeType;                                  \

@@ -3,7 +3,8 @@ include(FetchContent)
 FetchContent_Declare(yyjson URL file://${CMAKE_CURRENT_SOURCE_DIR}/yyjson)
 FetchContent_MakeAvailable(yyjson)
 
-FetchContent_Declare(pugixml URL file://${PROJECT_SOURCE_DIR}/thrd/pugixml)
+FetchContent_Declare(
+  pugixml URL file://${PROJECT_SOURCE_DIR}/thrd/pugixml-1.12.1.tar.gz)
 FetchContent_MakeAvailable(pugixml)
 
 # gtest

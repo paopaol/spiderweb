@@ -2,10 +2,10 @@
 #include "yyjson_json_reflection.hpp"
 
 struct People {
-  std::string name;
-  int age;
-  float height;
-  std::vector<int> intList;
+  std::string              name;
+  int                      age;
+  float                    height;
+  std::vector<int>         intList;
   std::vector<std::string> stringList;
 };
 
@@ -20,13 +20,13 @@ REFLECT_JSON(PeopleList, (peoples, "peoples"))
 static void BM_copy(benchmark::State &state) {
   std::vector<People> peoples;
   for (auto _ : state) {
-    peoples.emplace_back(People());
+    peoples.emplace_back();
   }
 }
 BENCHMARK(BM_copy);
 
 static void BM_FromJson(benchmark::State &state) {
-  const char *json = R"(
+  const char                            *json = R"(
 {
   "peoples": [
     {
@@ -60,7 +60,7 @@ static void BM_FromJson(benchmark::State &state) {
   ]
 }
 )";
-  reflect::json::YyJsonReader serilizer(json);
+  spiderweb::reflect::json::YyJsonReader serilizer(json);
   for (auto _ : state) {
     PeopleList people;
     serilizer.FromJson(&people);
@@ -82,7 +82,7 @@ static void BM_ToJsonReflect(benchmark::State &state) {
   }
 
   for (auto _ : state) {
-    reflect::json::YyJsonWriter writer;
+    spiderweb::reflect::json::YyJsonWriter writer;
     writer.ToJson(&people);
   }
 }

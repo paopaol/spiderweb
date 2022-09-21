@@ -11,29 +11,29 @@ REFLECT_ENUM(State, std::string, (kGood, "good"), (kBad, "bad"), (kInvalid, "inv
 
 TEST(enum_reflect, FromAliasType) {
   {
-    const auto result = reflect::FromAliasType(1, State::kBad);
+    const auto result = spiderweb::reflect::FromAliasType(1, State::kBad);
     EXPECT_EQ(result, State::kGood);
   }
 
   {
-    const auto result = reflect::FromAliasType("good", State::kBad);
+    const auto result = spiderweb::reflect::FromAliasType("good", State::kBad);
     EXPECT_EQ(result, State::kGood);
   }
 
   {
-    const auto result = reflect::FromAliasType("100", State::kInvalid);
+    const auto result = spiderweb::reflect::FromAliasType("100", State::kInvalid);
     EXPECT_EQ(result, State::kInvalid);
   }
 }
 
 TEST(enum_reflect, ToAliasType) {
   {
-    const auto result = reflect::ToAliasType<int>(State::kBad);
+    const auto result = spiderweb::reflect::ToAliasType<int>(State::kBad);
     EXPECT_EQ(result, 2);
   }
 
   {
-    const auto result = reflect::ToAliasType<std::string>(State::kInvalid);
+    const auto result = spiderweb::reflect::ToAliasType<std::string>(State::kInvalid);
     EXPECT_EQ(result, "invalid");
   }
 }

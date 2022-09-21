@@ -53,7 +53,7 @@ target_link_libraries(
          restinio
          yyjson
          pugixml)
-# add_subdirectory(reflect)
+add_subdirectory(reflect)
 
 # unit test
 add_executable(spiderweb_test)

@@ -2,6 +2,8 @@
 
 #include <assert.h>
 
+#include <string>
+
 #include "reflect/reflect_json.hpp"
 
 extern "C" {
@@ -19,6 +21,7 @@ extern "C" {
     return false;                                             \
   }
 
+namespace spiderweb {
 namespace reflect {
 namespace json {
 
@@ -26,12 +29,19 @@ class yyjson_value {
  public:
   yyjson_value() = default;
   ~yyjson_value() = default;
-  yyjson_value(yyjson_mut_doc *doc, yyjson_mut_val *val) : doc_(doc), val_(val) {}
+  yyjson_value(yyjson_mut_doc *doc, yyjson_mut_val *val) : doc_(doc), val_(val) {
+  }
 
-  const yyjson_mut_val *val() const { return val_; }
-  yyjson_mut_val *val() { return val_; }
+  const yyjson_mut_val *val() const {
+    return val_;
+  }
+  yyjson_mut_val *val() {
+    return val_;
+  }
 
-  yyjson_mut_doc *doc() const { return doc_; }
+  yyjson_mut_doc *doc() const {
+    return doc_;
+  }
 
  private:
   yyjson_mut_doc *doc_ = nullptr;
@@ -60,7 +70,9 @@ class yyjson_value_array {
     return true;
   }
 
-  inline void borrow(yyjson_value json) { ptr_ = json; }
+  inline void borrow(yyjson_value json) {
+    ptr_ = json;
+  }
 
  private:
   yyjson_value ptr_;
@@ -143,7 +155,7 @@ static void json_set_value(yyjson_value &json, const char *value) {
   assert(json.doc());
 
   const auto len = strlen(value);
-  char *new_str = unsafe_yyjson_mut_strncpy(json.doc(), value, len);
+  char      *new_str = unsafe_yyjson_mut_strncpy(json.doc(), value, len);
   if (yyjson_likely(json.val() && new_str)) {
     json.val()->tag = (static_cast<uint64_t>(len) << YYJSON_TAG_BIT) | YYJSON_TYPE_STR;
     json.val()->uni.str = new_str;
@@ -213,9 +225,9 @@ struct JsonValueVisitor<yyjson_value> {
 
 struct YyJsonValueBuilder {
   yyjson_value operator()(const char *json) const {
-    auto *idoc = yyjson_read(json, strlen(json), 0);
+    auto           *idoc = yyjson_read(json, strlen(json), 0);
     yyjson_mut_doc *doc = yyjson_doc_mut_copy(idoc, nullptr);
-    auto *root = yyjson_mut_doc_get_root(doc);
+    auto           *root = yyjson_mut_doc_get_root(doc);
     yyjson_doc_free(idoc);
     return yyjson_value(doc, root);
   }
@@ -229,14 +241,18 @@ struct YyJsonValueBuilder {
 
 struct YyJsonReader : reflect::json::Reader<yyjson_value> {
   explicit YyJsonReader(const char *json)
-      : root(YyJsonValueBuilder()(json)), reflect::json::Reader<yyjson_value>(&root) {}
+      : root(YyJsonValueBuilder()(json)), reflect::json::Reader<yyjson_value>(&root) {
+  }
 
-  YyJsonReader() : reflect::json::Reader<yyjson_value>(&root) {}
+  YyJsonReader() : reflect::json::Reader<yyjson_value>(&root) {
+  }
 
-  ~YyJsonReader() { yyjson_mut_doc_free(root.doc()); }
+  ~YyJsonReader() {
+    yyjson_mut_doc_free(root.doc());
+  }
 
   std::string ToString() const {
-    char *js = yyjson_mut_val_write(root.val(), 0, nullptr);
+    char       *js = yyjson_mut_val_write(root.val(), 0, nullptr);
     std::string json(js);
     free(js);
     return json;
@@ -247,7 +263,8 @@ struct YyJsonReader : reflect::json::Reader<yyjson_value> {
 };
 
 struct YyJsonWriter : reflect::json::Writer<yyjson_value> {
-  YyJsonWriter() : root(YyJsonValueBuilder()()), reflect::json::Writer<yyjson_value>(&root) {}
+  YyJsonWriter() : root(YyJsonValueBuilder()()), reflect::json::Writer<yyjson_value>(&root) {
+  }
 
   ~YyJsonWriter() {
     if (root.doc()) {
@@ -256,7 +273,7 @@ struct YyJsonWriter : reflect::json::Writer<yyjson_value> {
   }
 
   std::string ToString() const {
-    char *js = yyjson_mut_val_write(root.val(), 0, nullptr);
+    char       *js = yyjson_mut_val_write(root.val(), 0, nullptr);
     std::string json(js);
     free(js);
     return json;
@@ -267,3 +284,4 @@ struct YyJsonWriter : reflect::json::Writer<yyjson_value> {
 };
 }  // namespace json
 }  // namespace reflect
+}  // namespace spiderweb
