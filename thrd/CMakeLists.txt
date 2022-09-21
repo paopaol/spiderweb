@@ -1,5 +1,11 @@
 include(FetchContent)
 
+FetchContent_Declare(yyjson URL file://${CMAKE_CURRENT_SOURCE_DIR}/yyjson)
+FetchContent_MakeAvailable(yyjson)
+
+FetchContent_Declare(pugixml URL file://${PROJECT_SOURCE_DIR}/thrd/pugixml)
+FetchContent_MakeAvailable(pugixml)
+
 # gtest
 set(gtest_force_shared_crt
     ON

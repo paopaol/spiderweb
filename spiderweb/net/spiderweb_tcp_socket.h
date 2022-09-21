@@ -6,6 +6,7 @@
 #include "io/spiderweb_buffer.h"
 
 namespace spiderweb {
+
 namespace io {
 template <typename IoImpl>
 class IoPrivate;

@@ -18,10 +18,14 @@ target_sources(
           net/spiderweb_tcp_socket.h
           net/spiderweb_tcp_server.cc
           net/spiderweb_tcp_server.h
+          reflect/reflect_enum.hpp
+          reflect/reflect_json.hpp
+          reflect/reflect_xml.hpp
+          reflect/macro_map.h
   PRIVATE core/internal/index_sequence.hpp
           core/internal/thread_check.h
           core/internal/move_tuple_wrapper.h
-          net/private/spiderweb_stream_private.h
+          io/private/spiderweb_stream_private.h
           net/private/spiderweb_tcp_socket_private.h
           net/private/spiderweb_tcp_server_private.h)
 
@@ -40,8 +44,16 @@ target_compile_definitions(
          ASIO_HAS_STD_SHARED_PTR
          ASIO_HAS_STD_FUNCTION)
 
-target_link_libraries(spiderweb PUBLIC absl::any ghc_filesystem fmt spdlog
-                                       restinio)
+target_link_libraries(
+  spiderweb
+  PUBLIC absl::any
+         ghc_filesystem
+         fmt
+         spdlog
+         restinio
+         yyjson
+         pugixml)
+# add_subdirectory(reflect)
 
 # unit test
 add_executable(spiderweb_test)
