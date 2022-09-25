@@ -52,7 +52,8 @@ target_link_libraries(
          spdlog
          restinio
          yyjson
-         pugixml)
+         pugixml
+         date)
 add_subdirectory(reflect)
 
 # unit test

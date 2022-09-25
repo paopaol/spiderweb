@@ -7,6 +7,11 @@ FetchContent_Declare(
   pugixml URL file://${PROJECT_SOURCE_DIR}/thrd/pugixml-1.12.1.tar.gz)
 FetchContent_MakeAvailable(pugixml)
 
+# restinio(date)
+FetchContent_Declare(date
+                     URL file:///${CMAKE_CURRENT_SOURCE_DIR}/date-master.zip)
+FetchContent_MakeAvailable(date)
+
 # gtest
 set(gtest_force_shared_crt
     ON
