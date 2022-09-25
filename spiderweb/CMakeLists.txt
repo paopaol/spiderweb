@@ -53,7 +53,7 @@ target_link_libraries(
          restinio
          yyjson
          pugixml
-         date)
+         date-tz)
 add_subdirectory(reflect)
 
 # unit test
