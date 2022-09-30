@@ -112,8 +112,8 @@ class BinaryWriter {
     return strlen(data);
   }
 
-  template <std::size_t N, typename T>
-  inline std::size_t Size(const arch::EndianConvertor<N, T> &data) {
+  template <arch::ArchType type, std::size_t N, typename T>
+  inline std::size_t Size(const arch::EndianConvertor<type, N, T> &data) {
     return data.Size();
   }
 
@@ -143,8 +143,8 @@ class BinaryWriter {
     return data.size();
   }
 
-  template <std::size_t N, typename T>
-  inline std::size_t Write(const arch::EndianConvertor<N, T> &data) {
+  template <arch::ArchType type, std::size_t N, typename T>
+  inline std::size_t Write(const arch::EndianConvertor<type, N, T> &data) {
     stream_.Write(data.Begin(), data.End());
     return data.Size();
   }
@@ -168,8 +168,8 @@ class BinaryWriter {
     return data.size();
   }
 
-  template <std::size_t N, typename T>
-  inline std::size_t Preppend(const arch::EndianConvertor<N, T> &data) {
+  template <arch::ArchType type, std::size_t N, typename T>
+  inline std::size_t Preppend(const arch::EndianConvertor<type, N, T> &data) {
     stream_.Preppend(data.Begin(), data.End());
     return data.Size();
   }

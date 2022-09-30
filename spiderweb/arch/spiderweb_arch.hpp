@@ -9,25 +9,74 @@
 
 namespace spiderweb {
 namespace arch {
+
+enum class ArchType {
+  kBig,
+  kHost,
+  kLittle,
+};
+
+template <ArchType type, std::size_t N>
+struct ToEdian {};
+
+template <>
+struct ToEdian<ArchType::kBig, 2> {
+  template <typename T>
+  inline T operator()(T value) {
+    return htons(value);
+  }
+};
+
+template <>
+struct ToEdian<ArchType::kBig, 4> {
+  template <typename T>
+  inline T operator()(T value) {
+    return htonl(value);
+  }
+};
+
+template <>
+struct ToEdian<ArchType::kHost, 2> {
+  template <typename T>
+  inline T operator()(T value) {
+    return ntohs(value);
+  }
+};
+
+template <>
+struct ToEdian<ArchType::kHost, 4> {
+  template <typename T>
+  inline T operator()(T value) {
+    return ntohl(value);
+  }
+};
+
+template <>
+struct ToEdian<ArchType::kLittle, 2> {
+  template <typename T>
+  inline T operator()(T value) {
+    return htole16(value);
+  }
+};
+
+template <>
+struct ToEdian<ArchType::kLittle, 4> {
+  template <typename T>
+  inline T operator()(T value) {
+    return htole32(value);
+  }
+};
+
 /**
  * @brief convert host value to BigEndian or HostEndian
  */
-template <std::size_t N, typename T,
+template <ArchType type, std::size_t N, typename T,
           typename =
               typename std::enable_if<std::is_integral<T>::value && (N == 2 || N == 4)>::type>
 class EndianConvertor {
  public:
-  enum class ArchType {
-    kBig,
-    kHost,
-  };
-  explicit EndianConvertor(ArchType type, const T value) : type_(type) {
-    if (type_ == ArchType::kBig) {
-      converted_.value = (N == 2 ? htons(value) : htonl(value));
-      return;
-    } else if (type_ == ArchType::kHost) {
-      converted_.value = (N == 2 ? ntohs(value) : ntohl(value));
-    }
+  explicit EndianConvertor(const T value) {
+    converted_.value = ToEdian<type, N>()(value);
   }
 
   /**
@@ -52,7 +101,6 @@ class EndianConvertor {
   }
 
  private:
-  ArchType type_;
   union {
     T       value;
     uint8_t ch[N];
@@ -60,13 +108,19 @@ class EndianConvertor {
 };
 
 template <std::size_t N, typename T>
-inline EndianConvertor<N, T> BigEndian(const T value) {
-  return EndianConvertor<N, T>(EndianConvertor<N, T>::ArchType::kBig, value);
+inline EndianConvertor<ArchType::kBig, N, T> BigEndian(const T value) {
+  return EndianConvertor<ArchType::kBig, N, T>(value);
 }
 
 template <std::size_t N, typename T>
-inline EndianConvertor<N, T> HostEndian(const T value) {
-  return EndianConvertor<N, T>(EndianConvertor<N, T>::ArchType::kHost, value);
+inline EndianConvertor<ArchType::kHost, N, T> HostEndian(const T value) {
+  return EndianConvertor<ArchType::kHost, N, T>(value);
 }
+
+template <std::size_t N, typename T>
+inline EndianConvertor<ArchType::kLittle, N, T> HostEndian(const T value) {
+  return EndianConvertor<ArchType::kLittle, N, T>(value);
+}
+
 }  // namespace arch
 }  // namespace spiderweb
