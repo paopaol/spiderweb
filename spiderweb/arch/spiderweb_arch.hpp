@@ -118,7 +118,7 @@ inline EndianConvertor<ArchType::kHost, N, T> HostEndian(const T value) {
 }
 
 template <std::size_t N, typename T>
-inline EndianConvertor<ArchType::kLittle, N, T> HostEndian(const T value) {
+inline EndianConvertor<ArchType::kLittle, N, T> LittleEndian(const T value) {
   return EndianConvertor<ArchType::kLittle, N, T>(value);
 }
 
