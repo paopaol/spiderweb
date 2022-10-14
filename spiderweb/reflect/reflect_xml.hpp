@@ -48,6 +48,16 @@ inline void WriteTagImpl(XmlValue &node, const char *name, const ValueType &valu
 
 template <typename XmlValue, typename ValueType,
           template <typename Elem, typename = std::allocator<Elem>> class Array>
+inline void WriteTagImpl(XmlValue &node, const char *name, const Array<ValueType> &values) {
+  using ReturnType = decltype(node.CreateChild(name));
+  for (const auto &value : values) {
+    ReturnType new_child = node.CreateChild(name);
+    reflect ::XmlMeta<XmlValue, ValueType>::Write(new_child, value);
+  }
+}
+
+template <typename XmlValue, typename ValueType,
+          template <typename Elem, typename = std::allocator<Elem>> class Array>
 inline bool ReadTagImpl(XmlValue &node, const char *name, Array<ValueType> &values) {
   using MetaType = reflect::XmlMeta<XmlValue, ValueType>;
 
