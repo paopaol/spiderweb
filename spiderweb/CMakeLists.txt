@@ -42,7 +42,8 @@ target_compile_definitions(
          ASIO_HAS_CSTDINT
          ASIO_HAS_STD_ADDRESSOF
          ASIO_HAS_STD_SHARED_PTR
-         ASIO_HAS_STD_FUNCTION)
+         ASIO_HAS_STD_FUNCTION
+         ASIO_DISABLE_STD_ALIGNED_ALLOC)
 
 target_link_libraries(
   spiderweb
