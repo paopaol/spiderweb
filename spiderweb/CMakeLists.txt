@@ -67,7 +67,8 @@ target_sources(
           core/spiderweb_event_spy_test.cc
           io/spiderweb_binary_writer_test.cc
           net/spiderweb_tcp_socket_test.cc
-          net/spiderweb_tcp_server_test.cc)
+          net/spiderweb_tcp_server_test.cc
+          type/spiderweb_any_view_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark
