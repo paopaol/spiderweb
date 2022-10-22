@@ -27,7 +27,9 @@ target_sources(
           core/internal/move_tuple_wrapper.h
           io/private/spiderweb_stream_private.h
           net/private/spiderweb_tcp_socket_private.h
-          net/private/spiderweb_tcp_server_private.h)
+          net/private/spiderweb_tcp_server_private.h
+          ppk_assert.h
+          ppk_assert.cpp)
 
 target_include_directories(
   spiderweb PUBLIC asio-1.22.1/include ${CMAKE_CURRENT_SOURCE_DIR}
