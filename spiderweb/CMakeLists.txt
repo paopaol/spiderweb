@@ -22,6 +22,8 @@ target_sources(
           reflect/reflect_json.hpp
           reflect/reflect_xml.hpp
           reflect/macro_map.h
+          type/spiderweb_any_view.h
+          type/spiderweb_binary_view.h
   PRIVATE core/internal/index_sequence.hpp
           core/internal/thread_check.h
           core/internal/move_tuple_wrapper.h
@@ -70,7 +72,8 @@ target_sources(
           io/spiderweb_binary_writer_test.cc
           net/spiderweb_tcp_socket_test.cc
           net/spiderweb_tcp_server_test.cc
-          type/spiderweb_any_view_test.cc)
+          type/spiderweb_any_view_test.cc
+          type/spiderweb_binary_view_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark

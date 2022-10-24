@@ -11,8 +11,8 @@ namespace spiderweb {
 namespace arch {
 
 enum class ArchType {
+  // abcd
   kBig,
-  kHost,
   kLittle,
 };
 
@@ -36,18 +36,10 @@ struct ToEdian<ArchType::kBig, 4> {
 };
 
 template <>
-struct ToEdian<ArchType::kHost, 2> {
+struct ToEdian<ArchType::kBig, 8> {
   template <typename T>
   inline T operator()(T value) {
-    return ntohs(value);
-  }
-};
-
-template <>
-struct ToEdian<ArchType::kHost, 4> {
-  template <typename T>
-  inline T operator()(T value) {
-    return ntohl(value);
+    return htonll(value);
   }
 };
 
@@ -64,6 +56,71 @@ struct ToEdian<ArchType::kLittle, 4> {
   template <typename T>
   inline T operator()(T value) {
     return htole32(value);
+  }
+};
+
+template <>
+struct ToEdian<ArchType::kLittle, 8> {
+  template <typename T>
+  inline T operator()(T value) {
+    return htole64(value);
+  }
+};
+
+template <arch::ArchType type, std::size_t N>
+struct FromEndian;
+
+template <>
+struct FromEndian<arch::ArchType::kBig, 2> {
+  template <typename T,
+            typename = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 2>::type>
+  inline T operator()(T value) const {
+    return be16toh(value);
+  }
+};
+
+template <>
+struct FromEndian<arch::ArchType::kBig, 4> {
+  template <typename T,
+            typename = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 4>::type>
+  inline T operator()(T value) const {
+    return be32toh(value);
+  }
+};
+
+template <>
+struct FromEndian<arch::ArchType::kBig, 8> {
+  template <typename T,
+            typename = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 8>::type>
+  inline T operator()(T value) const {
+    return be64toh(value);
+  }
+};
+
+template <>
+struct FromEndian<arch::ArchType::kLittle, 2> {
+  template <typename T,
+            typename = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 2>::type>
+  inline T operator()(T value) const {
+    return le16toh(value);
+  }
+};
+
+template <>
+struct FromEndian<arch::ArchType::kLittle, 4> {
+  template <typename T,
+            typename = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 4>::type>
+  inline T operator()(T value) const {
+    return le32toh(value);
+  }
+};
+
+template <>
+struct FromEndian<arch::ArchType::kLittle, 8> {
+  template <typename T,
+            typename = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 8>::type>
+  inline T operator()(T value) const {
+    return le64toh(value);
   }
 };
 
@@ -110,11 +167,6 @@ class EndianConvertor {
 template <std::size_t N, typename T>
 inline EndianConvertor<ArchType::kBig, N, T> BigEndian(const T value) {
   return EndianConvertor<ArchType::kBig, N, T>(value);
-}
-
-template <std::size_t N, typename T>
-inline EndianConvertor<ArchType::kHost, N, T> HostEndian(const T value) {
-  return EndianConvertor<ArchType::kHost, N, T>(value);
 }
 
 template <std::size_t N, typename T>
