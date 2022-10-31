@@ -47,8 +47,7 @@ FetchContent_MakeAvailable(spdlog)
 
 # absl
 FetchContent_Declare(
-  absl
-  URL https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.0.tar.gz)
+  absl URL file:///${CMAKE_CURRENT_SOURCE_DIR}/abseil-20220623.0.tar.gz)
 FetchContent_MakeAvailable(absl)
 
 # restinio(http)
