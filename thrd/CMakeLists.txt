@@ -10,8 +10,12 @@ FetchContent_MakeAvailable(pugixml)
 # restinio(date)
 FetchContent_Declare(date
                      URL file:///${CMAKE_CURRENT_SOURCE_DIR}/date-master.zip)
-set(BUILD_TZ_LIB ON)
-set(USE_SYSTEM_TZ_DB ON)
+set(BUILD_TZ_LIB
+    OFF
+    CACHE BOOL "")
+set(USE_SYSTEM_TZ_DB
+    ON
+    CACHE BOOL "")
 FetchContent_MakeAvailable(date)
 
 # gtest
