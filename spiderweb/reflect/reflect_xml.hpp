@@ -352,16 +352,11 @@ class XmlWriter {
     }                                                                    \
   }
 
-#define REFLECT_XML_WRITE_TAG_CODE_BLOCK_2(member, name)      \
-  {                                                           \
-    using ReturnType = decltype(node.CreateChild(name));      \
-    using MemberType = decltype(result.member);               \
-    reflect::detail::WriteTagImpl(node, name, result.member); \
-  }
+#define REFLECT_XML_WRITE_TAG_CODE_BLOCK_2(member, name) \
+  { reflect::detail::WriteTagImpl(node, name, result.member); }
 
 #define REFLECT_XML_WRITE_TAG_CODE_BLOCK_3(member, name, type)    \
   {                                                               \
-    using ReturnType = decltype(node.CreateChild(name));          \
     const auto value = reflect::ToAliasType<type>(result.member); \
     reflect::detail::WriteTagImpl(node, name, value);             \
   }

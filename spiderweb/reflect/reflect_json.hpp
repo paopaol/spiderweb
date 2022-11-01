@@ -123,7 +123,6 @@ struct ArrayMeta {
   }
 
   inline void ToJson(const Cont<ValueType> *result, JsonType &json) const {
-    Visitor s;
     for (const auto &value : *result) {
       Meta<ValueType, JsonType> meta;
       JsonType                  tmp = Visitor::NewEmptyValueFrom(json);
@@ -144,7 +143,7 @@ struct ArrayMeta {
   inline bool FromJsonArray(const ArrayType &array, Cont<ValueType> *result) const {
     const auto size = array.size();
     result->reserve(array.size());
-    for (int i = 0; i < size; ++i) {
+    for (std::size_t i = 0; i < size; ++i) {
       const JsonType  &json = array[i];
       Reader<JsonType> reader(&json);
       ValueType        tmp;

@@ -7,5 +7,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(thrd)
 
+add_compile_options("-Wall" "-Werror" "-Wno-unused-function")
+
 add_subdirectory(spiderweb)
-#add_subdirectory(Qt)
+# add_subdirectory(Qt)

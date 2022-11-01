@@ -6,11 +6,11 @@ class Timer::Private {
   Private(Timer *qq, Object *parent) : q(qq), timer(GetLoop(parent)->IoService()) {
   }
 
+  Timer             *q = nullptr;
   asio::steady_timer timer;
   uint32_t           timeoutms = 3000;
   bool               is_running = {false};
   bool               singal_shot = false;
-  Timer             *q = nullptr;
 
   void SetExpired(const uint64_t timeout_ms) {
     if (!is_running) {

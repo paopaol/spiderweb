@@ -300,21 +300,9 @@ struct spiderweb::reflect ::XmlMeta<T, Node> {
     { reflect ::detail ::ReadTagImpl(node, "right", result.right); }
   }
   static void Write(XmlValue &node, const struct_type &result) {
-    {
-      using ReturnType = decltype(node.CreateChild("value"));
-      using MemberType = decltype(result.value);
-      reflect ::detail ::WriteTagImpl(node, "value", result.value);
-    }
-    {
-      using ReturnType = decltype(node.CreateChild("left"));
-      using MemberType = decltype(result.left);
-      reflect ::detail ::WriteTagImpl(node, "left", result.left);
-    }
-    {
-      using ReturnType = decltype(node.CreateChild("right"));
-      using MemberType = decltype(result.right);
-      reflect ::detail ::WriteTagImpl(node, "right", result.right);
-    }
+    { reflect ::detail ::WriteTagImpl(node, "value", result.value); }
+    { reflect ::detail ::WriteTagImpl(node, "left", result.left); }
+    { reflect ::detail ::WriteTagImpl(node, "right", result.right); }
   }
 };
 

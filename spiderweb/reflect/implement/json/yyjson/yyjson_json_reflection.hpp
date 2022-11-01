@@ -87,7 +87,7 @@ YYJSON_GET_VALUE(real, float)
 YYJSON_GET_VALUE(str, std::string)
 
 static void json_append_value(yyjson_value &array, const yyjson_value &value) {
-  bool ok = yyjson_mut_arr_append(array.val(), const_cast<yyjson_mut_val *>(value.val()));
+  yyjson_mut_arr_append(array.val(), const_cast<yyjson_mut_val *>(value.val()));
 }
 
 static void json_set_value(yyjson_value &json, const char *key, int value) {
@@ -241,7 +241,7 @@ struct YyJsonValueBuilder {
 
 struct YyJsonReader : reflect::json::Reader<yyjson_value> {
   explicit YyJsonReader(const char *json)
-      : root(YyJsonValueBuilder()(json)), reflect::json::Reader<yyjson_value>(&root) {
+      : reflect::json::Reader<yyjson_value>(&root), root(YyJsonValueBuilder()(json)) {
   }
 
   YyJsonReader() : reflect::json::Reader<yyjson_value>(&root) {
@@ -263,7 +263,7 @@ struct YyJsonReader : reflect::json::Reader<yyjson_value> {
 };
 
 struct YyJsonWriter : reflect::json::Writer<yyjson_value> {
-  YyJsonWriter() : root(YyJsonValueBuilder()()), reflect::json::Writer<yyjson_value>(&root) {
+  YyJsonWriter() : reflect::json::Writer<yyjson_value>(&root), root(YyJsonValueBuilder()()) {
   }
 
   ~YyJsonWriter() {
