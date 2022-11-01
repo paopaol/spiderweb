@@ -11,7 +11,7 @@ FetchContent_MakeAvailable(pugixml)
 FetchContent_Declare(date
                      URL file:///${CMAKE_CURRENT_SOURCE_DIR}/date-master.zip)
 set(BUILD_TZ_LIB
-    OFF
+    ON
     CACHE BOOL "")
 set(USE_SYSTEM_TZ_DB
     ON
