@@ -51,7 +51,23 @@ FetchContent_MakeAvailable(spdlog)
 # absl
 FetchContent_Declare(
   absl URL file:///${CMAKE_CURRENT_SOURCE_DIR}/abseil-cpp-20200225.2.tar.gz)
+get_property(
+  compile_options
+  DIRECTORY
+  PROPERTY COMPILE_OPTIONS)
+set_property(
+  DIRECTORY
+  APPEND
+  PROPERTY COMPILE_OPTIONS -Wno-unused-parameter)
 FetchContent_MakeAvailable(absl)
+set_property(DIRECTORY PROPERTY COMPILE_OPTIONS ${compile_options})
+unset(compile_options)
+
+# FetchContent_GetProperties(absl)
+
+# if(NOT absl_POPULATED) FetchContent_Populate(absl)
+# add_subdirectory(${absl_SOURCE_DIR} ${absl_BINARY_DIR}) target_link_options
+# endif()
 
 # restinio(http)
 FetchContent_Declare(http_parser
