@@ -385,8 +385,10 @@ class XmlWriter {
   apair
 
 #define REFLECT_XML(Type, ATTRS, ...)                              \
+  namespace spiderweb {                                            \
+  namespace reflect {                                              \
   template <typename T>                                            \
-  struct spiderweb::reflect::XmlMeta<T, Type> {                    \
+  struct XmlMeta<T, Type> {                                        \
     using XmlValue = T;                                            \
     using struct_type = Type;                                      \
     static void Read(const XmlValue &node, struct_type &result) {  \
@@ -397,7 +399,9 @@ class XmlWriter {
       MACRO_MAP(REFLECT_XML_WRITE_ATTRIBUTE, ATTRS)                \
       MACRO_MAP(REFLECT_XML_WRITE_TAG, __VA_ARGS__)                \
     }                                                              \
-  };
+  };                                                               \
+  }                                                                \
+  }
 
 }  // namespace reflect
 }  // namespace spiderweb

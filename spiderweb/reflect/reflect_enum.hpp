@@ -1,6 +1,7 @@
 #ifndef SPIDERWEB_REFLECT_ENUM_H
 #define SPIDERWEB_REFLECT_ENUM_H
 
+#include <map>
 #include <type_traits>
 #include <unordered_map>
 
@@ -33,7 +34,7 @@ T ToAliasType(EnumType value);
   template <typename = typename std::enable_if<std::is_enum<EnumType>::value>::type> \
   inline EnumType FromAliasType(const AliasType &value, EnumType defaultValue) {     \
     using Type = EnumType;                                                           \
-    static const std::unordered_map<AliasType, EnumType> _map{                       \
+    static const std::map<AliasType, EnumType> _map{                                 \
         MACRO_MAP(reflect_enum_expand_alias_enum_pair, __VA_ARGS__)};                \
     const auto it = _map.find(value);                                                \
     return it == _map.end() ? defaultValue : it->second;                             \
@@ -41,7 +42,7 @@ T ToAliasType(EnumType value);
   template <>                                                                        \
   inline AliasType ToAliasType(EnumType value) {                                     \
     using Type = EnumType;                                                           \
-    static const std::unordered_map<EnumType, AliasType> _map{                       \
+    static const std::map<EnumType, AliasType> _map{                                 \
         MACRO_MAP(reflect_enum_expand_enum_alias_pair, __VA_ARGS__)};                \
     return _map.at(value);                                                           \
   }                                                                                  \

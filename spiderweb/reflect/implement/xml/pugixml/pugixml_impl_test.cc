@@ -290,8 +290,10 @@ struct Node {
 };
 
 // REFLECT_XML(Node, REFLECT_XML_ATTR(), (value, "value"), (left, "left"), (right, "right"))
+namespace spiderweb {
+namespace reflect {
 template <typename T>
-struct spiderweb::reflect ::XmlMeta<T, Node> {
+struct XmlMeta<T, Node> {
   using XmlValue = T;
   using struct_type = Node;
   static void Read(const XmlValue &node, struct_type &result) {
@@ -305,6 +307,8 @@ struct spiderweb::reflect ::XmlMeta<T, Node> {
     { reflect ::detail ::WriteTagImpl(node, "right", result.right); }
   }
 };
+}  // namespace reflect
+}  // namespace spiderweb
 
 TEST(pugixml_impl, WriteNodeTree) {
   auto root = std::make_shared<Node>();

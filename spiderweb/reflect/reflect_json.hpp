@@ -271,8 +271,11 @@ struct Writer {
   PAIR
 
 #define REFLECT_JSON(Type, ...)                                          \
+  namespace spiderweb {                                                  \
+  namespace reflect {                                                    \
+  namespace json {                                                       \
   template <typename JsonNodeType>                                       \
-  struct spiderweb::reflect::json::Meta<Type, JsonNodeType> {            \
+  struct Meta<Type, JsonNodeType> {                                      \
     static constexpr bool IsMeta = true;                                 \
     using struct_type = Type;                                            \
     using jsonnode_type = JsonNodeType;                                  \
@@ -285,7 +288,10 @@ struct Writer {
       reflect::json::Writer<jsonnode_type> serilizer(&json);             \
       MACRO_MAP(reflect_json_expands_tojson, __VA_ARGS__)                \
     }                                                                    \
-  };
+  };                                                                     \
+  }                                                                      \
+  }                                                                      \
+  }
 
 }  // namespace json
 }  // namespace reflect

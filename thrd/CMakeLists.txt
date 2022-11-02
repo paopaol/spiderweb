@@ -8,8 +8,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(pugixml)
 
 # restinio(date)
-FetchContent_Declare(date
-                     URL file:///${CMAKE_CURRENT_SOURCE_DIR}/date-master.zip)
+FetchContent_Declare(date URL file:///${CMAKE_CURRENT_SOURCE_DIR}/date.tar.gz)
 set(BUILD_TZ_LIB
     ON
     CACHE BOOL "")
@@ -40,18 +39,18 @@ FetchContent_MakeAvailable(filesystem)
 
 # fmt
 FetchContent_Declare(fmt
-                     URL file:///${CMAKE_CURRENT_SOURCE_DIR}/fmt-9.1.0.tar.gz)
+                     URL file:///${CMAKE_CURRENT_SOURCE_DIR}/fmt-6.1.2.tar.gz)
 FetchContent_MakeAvailable(fmt)
 
 # spdlog
 FetchContent_Declare(
-  spdlog URL file:///${CMAKE_CURRENT_SOURCE_DIR}/spdlog-1.10.0.tar.gz)
+  spdlog URL file:///${CMAKE_CURRENT_SOURCE_DIR}/spdlog-1.5.0.tar.gz)
 set(SPDLOG_FMT_EXTERNAL ON)
 FetchContent_MakeAvailable(spdlog)
 
 # absl
 FetchContent_Declare(
-  absl URL file:///${CMAKE_CURRENT_SOURCE_DIR}/abseil-20220623.0.tar.gz)
+  absl URL file:///${CMAKE_CURRENT_SOURCE_DIR}/abseil-cpp-20200225.2.tar.gz)
 FetchContent_MakeAvailable(absl)
 
 # restinio(http)
