@@ -13,8 +13,7 @@ extern "C" {
 #define YYJSON_GET_VALUE(signature, type)                     \
   static bool json_get_value(yyjson_value js, type &result) { \
     if (!yyjson_mut_is_null(js.val())) {                      \
-      bool ret = yyjson_mut_is_##signature(js.val());         \
-      assert(ret);                                            \
+      assert(yyjson_mut_is_##signature(js.val()));            \
       result = yyjson_mut_get_##signature(js.val());          \
       return true;                                            \
     }                                                         \
