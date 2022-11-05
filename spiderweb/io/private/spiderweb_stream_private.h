@@ -1,8 +1,11 @@
 #ifndef SPIDERWEB_STREAM_PRIVATE_H
 #define SPIDERWEB_STREAM_PRIVATE_H
 
+#include <type_traits>
+
 #include "asio.hpp"
 #include "core/spiderweb_eventloop.h"
+#include "core/spiderweb_traits.h"
 #include "io/spiderweb_buffer.h"
 #include "spdlog/spdlog.h"
 
@@ -130,9 +133,10 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
     });
   }
 
-  template <typename AsyncStream>
-  void StartWrite(AsyncStream &stream, const std::vector<uint8_t> &data) {
-    StartWrite(stream, data.data(), data.size());
+  template <typename AsyncStream, typename Byte,
+            typename = typename std::enable_if<IsByte<Byte>::value>::type>
+  void StartWrite(AsyncStream &stream, const std::vector<Byte> &data) {
+    StartWrite(stream, static_cast<const uint8_t *>(data.data()), data.size());
   }
 
   template <typename AsyncStream>

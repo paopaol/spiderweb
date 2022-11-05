@@ -7,7 +7,8 @@
 
 namespace spiderweb {
 namespace net {
-struct TcpSocket::Private {
+class TcpSocket::Private {
+ public:
   explicit Private(TcpSocket *qq) : q(qq), socket(qq->ownerEventLoop()->IoService()) {
   }
 

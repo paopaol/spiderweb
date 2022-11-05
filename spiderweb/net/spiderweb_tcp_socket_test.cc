@@ -68,8 +68,8 @@ class MockSocket : public spiderweb::Object {
     using ::testing::_;
 
     EXPECT_CALL(stream, async_write_some(_, _))
-        .WillRepeatedly([this](const asio::const_buffers_1     &buffers,
-                               const test_stream::WriteHandler &handler) {});
+        .WillRepeatedly(
+            [](const asio::const_buffers_1 &buffers, const test_stream::WriteHandler &handler) {});
   }
 
   spiderweb::EventLoop          &event_loop;
@@ -205,13 +205,13 @@ TEST(spiderweb_tcp_socket, ReadSuccess) {
           [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {
             asio::buffer_copy(buffers, asio::buffer("hello", 5));
             const auto size = 5;
-            loop.QueueTask([size, handler]() { handler(asio::error_code(), size); });
+            loop.QueueTask([handler]() { handler(asio::error_code(), size); });
           })
       .WillOnce(
           [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {
             asio::buffer_copy(buffers, asio::buffer("world", 5));
             const auto size = 5;
-            loop.QueueTask([size, handler]() { handler(asio::error_code(), size); });
+            loop.QueueTask([handler]() { handler(asio::error_code(), size); });
           })
       .WillOnce(
           [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {});
