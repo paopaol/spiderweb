@@ -203,6 +203,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   template <typename AsyncStream>
   inline void Stop(AsyncStream &stream) {
     stopped = true;
+
     Close(stream);
   }
 

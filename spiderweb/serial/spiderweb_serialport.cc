@@ -6,8 +6,8 @@
 
 namespace spiderweb {
 namespace serial {
-SerialPort::SerialPort(const std::string &port, Object *parent)
-    : Object(parent), d(std::make_shared<io::IoPrivate<Private>>(port, this)) {
+SerialPort::SerialPort(Object *parent)
+    : Object(parent), d(std::make_shared<io::IoPrivate<Private>>(this)) {
 }
 
 SerialPort::~SerialPort() {
@@ -15,20 +15,40 @@ SerialPort::~SerialPort() {
   d->impl.q = nullptr;
 }
 
-void SerialPort::SetBaudRate(BaudRate baudrate) {
-  d->impl.SetBaudRate(baudrate);
+void SerialPort::Open(const std::string &port) {
+  d->StartOpen(d->impl.serial_port, port);
 }
 
-void SerialPort::SetDataBits(DataBits bits) {
-  d->impl.SetDataBits(bits);
+void SerialPort::SetParity(Parity parity, std::error_code &ec) {
+  d->impl.SetParity(parity, ec);
 }
 
-void SerialPort::SetParity(Parity parity) {
-  d->impl.SetParity(parity);
+spiderweb::serial::Parity SerialPort::GetParity() const {
+  return d->impl.GetParity();
 }
 
-void SerialPort::SetStopBits(StopBits stopbits) {
-  d->impl.SetStopBits(stopbits);
+void SerialPort::SetBaudRate(BaudRate baudrate, std::error_code &ec) {
+  d->impl.SetBaudRate(baudrate, ec);
+}
+
+spiderweb::serial::BaudRate SerialPort::GetBaudRate() const {
+  return d->impl.GetBaudRate();
+}
+
+void SerialPort::SetDataBits(DataBits bits, std::error_code &ec) {
+  d->impl.SetDataBits(bits, ec);
+}
+
+spiderweb::serial::DataBits SerialPort::GetDataBits() const {
+  return d->impl.GetDataBits();
+}
+
+void SerialPort::SetStopBits(StopBits stopbits, std::error_code &ec) {
+  d->impl.SetStopBits(stopbits, ec);
+}
+
+spiderweb::serial::StopBits SerialPort::GetStopBits() const {
+  return d->impl.GetStopBits();
 }
 
 void SerialPort::Close() {

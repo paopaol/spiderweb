@@ -18,6 +18,8 @@ target_sources(
           net/spiderweb_tcp_socket.h
           net/spiderweb_tcp_server.cc
           net/spiderweb_tcp_server.h
+          serial/spiderweb_serialport.cc
+          serial/spiderweb_serialport.h
           reflect/reflect_enum.hpp
           reflect/reflect_json.hpp
           reflect/reflect_xml.hpp
@@ -30,6 +32,7 @@ target_sources(
           io/private/spiderweb_stream_private.h
           net/private/spiderweb_tcp_socket_private.h
           net/private/spiderweb_tcp_server_private.h
+          serial/private/spiderweb_serialport_private.h
           ppk_assert.h
           ppk_assert.cpp)
 
@@ -73,6 +76,7 @@ target_sources(
           io/spiderweb_binary_writer_test.cc
           net/spiderweb_tcp_socket_test.cc
           net/spiderweb_tcp_server_test.cc
+          serial/spiderweb_serialport_test.cc
           type/spiderweb_any_view_test.cc
           type/spiderweb_binary_view_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
