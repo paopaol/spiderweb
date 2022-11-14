@@ -14,6 +14,7 @@ target_sources(
           io/spiderweb_binary_writer.hpp
           io/spiderweb_buffer.cc
           io/spiderweb_buffer.h
+          io/spiderweb_bitmap_readwriter.h
           net/spiderweb_tcp_socket.cc
           net/spiderweb_tcp_socket.h
           net/spiderweb_tcp_server.cc

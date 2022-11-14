@@ -159,9 +159,9 @@ class EndianConvertor {
 
  private:
   union {
-    T       value;
+    T       value{};
     uint8_t ch[N];
-  } converted_;
+  } converted_{};
 };
 
 template <std::size_t N, typename T>
