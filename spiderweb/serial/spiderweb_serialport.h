@@ -5,8 +5,8 @@
 #include "spiderweb/core/spiderweb_object.h"
 
 namespace spiderweb {
-namespace io {
 
+namespace io {
 template <typename IoImpl>
 class IoPrivate;
 }

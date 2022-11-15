@@ -57,6 +57,20 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
               [this, self, &stream](const asio::error_code &ec) { HandleOpen(stream, ec); });
   }
 
+  template <typename AsyncStream, typename... Args>
+  void StartOpenEx(AsyncStream &stream, bool check, Args &&...args) {
+    if (check && stream.is_open()) {
+      spdlog::warn("{}({}) alreay connected or connecting", impl.Description(), fmt::ptr(impl.q));
+      return;
+    }
+
+    stopped = false;
+    auto self = this->shared_from_this();
+
+    impl.Open(stream, std::forward<Args>(args)...,
+              [this, self, &stream](const asio::error_code &ec) { HandleOpen(stream, ec); });
+  }
+
   template <typename AsyncStream>
   void HandleOpen(AsyncStream &stream, const asio::error_code &ec) {
     if (stopped) {

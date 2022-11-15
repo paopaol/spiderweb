@@ -83,3 +83,13 @@ if(NOT restinio_POPULATED)
   add_subdirectory(${restinio_SOURCE_DIR}/dev ${restinio_BINARY_DIR}
                    EXCLUDE_FROM_ALL)
 endif()
+
+FetchContent_Declare(canary
+                     URL file://${CMAKE_CURRENT_SOURCE_DIR}/canary.tar.gz)
+if(NOT canary_POPULATED)
+  FetchContent_Populate(canary)
+  set(CANARY_STANDALONE_ASIO_DIR
+      "${CMAKE_CURRENT_SOURCE_DIR}/../spiderweb/asio-1.22.1"
+      CACHE INTERNAL "")
+  add_subdirectory(${canary_SOURCE_DIR} ${canary_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()

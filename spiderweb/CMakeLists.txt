@@ -21,6 +21,8 @@ target_sources(
           net/spiderweb_tcp_server.h
           serial/spiderweb_serialport.cc
           serial/spiderweb_serialport.h
+          serial/spiderweb_socketcan.h
+          serial/spiderweb_socketcan.cc
           reflect/reflect_enum.hpp
           reflect/reflect_json.hpp
           reflect/reflect_xml.hpp
@@ -34,6 +36,7 @@ target_sources(
           net/private/spiderweb_tcp_socket_private.h
           net/private/spiderweb_tcp_server_private.h
           serial/private/spiderweb_serialport_private.h
+          serial/private/spiderweb_socketcan_private.h
           ppk_assert.h
           ppk_assert.cpp)
 
@@ -63,7 +66,8 @@ target_link_libraries(
          yyjson
          pugixml
          date
-         date-tz)
+         date-tz
+         canary::canary)
 add_subdirectory(reflect)
 
 # unit test
@@ -75,9 +79,11 @@ target_sources(
           core/spiderweb_eventloop_test.cc
           core/spiderweb_event_spy_test.cc
           io/spiderweb_binary_writer_test.cc
+          io/spiderweb_bitmap_readwriter_test.cc
           net/spiderweb_tcp_socket_test.cc
           net/spiderweb_tcp_server_test.cc
           serial/spiderweb_serialport_test.cc
+          serial/spiderweb_socketcan_test.cc
           type/spiderweb_any_view_test.cc
           type/spiderweb_binary_view_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
