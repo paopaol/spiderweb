@@ -45,7 +45,7 @@ class BinaryView {
     constexpr int kTypeSize = sizeof(T);
     PPK_ASSERT_FATAL(size >= kTypeSize, "%lu < type size %d", size, kTypeSize);
 
-    detail::Pack<T, kTypeSize> pack;
+    detail::Pack<T, kTypeSize> pack{};
     std::memcpy(pack.buf, buf, kTypeSize);
 
     if (mid) {
