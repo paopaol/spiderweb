@@ -26,5 +26,8 @@ TEST(spiderweb_BinaryWriter, Write) {
 
   writer.Preppend(spiderweb::arch::BigEndian<2>(size));
 
-  EXPECT_THAT(output.Stream(), testing::ElementsAre(0x00, 0x05, 0x00, 0x7b, 0x31, 0x32, 0x33));
+  writer.Write(static_cast<uint8_t>(0x01));
+
+  EXPECT_THAT(output.Stream(),
+              testing::ElementsAre(0x00, 0x05, 0x00, 0x7b, 0x31, 0x32, 0x33, 0x01));
 }

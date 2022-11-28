@@ -127,6 +127,11 @@ class BinaryWriter {
     return Write(arg) + Write(std::forward<Args>(args)...);
   }
 
+  inline std::size_t Write(uint8_t data) {
+    stream_.Write(&data, &data + 1);
+    return 1;
+  }
+
   inline std::size_t Write(const char *data) {
     const auto size = strlen(data);
     stream_.Write(data, data + size);
@@ -152,6 +157,11 @@ class BinaryWriter {
   /**
    * @brief preppend some data
    */
+  inline std::size_t Preppend(uint8_t data) {
+    stream_.Preppend(&data, &data + 1);
+    return 1;
+  }
+
   inline std::size_t Preppend(const char *data) {
     const auto size = strlen(data);
     stream_.Preppend(data, data + size);
