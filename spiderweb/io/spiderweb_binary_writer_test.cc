@@ -31,3 +31,14 @@ TEST(spiderweb_BinaryWriter, Write) {
   EXPECT_THAT(output.Stream(),
               testing::ElementsAre(0x00, 0x05, 0x00, 0x7b, 0x31, 0x32, 0x33, 0x01));
 }
+
+TEST(spiderweb_BinaryWriter, WriteArray) {
+  spiderweb::io::DefaultStreamer output;
+
+  spiderweb::io::BinaryWriter<spiderweb::io::DefaultStreamer> writer(output);
+
+  std::array<uint8_t, 4> data = {0x01, 0x02, 0x03, 0x04};
+  writer.Write(data);
+
+  EXPECT_THAT(output.Stream(), testing::ElementsAre(0x01, 0x02, 0x03, 0x04));
+}

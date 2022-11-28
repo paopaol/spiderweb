@@ -2,6 +2,7 @@
 
 #include <arpa/inet.h>
 
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -144,6 +145,12 @@ class BinaryWriter {
   }
 
   inline std::size_t Write(const std::vector<uint8_t> &data) {
+    stream_.Write(data.begin(), data.end());
+    return data.size();
+  }
+
+  template <std::size_t N>
+  inline std::size_t Write(const std::array<uint8_t, N> &data) {
     stream_.Write(data.begin(), data.end());
     return data.size();
   }
