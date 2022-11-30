@@ -123,11 +123,11 @@ class BufferReader {
     return buffer_.Cap();
   }
 
-  inline void UnReadByte(/*error*/) {
+  inline void UnReadByte(/*error*/) const {
     buffer_.UnReadByte();
   }
 
-  inline void UnReadBytes(size_t n) {
+  inline void UnReadBytes(size_t n) const {
     buffer_.UnReadBytes(n);
   }
 
