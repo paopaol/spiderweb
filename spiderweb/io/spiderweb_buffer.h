@@ -89,38 +89,46 @@ class BufferReader {
   ~BufferReader() = default;
 
   // Read All
-  size_t Read(std::vector<char> &p) const {
+  inline size_t Read(std::vector<char> &p) const {
     return buffer_.Read(p);
   }
 
   // Read One Byte
-  char ReadByte() const {
+  inline char ReadByte() const {
     return buffer_.ReadByte();
   }
 
   // Read N Bytes from buffer
-  size_t ReadBytes(std::vector<char> &p, size_t n) const {
+  inline size_t ReadBytes(std::vector<char> &p, size_t n) const {
     return buffer_.ReadBytes(p, n);
   }
 
-  size_t Read(char *buffer, size_t n) const {
+  inline size_t Read(char *buffer, size_t n) const {
     return buffer_.Read(buffer, n);
   }
 
-  size_t ZeroCopyRead(char *&ptr, size_t n) const {
+  inline size_t ZeroCopyRead(char *&ptr, size_t n) const {
     return buffer_.ZeroCopyRead(ptr, n);
   }
 
-  bool PeekAt(std::vector<char> &p, size_t index, size_t size) const {
+  inline bool PeekAt(std::vector<char> &p, size_t index, size_t size) const {
     return buffer_.PeekAt(p, index, size);
   }
 
-  size_t Len() const {
+  inline size_t Len() const {
     return buffer_.Len();
   }
 
-  size_t Cap() const {
+  inline size_t Cap() const {
     return buffer_.Cap();
+  }
+
+  inline void UnReadByte(/*error*/) {
+    buffer_.UnReadByte();
+  }
+
+  inline void UnReadBytes(size_t n) {
+    buffer_.UnReadBytes(n);
   }
 
  private:
