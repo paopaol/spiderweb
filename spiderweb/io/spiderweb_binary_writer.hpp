@@ -39,13 +39,13 @@ class Streamer {
   inline std::size_t Preppend(Beg beg, End end) {
     return static_cast<T &>(*this).Preppend(beg, end);
   }
-
- private:
 };
 
 class DefaultStreamer : public Streamer<DefaultStreamer> {
  public:
-  DefaultStreamer() = default;
+  explicit DefaultStreamer(std::size_t cap = 128) {
+    vec_.reserve(cap);
+  }
 
   template <typename Beg, typename End>
   inline std::size_t Write(Beg beg, End end) {
