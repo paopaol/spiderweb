@@ -10,6 +10,7 @@ target_sources(
           core/spiderweb_object.h
           core/spiderweb_timer.cc
           core/spiderweb_timer.h
+          core/spiderweb_waiter.cc
           core/spiderweb_waiter.h
           core/spiderweb_thread.cc
           core/spiderweb_thread.h

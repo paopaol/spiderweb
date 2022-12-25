@@ -39,6 +39,10 @@ class Thread {
 
   ~Thread();
 
+  Thread(const Thread &) = delete;
+
+  Thread &operator=(const Thread &rh) = delete;
+
   /**
    * @brief Thread The Loop Thread
    */
