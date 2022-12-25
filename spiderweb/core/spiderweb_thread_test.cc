@@ -19,11 +19,7 @@ class ThreadTest : public testing::Test {
 };
 
 TEST_F(ThreadTest, Run) {
-  EXPECT_FALSE(r.IsRunning());
-  r.Start();
-  EXPECT_TRUE(r.IsRunning());
-
-  r.QueueTask([&]() {
+  const auto task = [&]() {
     timer = absl::make_unique<spiderweb::Timer>();
 
     timer->SetInterval(100);
@@ -35,7 +31,12 @@ TEST_F(ThreadTest, Run) {
     });
 
     timer->Start();
-  });
+  };
+
+  EXPECT_FALSE(r.IsRunning());
+  r.Start();
+  EXPECT_TRUE(r.IsRunning());
+  r.QueueTask(task);
 
   waiter.Wait();
   EXPECT_TRUE(called);
