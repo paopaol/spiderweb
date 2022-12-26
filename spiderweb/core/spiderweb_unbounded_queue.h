@@ -6,11 +6,16 @@
 
 namespace spiderweb {
 
-template <typename T, template <typename E, typename = std::deque<E>> class Container = std::queue>
+/// a thread safe bounded queue
+template <typename T>
 class SyncUnboundedQueue {
  public:
   using Element = T;
-  using ElementQueue = Container<Element>;
+
+  template <typename E, typename = std::deque<E>>
+  using Queue = std::queue<E>;
+
+  using ElementQueue = Queue<Element>;
 
   using Mutex = std::mutex;
 
@@ -49,29 +54,33 @@ class SyncUnboundedQueue {
   }
 
   template <typename U>
-  inline void Swap(Container<U> &in) {
+  inline void Swap(Queue<U> &in) {
     Lock<Mutex> lock(mutex_);
     queue_.swap(in);
   }
 
+  /// call f with first element
   template <typename F>
   void FrontDo(F &&f) const {
     Lock<Mutex> lock(mutex_);
     std::forward<F>(f)(queue_.front());
   }
 
+  /// call f with first element
   template <typename F>
   void FrontDo(F &&f) {
     Lock<Mutex> lock(mutex_);
     std::forward<F>(f)(queue_.front());
   }
 
+  /// call f with last element
   template <typename F>
   void BackDo(F &&f) const {
     Lock<Mutex> lock(mutex_);
     std::forward<F>(f)(queue_.back());
   }
 
+  /// call f with last element
   template <typename F>
   void BackDo(F &&f) {
     Lock<Mutex> lock(mutex_);
