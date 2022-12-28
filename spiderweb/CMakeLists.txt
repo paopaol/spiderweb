@@ -15,6 +15,7 @@ target_sources(
           core/spiderweb_thread.cc
           core/spiderweb_thread.h
           core/spiderweb_unbounded_queue.h
+          core/spiderweb_range.h
           arch/spiderweb_arch.hpp
           io/spiderweb_binary_writer.hpp
           io/spiderweb_buffer.cc
@@ -86,6 +87,7 @@ target_sources(
           core/spiderweb_waiter_test.cc
           core/spiderweb_thread_test.cc
           core/spiderweb_unbounded_queue_test.cc
+          core/spiderweb_range_test.cc
           io/spiderweb_binary_writer_test.cc
           io/spiderweb_bitmap_readwriter_test.cc
           net/spiderweb_tcp_socket_test.cc
