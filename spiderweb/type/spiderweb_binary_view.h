@@ -19,21 +19,21 @@ template <typename T>
 union Pack<T, 2> {
   T        v;
   uint16_t u;
-  char     buf[2];
+  uint8_t  buf[2];
 };
 
 template <typename T>
 union Pack<T, 4> {
   T        v;
   uint32_t u;
-  char     buf[4];
+  uint8_t  buf[4];
 };
 
 template <typename T>
 union Pack<T, 8> {
   T        v;
   uint64_t u;
-  char     buf[8];
+  uint8_t  buf[8];
 };
 };  // namespace detail
 
@@ -41,15 +41,12 @@ class BinaryView {
  public:
   template <typename T, typename = typename std::enable_if<std::is_integral<T>::value ||
                                                            std::is_floating_point<T>::value>::type>
-  static T ViewAs(const uint8_t *buf, std::size_t size, arch::ArchType type, bool mid = false) {
+  static T ViewAs(const uint8_t *buf, std::size_t size, arch::ArchType type) {
     constexpr int kTypeSize = sizeof(T);
     PPK_ASSERT_FATAL(size >= kTypeSize, "%lu < type size %d", size, kTypeSize);
 
     detail::Pack<T, kTypeSize> pack{};
     std::memcpy(pack.buf, buf, kTypeSize);
-
-    if (mid) {
-    }
 
     switch (type) {
       case arch::ArchType::kBig: {
