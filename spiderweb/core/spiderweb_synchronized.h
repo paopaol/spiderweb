@@ -21,19 +21,19 @@ class SynchronizedLocker {
     rth.ref_ = nullptr;
   }
 
-  SynchronizedLocker &operator=(const SynchronizedLocker &) = delete;
-
   ~SynchronizedLocker() {
     if (ref_) {
       ref_->mutex_.unlock();
     }
   }
 
-  T *operator->() {
+  SynchronizedLocker &operator=(const SynchronizedLocker &) = delete;
+
+  inline T *operator->() {
     return &ref_->data_;
   }
 
-  const T *operator->() const {
+  inline const T *operator->() const {
     return &ref_->data_;
   }
 
@@ -51,22 +51,24 @@ class Synchronized {
   explicit Synchronized(Args &&...args) : data_(std::forward<Args>(args)...) {
   }
 
-  SynchronizedLocker<DataType> Lock() {
+  Synchronized &operator=(const Synchronized &) = delete;
+
+  inline SynchronizedLocker<DataType> Lock() {
     return std::move(SynchronizedLocker<DataType>(this));
   }
 
-  SynchronizedLocker<DataType> Lock() const {
+  inline SynchronizedLocker<DataType> Lock() const {
     return std::move(SynchronizedLocker<const DataType>(this));
   }
 
   template <class Function>
-  auto WithLock(Function &&function) {
+  inline auto WithLock(Function &&function) {
     auto l(Lock());
     return function(&data_);
   }
 
   template <class Function>
-  auto WithLock(Function &&function) const {
+  inline auto WithLock(Function &&function) const {
     auto l(Lock());
     return function(&data_);
   }
