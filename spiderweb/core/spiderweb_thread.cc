@@ -17,6 +17,7 @@ class Thread::Private {
 
     wait_for_satrt.Notify(true);
     loop->Exec();
+    loop = nullptr;
   }
 
   void StartRoutineOnce() {
@@ -54,6 +55,8 @@ void Thread::Start() {
 
 void Thread::Quit() {
   if (IsRunning()) {
+    assert(std::this_thread::get_id() != d->t.get_id() &&
+           "Thread::Quit() must not called in it's spiderweb::Thread");
     d->loop->Quit();
   }
   d->WaitForThreadExit();
