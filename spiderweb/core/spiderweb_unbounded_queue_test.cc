@@ -3,6 +3,8 @@
 #include <atomic>
 
 #include "gtest/gtest.h"
+#include "spiderweb/core/spiderweb_thread.h"
+#include "spiderweb/core/spiderweb_waiter.h"
 
 template <typename Child>
 class Count {
@@ -62,13 +64,25 @@ TEST(UnboundedQueue, CopyConstruct) {
 
   spiderweb::SyncUnboundedQueue<Element> queue;
 
-  queue.PushBack(Element());
-  queue.PushBack(Element());
-  queue.PushBack(Element());
+  queue.PushBack(Element{0});
+  queue.PushBack(Element{1});
+  queue.PushBack(Element{2});
 
-  spiderweb::SyncUnboundedQueue<Element> queue2(queue);
+  spiderweb::Thread thread;
 
-  EXPECT_EQ(queue.Size(), queue2.Size());
+  spiderweb::Waiter<bool> waiter;
+  thread.Start();
+  thread.QueueTask([&]() {
+    spiderweb::SyncUnboundedQueue<Element> queue2(queue);
+
+    queue2.PushBack(Element{3});
+    EXPECT_EQ(queue2.Size(), 4);
+
+    waiter.Notify(true);
+  });
+  const auto called = waiter.Wait();
+  thread.Quit();
+  EXPECT_TRUE(called);
 }
 
 TEST(UnboundedQueue, FrontDo) {

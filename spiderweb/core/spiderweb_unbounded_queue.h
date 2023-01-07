@@ -25,7 +25,7 @@ class SyncUnboundedQueue {
   SyncUnboundedQueue() = default;
 
   SyncUnboundedQueue(const SyncUnboundedQueue &other) {
-    Lock<Mutex> lock(mutex_);
+    Lock<Mutex> lock(other.mutex_);
     queue_ = other.queue_;
   }
 
