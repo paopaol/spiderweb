@@ -6,7 +6,7 @@
 
 namespace spiderweb {
 
-/// a thread safe bounded queue
+/// a thread safe unbounded queue
 template <typename T>
 class SyncUnboundedQueue {
  public:
@@ -37,10 +37,15 @@ class SyncUnboundedQueue {
     queue_.push(std::forward<U>(element));
   }
 
-  inline void PopFront(Element &output) {
+  inline bool PopFront(Element &output) {
     Lock<Mutex> lock(mutex_);
-    output = std::move(queue_.front());
-    queue_.pop();
+    if (!queue_.empty()) {
+      output = std::move(queue_.front());
+      queue_.pop();
+
+      return true;
+    }
+    return false;
   }
 
   inline std::size_t Size() const {
@@ -63,28 +68,36 @@ class SyncUnboundedQueue {
   template <typename F>
   void FrontDo(F &&f) const {
     Lock<Mutex> lock(mutex_);
-    std::forward<F>(f)(queue_.front());
+    if (!queue_.empty()) {
+      std::forward<F>(f)(queue_.front());
+    }
   }
 
   /// call f with first element
   template <typename F>
   void FrontDo(F &&f) {
     Lock<Mutex> lock(mutex_);
-    std::forward<F>(f)(queue_.front());
+    if (!queue_.empty()) {
+      std::forward<F>(f)(queue_.front());
+    }
   }
 
   /// call f with last element
   template <typename F>
   void BackDo(F &&f) const {
     Lock<Mutex> lock(mutex_);
-    std::forward<F>(f)(queue_.back());
+    if (!queue_.empty()) {
+      std::forward<F>(f)(queue_.back());
+    }
   }
 
   /// call f with last element
   template <typename F>
   void BackDo(F &&f) {
     Lock<Mutex> lock(mutex_);
-    std::forward<F>(f)(queue_.back());
+    if (!queue_.empty()) {
+      std::forward<F>(f)(queue_.back());
+    }
   }
 
  private:

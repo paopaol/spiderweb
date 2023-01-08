@@ -40,6 +40,15 @@ TEST(UnboundedQueue, Operate) {
   EXPECT_EQ(Element::GetCount(), 2);
 }
 
+TEST(UnboundedQueue, PopEmpyQueue) {
+  struct Element {};
+
+  spiderweb::SyncUnboundedQueue<Element> queue;
+
+  Element out;
+  EXPECT_FALSE(queue.PopFront(out));
+}
+
 TEST(UnboundedQueue, Swap) {
   struct Element {};
 
@@ -101,6 +110,16 @@ TEST(UnboundedQueue, FrontDo) {
   EXPECT_EQ(first.value, 10);
 }
 
+TEST(UnboundedQueue, FrontDoEmptyQueue) {
+  spiderweb::SyncUnboundedQueue<int> queue;
+
+  bool called = false;
+  queue.FrontDo([&](int&) { called = true; });
+
+  // should never called,on empy queue
+  EXPECT_FALSE(called);
+}
+
 TEST(UnboundedQueue, BackDo) {
   struct Element {
     int value = 0;
@@ -115,4 +134,13 @@ TEST(UnboundedQueue, BackDo) {
 
   queue.PopFront(first);
   EXPECT_EQ(first.value, 10);
+}
+
+TEST(UnboundedQueue, BackDoEmptyQueue) {
+  spiderweb::SyncUnboundedQueue<int> queue;
+
+  bool called = false;
+  queue.BackDo([&](int&) { called = true; });
+  // should never called,on empy queue
+  EXPECT_FALSE(called);
 }
