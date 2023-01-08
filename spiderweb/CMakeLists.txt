@@ -2,7 +2,9 @@ add_library(spiderweb)
 
 target_sources(
   spiderweb
-  PRIVATE core/spiderweb_event_spy.h
+  PRIVATE core/spiderweb_error_code.cc
+          core/spiderweb_error_code.h
+          core/spiderweb_event_spy.h
           core/spiderweb_eventsignal.h
           core/spiderweb_eventloop.cc
           core/spiderweb_eventloop.h
@@ -81,7 +83,8 @@ add_subdirectory(reflect)
 add_executable(spiderweb_test)
 target_sources(
   spiderweb_test
-  PRIVATE core/spiderweb_object_test.cc
+  PRIVATE core/spiderweb_error_code_test.cc
+          core/spiderweb_object_test.cc
           core/spiderweb_timer_test.cc
           core/spiderweb_eventloop_test.cc
           core/spiderweb_event_spy_test.cc
