@@ -24,6 +24,8 @@ target_sources(
           io/spiderweb_buffer.cc
           io/spiderweb_buffer.h
           io/spiderweb_bitmap_readwriter.h
+          io/spiderweb_named_pipe.cc
+          io/spiderweb_named_pipe.h
           net/spiderweb_tcp_socket.cc
           net/spiderweb_tcp_socket.h
           net/spiderweb_tcp_server.cc
@@ -42,6 +44,7 @@ target_sources(
           core/internal/thread_check.h
           core/internal/move_tuple_wrapper.h
           io/private/spiderweb_stream_private.h
+          io/private/spiderweb_named_pipe_private.h
           net/private/spiderweb_tcp_socket_private.h
           net/private/spiderweb_tcp_server_private.h
           serial/private/spiderweb_serialport_private.h
@@ -95,6 +98,7 @@ target_sources(
           core/spiderweb_synchronized_test.cc
           io/spiderweb_binary_writer_test.cc
           io/spiderweb_bitmap_readwriter_test.cc
+          io/spiderweb_named_pipe_test.cc
           net/spiderweb_tcp_socket_test.cc
           net/spiderweb_tcp_server_test.cc
           serial/spiderweb_serialport_test.cc

@@ -1,5 +1,6 @@
 #include "spiderweb_synchronized.h"
 
+#include <thread>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -8,11 +9,16 @@ class My {
  public:
   void Do() const {
     printf("Do\n");
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     ++i;
   }
 
   void Dump() {
     printf("i=%d\n", i);
+  }
+
+  int Value() const {
+    return i;
   }
 
  private:
@@ -22,10 +28,14 @@ class My {
 TEST(Synchronized, Lock) {
   spiderweb::Synchronized<My> syn;
 
-  syn.Lock()->Do();
-  syn.Lock()->Do();
-  syn.WithLock([](const My *my) { my->Do(); });
-  syn.WithLock([](My *my) { my->Do(); });
+  std::thread thread1([&]() { syn.Lock()->Do(); });
 
-  syn.Lock()->Dump();
+  std::thread thread2([&]() {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    syn.Lock()->Dump();
+  });
+
+  thread1.join();
+  thread2.join();
+  EXPECT_EQ(syn.Lock()->Value(), 1);
 }
