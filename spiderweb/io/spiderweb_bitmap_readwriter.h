@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdio.h>
+
+#include <cstdint>
+#include <limits>
 #include <type_traits>
 
 namespace spiderweb {
@@ -57,12 +61,28 @@ struct BitmapWriter {
   }
 
   inline void Set(const T v) {
-    BitmapReader<T, 0, high - low> r(v);
+    constexpr std::size_t kMaxBits = sizeof(T) * 8;
+    constexpr std::size_t low_bound = Max<0, low - 1>::value;
+    constexpr std::size_t high_bound = Min<high + 1, kMaxBits - 1>::value;
 
-    value |= (r.Value() << low);
+    const BitmapReader<T, 0, high - low>            adjusted(v);
+    const BitmapReader<T, 0, low_bound>             low_value(value);
+    const BitmapReader<T, high_bound, kMaxBits - 1> high_value(value);
+
+    value = (high_value.Value() << high_bound) | (adjusted.Value() << low) | low_value.Value();
   }
 
  private:
+  template <std::size_t a, std::size_t b>
+  struct Max {
+    static constexpr std::size_t value = a > b ? a : b;
+  };
+
+  template <std::size_t a, std::size_t b>
+  struct Min {
+    static constexpr std::size_t value = a < b ? a : b;
+  };
+
   T &value;
 };
 

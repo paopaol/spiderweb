@@ -103,3 +103,12 @@ TEST(BitmapReader, WriteSomeBit) {
     EXPECT_EQ(value, 1);
   }
 }
+
+TEST(BitmapReader, OverWriteSomeBit) {
+  uint8_t                                    value = 0xfd;
+  spiderweb::io::BitmapWriter<uint8_t, 3, 5> w(value);
+  w.Set(2);
+  EXPECT_EQ(value, 0xd5);
+  w.Set(4);
+  EXPECT_EQ(value, 0xe5);
+}
