@@ -27,6 +27,8 @@ class SynchronizedLocker {
     }
   }
 
+  SynchronizedLocker(const SynchronizedLocker &) = delete;
+
   SynchronizedLocker &operator=(const SynchronizedLocker &) = delete;
 
   inline T *operator->() {
