@@ -34,4 +34,27 @@ void WaitGroup::Wait() {
   }
 }
 
+class AsyncWaitGroup::Private {
+ public:
+  uint32_t   size = 0;
+  std::mutex mutex;
+};
+
+AsyncWaitGroup::AsyncWaitGroup(uint32_t size, Object *parent) : Object(parent), d(new Private()) {
+  d->size = size;
+}
+
+AsyncWaitGroup::~AsyncWaitGroup() {
+  delete d;
+}
+
+void AsyncWaitGroup::Done() {
+  std::unique_lock<std::mutex> lock(d->mutex);
+
+  d->size--;
+  if (d->size == 0) {
+    spider_emit Finished();
+  }
+}
+
 }  // namespace spiderweb

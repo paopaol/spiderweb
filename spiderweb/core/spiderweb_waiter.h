@@ -2,6 +2,9 @@
 
 #include <future>
 
+#include "core/spiderweb_eventsignal.h"
+#include "core/spiderweb_object.h"
+
 namespace spiderweb {
 
 // Waiter is a thread notify tool,
@@ -46,6 +49,26 @@ class WaitGroup {
   void Done();
 
   void Wait();
+
+ private:
+  Private *d = nullptr;
+};
+
+class AsyncWaitGroup : public Object {
+  class Private;
+
+ public:
+  explicit AsyncWaitGroup(uint32_t size, Object *parent);
+
+  ~AsyncWaitGroup() override;
+
+  AsyncWaitGroup(const AsyncWaitGroup &other) = delete;
+
+  AsyncWaitGroup &operator=(const AsyncWaitGroup &rh) = delete;
+
+  void Done();
+
+  EventSignal<void()> Finished;
 
  private:
   Private *d = nullptr;
