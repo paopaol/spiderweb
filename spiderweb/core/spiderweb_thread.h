@@ -32,9 +32,9 @@ namespace spiderweb {
 class Thread {
   class Private;
 
+ public:
   using Id = std::thread::id;
 
- public:
   Thread();
 
   ~Thread();

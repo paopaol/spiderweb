@@ -16,6 +16,7 @@ target_sources(
           core/spiderweb_waiter.h
           core/spiderweb_thread.cc
           core/spiderweb_thread.h
+          core/spiderweb_thread_data.h
           core/spiderweb_unbounded_queue.h
           core/spiderweb_range.h
           core/spiderweb_synchronized.h
@@ -93,6 +94,7 @@ target_sources(
           core/spiderweb_event_spy_test.cc
           core/spiderweb_waiter_test.cc
           core/spiderweb_thread_test.cc
+          core/spiderweb_thread_data_test.cc
           core/spiderweb_unbounded_queue_test.cc
           core/spiderweb_range_test.cc
           core/spiderweb_synchronized_test.cc

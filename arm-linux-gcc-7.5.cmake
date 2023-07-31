@@ -1,0 +1,6 @@
+set(CMAKE_SYSTEM_PROCESSOR aarch64)
+set(CMAKE_SYSTEM_NAME Linux)
+set(TOOL_PATH "/opt/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu")
+set(TOOLCHAIN_PATH ${TOOL_PATH}/aarch64-linux-gnu)
+set(CMAKE_C_COMPILER ${TOOL_PATH}/bin/aarch64-linux-gnu-gcc)
+set(CMAKE_CXX_COMPILER ${TOOL_PATH}/bin/aarch64-linux-gnu-g++)
