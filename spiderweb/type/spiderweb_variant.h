@@ -175,6 +175,11 @@ class Variant {
 
   float ToFloat(bool *ok = nullptr) const;
 
+  inline void Clear() {
+    v_ = Monostate{};
+    current_type_ = Type::kNull;
+  }
+
  private:
   inline void Assign(const Variant &rh) {
     if (this == &rh) {
