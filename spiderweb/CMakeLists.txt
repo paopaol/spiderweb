@@ -41,6 +41,8 @@ target_sources(
           reflect/macro_map.h
           type/spiderweb_any_view.h
           type/spiderweb_binary_view.h
+          type/spiderweb_variant.h
+          type/spiderweb_variant.cc
   PRIVATE core/internal/index_sequence.hpp
           core/internal/thread_check.h
           core/internal/move_tuple_wrapper.h
@@ -72,6 +74,8 @@ target_compile_definitions(
 target_link_libraries(
   spiderweb
   PUBLIC absl::any
+         absl::variant
+         absl::strings
          ghc_filesystem
          fmt
          spdlog
@@ -106,7 +110,8 @@ target_sources(
           serial/spiderweb_serialport_test.cc
           serial/spiderweb_socketcan_test.cc
           type/spiderweb_any_view_test.cc
-          type/spiderweb_binary_view_test.cc)
+          type/spiderweb_binary_view_test.cc
+          type/spiderweb_variant_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark
