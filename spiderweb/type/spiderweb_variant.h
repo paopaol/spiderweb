@@ -102,13 +102,6 @@ class Variant {
   Variant(std::string def) : v_(std::move(def)), current_type_(CurrentType<std::string>::type) {
   }
 
-  static Variant Any(absl::any v) {
-    Variant var;
-    var.current_type_ = Type::kAny;
-    var.v_ = std::move(v);
-    return var;
-  }
-
   /**
    * @brief copy construct
    */
