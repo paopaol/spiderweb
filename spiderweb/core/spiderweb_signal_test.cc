@@ -14,7 +14,7 @@ TEST(SignalTest, Emit) {
     loop.Exit(0);
   });
 
-  kill(getpid(), SIGINT);
+  loop.RunAfter(1000, []() { kill(getpid(), SIGINT); });
 
   loop.Exec();
 

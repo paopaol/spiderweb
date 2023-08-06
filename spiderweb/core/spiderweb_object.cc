@@ -2,6 +2,7 @@
 
 #include <thread>
 
+#include "spiderweb/core/spiderweb_timer.h"
 #include "spiderweb_eventloop.h"
 
 namespace spiderweb {
@@ -44,6 +45,20 @@ spiderweb::EventLoop *Object::ownerEventLoop() {
 
 void Object::QueueTask(std::function<void()> &&f) const {
   d->loop->IoService().post(std::forward<decltype(f)>(f));
+}
+
+void Object::RunAfter(uint64_t delay_ms, std::function<void()> &&f) const {
+  auto *timer = new Timer(d->loop);
+
+  Connect(timer, &Timer::timeout, timer, [ff = std::move(f), timer]() {
+    timer->DeleteLater();
+    ff();
+  });
+
+  timer->SetSingalShot(true);
+
+  timer->SetInterval(delay_ms);
+  timer->Start();
 }
 
 std::thread::id Object::ThreadId() const {

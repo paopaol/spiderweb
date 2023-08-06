@@ -89,6 +89,8 @@ class Object {
 
   void QueueTask(std::function<void()> &&f) const;
 
+  void RunAfter(uint64_t delay_ms, std::function<void()> &&f) const;
+
   std::thread::id ThreadId() const;
 
   void DeleteLater();
