@@ -20,6 +20,8 @@ target_sources(
           core/spiderweb_unbounded_queue.h
           core/spiderweb_range.h
           core/spiderweb_synchronized.h
+          core/spiderweb_signal.cc
+          core/spiderweb_signal.h
           arch/spiderweb_arch.hpp
           io/spiderweb_binary_writer.hpp
           io/spiderweb_buffer.cc
@@ -102,6 +104,7 @@ target_sources(
           core/spiderweb_unbounded_queue_test.cc
           core/spiderweb_range_test.cc
           core/spiderweb_synchronized_test.cc
+          core/spiderweb_signal_test.cc
           io/spiderweb_binary_writer_test.cc
           io/spiderweb_bitmap_readwriter_test.cc
           io/spiderweb_named_pipe_test.cc

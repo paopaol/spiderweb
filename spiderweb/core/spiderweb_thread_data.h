@@ -3,6 +3,7 @@
 #include <future>
 
 #include "spiderweb/core/spiderweb_thread.h"
+#include "spiderweb/core/spiderweb_type_traits.h"
 #include "spiderweb/ppk_assert.h"
 
 namespace spiderweb {
@@ -12,9 +13,6 @@ using Future = std::future<T>;
 
 template <typename T>
 using Callback = std::function<void(T)>;
-
-template <class T>
-struct IsVoid : std::is_same<void, typename std::remove_cv<T>::type> {};
 
 namespace detail {
 
