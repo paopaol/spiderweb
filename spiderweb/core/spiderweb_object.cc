@@ -69,4 +69,8 @@ void Object::DeleteLater() {
   QueueTask(detail::ObjectDleter(this));
 }
 
+void Object::DeleteLater(Object *object) {
+  object->DeleteLater();
+}
+
 }  // namespace spiderweb

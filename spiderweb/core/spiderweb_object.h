@@ -95,6 +95,8 @@ class Object {
 
   void DeleteLater();
 
+  static void DeleteLater(Object *object);
+
  private:
   explicit Object(EventLoop *loop, Object *parent = nullptr);
 
@@ -103,6 +105,22 @@ class Object {
 
   friend class EventLoop;
 };
+
+template <typename T>
+using ObjectPtr = std::shared_ptr<T>;
+
+namespace detail {
+
+template <typename T>
+void LazyDeleter(T *p) {
+  p->DeleteLater();
+}
+}  // namespace detail
+
+template <typename T, typename... Args>
+ObjectPtr<T> MakeObject(Args &&...args) {
+  return std::shared_ptr<T>(new T(std::forward<Args>(args)...), detail::LazyDeleter<T>);
+}
 
 }  // namespace spiderweb
 
