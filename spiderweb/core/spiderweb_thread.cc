@@ -3,6 +3,7 @@
 #include <thread>
 
 #include "absl/memory/memory.h"
+#include "internal/asio_cast.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_waiter.h"
 
@@ -69,7 +70,7 @@ void Thread::QueueTask(std::function<void()> &&f) {
 }
 
 bool Thread::IsRunning() const {
-  return d->loop && !d->loop->IoService().stopped();
+  return d->loop && !AsioService(d->loop.get()).stopped();
 }
 
 Thread::Id Thread::GetThreadId() const {

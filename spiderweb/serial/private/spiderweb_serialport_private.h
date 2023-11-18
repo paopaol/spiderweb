@@ -4,6 +4,7 @@
 #include <map>
 
 #include "asio.hpp"
+#include "core/internal/asio_cast.h"
 #include "core/spiderweb_eventloop.h"
 #include "reflect/reflect_enum.hpp"
 #include "spdlog/spdlog.h"
@@ -27,7 +28,7 @@ namespace serial {
 
 class SerialPort::Private {
  public:
-  explicit Private(SerialPort *qq) : q(qq), serial_port(qq->ownerEventLoop()->IoService()) {
+  explicit Private(SerialPort *qq) : q(qq), serial_port(AsioService(qq->ownerEventLoop())) {
   }
 
   template <typename AsyncStream, typename Handler>

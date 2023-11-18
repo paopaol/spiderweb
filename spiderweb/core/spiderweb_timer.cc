@@ -1,9 +1,11 @@
 #include "spiderweb_timer.h"
 
+#include "core/internal/asio_cast.h"
+
 namespace spiderweb {
 class Timer::Private {
  public:
-  Private(Timer *qq, Object *parent) : q(qq), timer(GetLoop(parent)->IoService()) {
+  Private(Timer *qq, Object *parent) : q(qq), timer(AsioService(GetLoop(parent))) {
   }
 
   Timer             *q = nullptr;

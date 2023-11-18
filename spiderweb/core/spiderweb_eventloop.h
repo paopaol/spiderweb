@@ -1,7 +1,6 @@
 #ifndef SPIDERWEB_EVENTLOOP_H
 #define SPIDERWEB_EVENTLOOP_H
 
-#include "asio-1.22.1/include/asio/io_service.hpp"
 #include "spiderweb_eventsignal.h"
 #include "spiderweb_object.h"
 
@@ -25,7 +24,7 @@ class EventLoop : public Object {
 
   static EventLoop *LoopOfCurrentThread();
 
-  asio::io_service &IoService();
+  NativeIoService IoService();
 
  private:
   class Private;

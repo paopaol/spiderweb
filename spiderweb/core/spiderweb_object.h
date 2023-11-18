@@ -4,11 +4,9 @@
 #include <functional>
 #include <memory>
 #include <thread>
-#include <tuple>
 #include <type_traits>
 #include <utility>
 
-#include "asio-1.22.1/include/asio/io_service.hpp"
 #include "internal/move_tuple_wrapper.h"
 #include "spiderweb_eventsignal.h"
 
@@ -18,6 +16,9 @@
 #endif
 
 namespace spiderweb {
+
+using NativeIoService = void *;
+
 template <typename Type, typename... Args>
 static inline std::function<void(Args...)> create_class_member_functor(
     Type *instance, void (Type::*method)(Args... args)) {

@@ -19,7 +19,7 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
         /**
          * @brief currently, only support ipv4
          */
-        acceptor(qq->ownerEventLoop()->IoService(),
+        acceptor(AsioService(qq->ownerEventLoop()),
                  asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)) {
   }
 

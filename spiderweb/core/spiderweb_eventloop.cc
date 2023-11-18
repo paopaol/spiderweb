@@ -1,8 +1,6 @@
 #include "spiderweb_eventloop.h"
 
-#include <thread>
-
-#include "asio.hpp"
+#include "asio/io_service.hpp"
 
 namespace spiderweb {
 
@@ -50,8 +48,10 @@ spiderweb::EventLoop *EventLoop::LoopOfCurrentThread() {
   return current_loop;
 }
 
-asio::io_service &EventLoop::IoService() {
-  return d->io;
+NativeIoService EventLoop::IoService() {
+  asio::io_service s;
+
+  return &d->io;
 }
 
 }  // namespace spiderweb

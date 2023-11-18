@@ -3,7 +3,6 @@
 
 #include "core/spiderweb_eventsignal.h"
 #include "core/spiderweb_object.h"
-#include "io/spiderweb_buffer.h"
 
 namespace spiderweb {
 namespace net {

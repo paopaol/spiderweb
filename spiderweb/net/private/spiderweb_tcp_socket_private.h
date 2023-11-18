@@ -2,6 +2,7 @@
 #define SPIDERWEB_TCP_SOCKET_PRIVATE_H
 
 #include "asio.hpp"
+#include "core/internal/asio_cast.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/net/spiderweb_tcp_socket.h"
 
@@ -9,7 +10,7 @@ namespace spiderweb {
 namespace net {
 class TcpSocket::Private {
  public:
-  explicit Private(TcpSocket *qq) : q(qq), socket(qq->ownerEventLoop()->IoService()) {
+  explicit Private(TcpSocket *qq) : q(qq), socket(AsioService(qq->ownerEventLoop())) {
   }
 
   template <typename AsyncStream, typename Handler>

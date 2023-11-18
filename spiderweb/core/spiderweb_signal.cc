@@ -1,12 +1,13 @@
 #include "spiderweb/core/spiderweb_signal.h"
 
 #include "asio/signal_set.hpp"
+#include "core/internal/asio_cast.h"
 
 namespace spiderweb {
 class Signals::Private {
  public:
   Private(Signals* qq, Object* parent, int sig_number)
-      : q(qq), set_(GetLoop(parent)->IoService(), sig_number) {
+      : q(qq), set_(AsioService(GetLoop(parent)), sig_number) {
     SetUp();
   }
 

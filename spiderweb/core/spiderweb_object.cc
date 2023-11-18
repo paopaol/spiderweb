@@ -2,6 +2,7 @@
 
 #include <thread>
 
+#include "core/internal/asio_cast.h"
 #include "spiderweb/core/spiderweb_timer.h"
 #include "spiderweb_eventloop.h"
 
@@ -44,7 +45,7 @@ spiderweb::EventLoop *Object::ownerEventLoop() {
 }
 
 void Object::QueueTask(std::function<void()> &&f) const {
-  d->loop->IoService().post(std::forward<decltype(f)>(f));
+  AsioService(d->loop).post(std::forward<decltype(f)>(f));
 }
 
 void Object::RunAfter(uint64_t delay_ms, std::function<void()> &&f) const {

@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 #include "spiderweb/core/spiderweb_event_spy.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
 
 class SerialPortTest : public testing::Test {};
 

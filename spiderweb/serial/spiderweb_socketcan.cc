@@ -1,6 +1,7 @@
 #include "spiderweb_socketcan.h"
 
 #include "absl/memory/memory.h"
+#include "core/internal/asio_cast.h"
 #include "core/internal/thread_check.h"
 #include "io/private/spiderweb_stream_private.h"
 #include "private/spiderweb_socketcan_private.h"
@@ -32,14 +33,15 @@ void SocketCan::Open(const std::string &can, SocketCanType type) {
   switch (d->impl.type) {
     case SocketCanType::kRaw: {
       auto const ep = canary::raw::endpoint{idx};
-      d->impl.raw_sock = absl::make_unique<canary::raw::socket>(ownerEventLoop()->IoService(), ep);
+      d->impl.raw_sock =
+          absl::make_unique<canary::raw::socket>(AsioService(ownerEventLoop()), ep);
       d->impl.raw_sock->set_option(canary::filter_if_any(&filter, 1));
       d->StartOpenEx(*d->impl.raw_sock, false, ec);
     } break;
     case SocketCanType::kIsotp: {
       auto const ep = canary::isotp::endpoint{idx};
       d->impl.isotp_sock =
-          absl::make_unique<canary::isotp::socket>(ownerEventLoop()->IoService(), ep);
+          absl::make_unique<canary::isotp::socket>(AsioService(ownerEventLoop()), ep);
       d->impl.isotp_sock->set_option(canary::filter_if_any(&filter, 1));
       d->StartOpenEx(*d->impl.isotp_sock, false, ec);
     } break;

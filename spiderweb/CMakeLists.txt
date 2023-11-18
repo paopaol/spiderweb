@@ -5,6 +5,7 @@ target_sources(
   PRIVATE core/spiderweb_error_code.cc
           core/spiderweb_error_code.h
           core/spiderweb_event_spy.h
+          core/spiderweb_event_spy.cc
           core/spiderweb_eventsignal.h
           core/spiderweb_eventloop.cc
           core/spiderweb_eventloop.h
@@ -58,8 +59,8 @@ target_sources(
           ppk_assert.cpp)
 
 target_include_directories(
-  spiderweb PUBLIC asio-1.22.1/include ${CMAKE_CURRENT_SOURCE_DIR}
-                   ${PROJECT_SOURCE_DIR})
+  spiderweb PUBLIC ${PROJECT_SOURCE_DIR}/thrd/asio-1.22.1/include
+                   ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR})
 # we do not use any bosst components
 target_compile_definitions(
   spiderweb

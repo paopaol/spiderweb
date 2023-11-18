@@ -1,6 +1,6 @@
 #include "spiderweb/net/spiderweb_tcp_socket.h"
 
-#include "absl/strings/string_view.h"
+#include "core/internal/asio_cast.h"
 #include "fmt/ranges.h"
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_event_spy.h"
@@ -16,7 +16,7 @@ class MockSocket : public spiderweb::Object {
   explicit MockSocket(spiderweb::EventLoop &loop, spiderweb::Object *parent = nullptr)
       : spiderweb::Object(parent),
         event_loop(loop),
-        stream(loop.IoService()),
+        stream(spiderweb::AsioService(&loop)),
         d(std::make_shared<TestIoPrivate>(&socket)) {
   }
 
@@ -106,7 +106,7 @@ TEST(spiderweb_tcp_socket, ConnectToHostFailed_ConnectionRefused) {
   EXPECT_EQ(spy.Count(), 1);
   auto error_code = std::get<0>(spy.LastResult<std::error_code>());
   EXPECT_EQ(error_code, asio::error::connection_refused);
-  std::cout << error_code.message() << std::endl;
+  std::cout << error_code.message() << '\n';
 }
 
 TEST(spiderweb_tcp_socket, CloseConnectingSocket) {
@@ -123,7 +123,7 @@ TEST(spiderweb_tcp_socket, CloseConnectingSocket) {
   EXPECT_EQ(spy.Count(), 1);
   auto error_code = std::get<0>(spy.LastResult<std::error_code>());
   EXPECT_EQ(error_code, asio::error::connection_aborted);
-  std::cout << error_code.message() << std::endl;
+  std::cout << error_code.message() << '\n';
 }
 
 TEST(spiderweb_tcp_socket, WriteSuccess) {
@@ -146,7 +146,7 @@ TEST(spiderweb_tcp_socket, WriteSuccess) {
 
   spy.Wait();
   EXPECT_TRUE(spy.Count() == 1);
-  std::cout << std::get<0>(spy.LastResult<std::size_t>()) << std::endl;
+  std::cout << std::get<0>(spy.LastResult<std::size_t>()) << '\n';
 }
 
 TEST(spiderweb_tcp_socket, MultiWrite) {

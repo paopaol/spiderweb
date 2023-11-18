@@ -1,13 +1,14 @@
 #pragma once
 
 #include "asio.hpp"
+#include "core/internal/asio_cast.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/io/spiderweb_named_pipe.h"
 
 namespace spiderweb {
 class NamedPipe::Private {
  public:
-  explicit Private(NamedPipe *qq) : q(qq), pipe(qq->ownerEventLoop()->IoService()) {
+  explicit Private(NamedPipe *qq) : q(qq), pipe(AsioService(qq->ownerEventLoop())) {
   }
 
   template <typename AsyncStream, typename Handler>
