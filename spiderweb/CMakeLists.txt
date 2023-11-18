@@ -1,6 +1,5 @@
 add_library(spiderweb SHARED)
 
-
 target_sources(
   spiderweb
   PRIVATE core/spiderweb_error_code.cc
