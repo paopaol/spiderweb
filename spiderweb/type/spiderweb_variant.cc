@@ -104,13 +104,13 @@ struct VisitorAs<double> {
   }
 };
 
-template <typename IntType>
-IntType ToIntOrFloat(const Variant::Var &v, bool *ok = nullptr) {
-  bool    success = true;
-  IntType result = 0;
+template <typename TargetType>
+TargetType ToIntOrFloat(const Variant::Var &v, bool *ok = nullptr) {
+  bool       success = true;
+  TargetType result = 0;
 
   try {
-    result = absl::visit(detail::VisitorAs<IntType>(), v);
+    result = absl::visit(detail::VisitorAs<TargetType>(), v);
   } catch (const std::exception &e) {
     success = false;
   }
