@@ -1,6 +1,8 @@
 #ifndef SPIDERWEB_SERIALPORT_H
 #define SPIDERWEB_SERIALPORT_H
 
+#include <system_error>
+
 #include "io/spiderweb_buffer.h"
 #include "spiderweb/core/spiderweb_object.h"
 

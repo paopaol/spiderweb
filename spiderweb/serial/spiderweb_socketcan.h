@@ -1,7 +1,8 @@
 #ifndef SPIDERWEB_SOCKETCAN_H
 #define SPIDERWEB_SOCKETCAN_H
 
-#include "canary/filter.hpp"
+#include <system_error>
+
 #include "canary/frame_header.hpp"
 #include "spiderweb/core/spiderweb_object.h"
 

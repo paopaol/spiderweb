@@ -1,5 +1,7 @@
 #pragma once
 
+#include <system_error>
+
 #include "spiderweb/core/spiderweb_eventsignal.h"
 #include "spiderweb/core/spiderweb_object.h"
 #include "spiderweb/io/spiderweb_buffer.h"

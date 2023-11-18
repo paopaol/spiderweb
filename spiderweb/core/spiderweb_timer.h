@@ -1,8 +1,7 @@
 #ifndef SPIDERWEB_TIMER_H
 #define SPIDERWEB_TIMER_H
 
-#include "asio/steady_timer.hpp"
-#include "spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_object.h"
 
 namespace spiderweb {
 /**

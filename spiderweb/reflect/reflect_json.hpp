@@ -1,10 +1,7 @@
 #ifndef SPIDERWEB_REFLECT_JSON_H
 #define SPIDERWEB_REFLECT_JSON_H
 
-#include <iostream>
 #include <memory>
-#include <type_traits>
-#include <vector>
 
 #include "reflect_enum.hpp"
 #include "unordered_map"

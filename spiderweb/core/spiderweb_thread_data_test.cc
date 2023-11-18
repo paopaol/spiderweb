@@ -6,6 +6,7 @@
 #include "core/spiderweb_timer.h"
 #include "fmt/format.h"
 #include "gtest/gtest.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_thread.h"
 
 class Service {

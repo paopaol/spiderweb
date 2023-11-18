@@ -1,9 +1,7 @@
 #ifndef SPIDERWEB_REFLECT_ENUM_H
 #define SPIDERWEB_REFLECT_ENUM_H
 
-#include <map>
 #include <type_traits>
-#include <unordered_map>
 
 #include "macro_map.h"
 

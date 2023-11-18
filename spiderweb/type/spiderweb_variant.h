@@ -4,8 +4,6 @@
 
 #include "absl/types/any.h"
 #include "absl/types/variant.h"
-#include "fmt/format.h"
-#include "spiderweb/core/spiderweb_object.h"
 #include "spiderweb/core/spiderweb_type_traits.h"
 
 namespace spiderweb {

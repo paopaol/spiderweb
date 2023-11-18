@@ -1,7 +1,6 @@
 ﻿#ifndef SPIDERWEB_REFLECT_XML_H
 #define SPIDERWEB_REFLECT_XML_H
 
-#include <iostream>
 #include <memory>
 #include <string>
 #include <type_traits>

@@ -1,11 +1,6 @@
 #ifndef SPIDERWEB_IO_BUFFER_H
 #define SPIDERWEB_IO_BUFFER_H
 
-#include <assert.h>
-
-#include <algorithm>
-#include <iterator>
-#include <memory>
 #include <string>
 #include <vector>
 

@@ -1,5 +1,6 @@
 #include "spiderweb_timer.h"
 
+#include "asio/steady_timer.hpp"
 #include "core/internal/asio_cast.h"
 
 namespace spiderweb {

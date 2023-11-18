@@ -2,7 +2,6 @@
 #define SPIDERWEB_BINARY_VIEW_H
 
 #include <cstring>
-#include <system_error>
 
 #include "arch/spiderweb_arch.hpp"
 #include "spiderweb/ppk_assert.h"

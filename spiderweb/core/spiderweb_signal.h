@@ -1,7 +1,6 @@
 #pragma once
 
 #include "spiderweb/core/spiderweb_error_code.h"
-#include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_object.h"
 
 namespace spiderweb {

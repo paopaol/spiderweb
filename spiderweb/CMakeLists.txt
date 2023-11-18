@@ -1,4 +1,5 @@
-add_library(spiderweb)
+add_library(spiderweb SHARED)
+
 
 target_sources(
   spiderweb

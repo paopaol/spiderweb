@@ -1,5 +1,7 @@
 #include "spiderweb_buffer.h"
 
+#include <cassert>
+
 namespace spiderweb {
 namespace io {
 Buffer::Buffer() : b(8192), ridx(0), widx(0) {
