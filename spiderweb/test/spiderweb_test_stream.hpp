@@ -1,4 +1,3 @@
-// #include "../../thrd/asio-1.22.1/src/tests/unit/unit_test.hpp"
 #include "asio.hpp"
 #include "gmock/gmock.h"
 
