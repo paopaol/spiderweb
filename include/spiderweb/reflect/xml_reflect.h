@@ -29,7 +29,7 @@ inline bool ReadTagImpl(XmlValue &node, const char *name, ValueType &value) {
     }
   }
 
-  const auto &child = node.FindChild(name);
+  auto child = node.FindChild(name);
   if (child.HasValue()) {
     reflect::XmlMeta<XmlValue, ValueType>::Read(child, value);
     return true;
@@ -60,13 +60,11 @@ template <typename XmlValue, typename ValueType,
 inline bool ReadTagImpl(XmlValue &node, const char *name, Array<ValueType> &values) {
   using MetaType = reflect::XmlMeta<XmlValue, ValueType>;
 
-  const auto &childs = node.FindChilds(name);
-  for (const auto &child : childs) {
-    const XmlValue xmlNode(child);
-    ValueType      result{};
-    MetaType::Read(xmlNode, result);
+  node.ForEachChilds(name, [&](const XmlValue &child) {
+    ValueType result{};
+    MetaType::Read(child, result);
     values.push_back(std::move(result));
-  }
+  });
   return true;
 }
 
@@ -118,7 +116,7 @@ struct XmlMeta {
  */
 template <typename XmlValueType, typename ValueType>
 struct XmlMeta<XmlValueType, std::shared_ptr<ValueType>> {
-  inline static void Read(const XmlValueType &node, std::shared_ptr<ValueType> &value) {
+  inline static void Read(XmlValueType &node, std::shared_ptr<ValueType> &value) {
     using MetaType = reflect::XmlMeta<XmlValueType, ValueType>;
 
     if (!value) {
@@ -156,8 +154,9 @@ class XmlReader {
   void Read(const char *target_tag, T &out, Paths... paths) const {
     using MetaType = reflect::XmlMeta<XmlValueType, T>;
 
-    const auto root = builder_.Root();
-    const auto found = FindChild(root, paths...).FindChild(target_tag);
+    auto root = builder_.Root();
+    auto child = FindChild(root, paths...);
+    auto found = std::move(child.FindChild(target_tag));
 
     MetaType::Read(found, out);
   }
@@ -181,19 +180,22 @@ class XmlReader {
   void Read(const char *target_tag, T &out, int index, Pathes... pathes) const {
     using MetaType = reflect::XmlMeta<XmlValueType, T>;
 
-    const auto root = builder_.Root();
+    auto root = builder_.Root();
+    auto root_child = std::move(FindChild(root, pathes...));
 
-    const auto childs = FindChild(root, pathes...).FindChilds(target_tag);
-    int        n = 0;
-    for (const auto &child : childs) {
+    int  n = 0;
+    bool done = false;
+    root_child.ForEachChilds(target_tag, [&](const XmlValueType &child) {
       if (n++ != index) {
-        continue;
+        return;
+      }
+      if (done) {
+        return;
       }
 
-      const XmlValueType xmlNode(child);
-      MetaType::Read(xmlNode, out);
-      break;
-    }
+      done = true;
+      MetaType::Read(child, out);
+    });
   }
 
   /**
@@ -212,38 +214,42 @@ class XmlReader {
   void Read(const char *target_tag, Array<T> &out, Pathes... pathes) const {
     using MetaType = reflect::XmlMeta<XmlValueType, T>;
 
-    const auto root = builder_.Root();
+    auto root = builder_.Root();
+    auto root_child = std::move(FindChild(root, pathes...));
 
-    const auto childs = FindChild(root, pathes...).FindChilds(target_tag);
-    for (const auto &child : childs) {
-      const XmlValueType xmlNode(child);
-      T                  result{};
-      MetaType::Read(xmlNode, result);
+    root_child.ForEachChilds(target_tag, [&](const XmlValueType &child) {
+      T result{};
+      MetaType::Read(child, result);
       out.push_back(std::move(result));
-    }
+    });
   }
 
   template <typename T>
   void Read(T &out) const {
     using MetaType = reflect::XmlMeta<XmlValueType, T>;
 
-    const auto root = builder_.Root();
+    auto root = builder_.Root();
+    auto child = root.FirstChild();
 
-    MetaType::Read(root.FirstChild(), out);
+    MetaType::Read(child, out);
   }
 
  private:
-  inline XmlValueType FindChild(const XmlValueType &node) const {
+  inline XmlValueType &FindChild(XmlValueType &node) const {
     return node;
   }
 
-  inline XmlValueType FindChild(const XmlValueType &node, const char *tag) const {
+  inline XmlValueType FindChild(XmlValueType &node) {
+    return std::move(node);
+  }
+
+  inline XmlValueType FindChild(XmlValueType &node, const char *tag) const {
     return node.FindChild(tag);
   }
 
   template <typename... Paths>
-  XmlValueType FindChild(const XmlValueType &node, const char *target_tag, Paths... paths) const {
-    const auto first = FindChild(node, target_tag);
+  XmlValueType FindChild(XmlValueType &node, const char *target_tag, Paths... paths) const {
+    auto first = FindChild(node, target_tag);
     return FindChild(first, paths...);
   }
 
@@ -253,7 +259,7 @@ class XmlReader {
 template <typename XmlValueType, typename BuilderType>
 class XmlWriter {
  public:
-  using StringType = decltype(std::declval<XmlValueType>().template ToString<2>());
+  using StringType = decltype(std::declval<XmlValueType>().template ToString());
   XmlWriter() = default;
 
   ~XmlWriter() = default;
@@ -262,9 +268,9 @@ class XmlWriter {
   void Write(const char *name, const T &value, Pathes... pathes) {
     using MetaType = reflect::XmlMeta<XmlValueType, T>;
 
-    auto root = builder_.Root();
-    root = CreateChild(root, pathes...);
-    root = root.CreateChild(name);
+    auto root = std::move(builder_.Root());
+    root = std::move(CreateChild(root, pathes...));
+    root = std::move(root.CreateChild(name));
 
     MetaType::Write(root, value);
   }
@@ -297,9 +303,8 @@ class XmlWriter {
     return CreateChild(child, pathes...);
   }
 
-  template <int Indent = 2>
   StringType ToString() const {
-    return builder_.Root().template ToString<Indent>();
+    return builder_.Root().template ToString();
   }
 
  private:
@@ -313,16 +318,14 @@ class XmlWriter {
 
 #define REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_2(member, name) \
   {                                                           \
-    const auto &attr = node.GetAttributeNode(name);           \
-    if (XmlValue::HasValue(attr)) {                           \
+    if (XmlValue::HasAtrributeValue(node, name)) {            \
       node.GetAttribute(name, result.member);                 \
     }                                                         \
   }
 
 #define REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_3(member, name, type) \
   {                                                                 \
-    const auto &attr = node.GetAttributeNode(name);                 \
-    if (XmlValue::HasValue(attr)) {                                 \
+    if (XmlValue::HasAtrributeValue(node, name)) {                  \
       type value;                                                   \
       node.GetAttribute(name, value);                               \
       result.member = reflect::FromAliasType(value, result.member); \

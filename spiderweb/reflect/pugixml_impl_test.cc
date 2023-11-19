@@ -1,8 +1,5 @@
-﻿#include <array>
-#include <list>
-
-#include "gtest/gtest.h"
-#include "spiderweb/reflect/implement/xml/pugixml/pugixml_xml_reflection.hpp"
+﻿#include "gtest/gtest.h"
+#include "spiderweb/reflect/xml_node.h"
 
 struct Child {
   int64_t id = 0;
@@ -14,13 +11,13 @@ REFLECT_ENUM(Sex, std::string, (kBoy, "boy"), (kGril, "gril"))
 REFLECT_ENUM(Sex, int, (kBoy, 1), (kGril, 2))
 
 struct People {
-  int         age;
-  float       height;
+  int         age = 0;
+  float       height = 0;
   std::string name;
-  bool        attri_bool_value;
-  int64_t     address;
+  bool        attri_bool_value = false;
+  int64_t     address = 0;
   Child       child;
-  bool        child_bool_value;
+  bool        child_bool_value = false;
   Sex         child_value_sex{Sex::kBoy};
   Sex         attr_value_sex{Sex::kBoy};
 };
@@ -186,7 +183,7 @@ TEST(pugixml_impl, WriteSimpleArrayInt) {
 
   writer.Write("int", values, "intList", "child1", "child2");
 
-  std::cout << writer.ToString<4>() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
 TEST(pugixml_impl, WriteComplexdArray) {
@@ -222,7 +219,7 @@ TEST(pugixml_impl, WriteComplexdArray) {
 
   writer.Write("people", peoples, "china", "hebei", "somepeoples");
 
-  std::cout << writer.ToString<-1>() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
 TEST(pugixml_impl, FromXmlSharedPtr) {
@@ -280,7 +277,7 @@ TEST(pugixml_impl, WriteComplexdArraySharedPtr) {
 
   writer.Write("people", peoples, "china", "hebei", "somepeoples");
 
-  std::cout << writer.ToString<8>() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
 struct Node {
@@ -296,7 +293,7 @@ template <typename T>
 struct XmlMeta<T, Node> {
   using XmlValue = T;
   using struct_type = Node;
-  static void Read(const XmlValue &node, struct_type &result) {
+  static void Read(XmlValue &node, struct_type &result) {
     { reflect ::detail ::ReadTagImpl(node, "value", result.value); }
     { reflect ::detail ::ReadTagImpl(node, "left", result.left); }
     { reflect ::detail ::ReadTagImpl(node, "right", result.right); }
@@ -323,7 +320,7 @@ TEST(pugixml_impl, WriteNodeTree) {
 
   spiderweb::reflect::PugiXmlWriter writer;
   writer.Write("rootNode", root);
-  std::cout << writer.ToString<8>() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
 TEST(pugixml_impl, ReadNodeTree) {

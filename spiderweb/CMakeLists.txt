@@ -26,7 +26,8 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_socketcan.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/reflect_enum.hpp
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/reflect_json.hpp
-    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/reflect_xml.hpp
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/xml_reflect.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/xml_node.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/macro_map.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/type/spiderweb_any_view.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/type/spiderweb_binary_view.h
@@ -50,6 +51,7 @@ target_sources(
     serial/spiderweb_serialport.cc
     serial/spiderweb_socketcan.cc
     type/spiderweb_variant.cc
+    reflect/pugixml_impl.cc
   PRIVATE io/private/spiderweb_stream_private.h
           io/private/spiderweb_named_pipe_private.h
           net/private/spiderweb_tcp_socket_private.h
@@ -118,7 +120,8 @@ target_sources(
           serial/spiderweb_socketcan_test.cc
           type/spiderweb_any_view_test.cc
           type/spiderweb_binary_view_test.cc
-          type/spiderweb_variant_test.cc)
+          type/spiderweb_variant_test.cc
+          reflect/pugixml_impl_test.cc)
 target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark
