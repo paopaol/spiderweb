@@ -1,7 +1,6 @@
 #include "spiderweb_object.h"
 
 #include "core/spiderweb_eventloop.h"
-#include "core/spiderweb_timer.h"
 #include "gtest/gtest.h"
 
 class Sender : public spiderweb::Object {
@@ -10,10 +9,10 @@ class Sender : public spiderweb::Object {
   }
 
   ~Sender() override {
-    std::cout << "Sender deleted" << std::endl;
+    std::cout << "Sender deleted" << '\n';
   }
 
-  spiderweb::Notify<void()> a_event;
+  spiderweb::Notify<> a_event;
 };
 
 TEST(spiderweb_object, DeleteLater) {
@@ -23,7 +22,7 @@ TEST(spiderweb_object, DeleteLater) {
   spiderweb::Object::Connect(sender, &Sender::a_event, &loop, [&]() {
     // should crash here under windows
     sender->DeleteLater();
-    std::cout << "crash here ? " << std::endl;
+    std::cout << "crash here ? " << '\n';
 
     loop.QueueTask([&]() { loop.Quit(); });
   });

@@ -32,7 +32,7 @@ class TestObject : public spiderweb::Object {
     }
   }
 
-  spiderweb::Notify<void(bool state)> statedChanged;
+  spiderweb::Notify<bool> statedChanged;
 
  private:
   bool state_ = false;

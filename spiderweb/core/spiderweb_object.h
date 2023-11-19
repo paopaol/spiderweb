@@ -59,7 +59,7 @@ class Object {
   Object &operator=(const Object &other) = delete;
 
   template <typename Sender, typename SenderU, typename Reciver, typename... Args>
-  static void Connect(Sender *sender, Notify<void(Args... args)> SenderU::*signal, Reciver *reciver,
+  static void Connect(Sender *sender, Notify<Args...> SenderU::*signal, Reciver *reciver,
                       void (Reciver::*method)(Args... args)) {
     static_assert(std::is_base_of<Object, Reciver>::value, "Reciver must derived from Base");
 
@@ -69,8 +69,7 @@ class Object {
   }
 
   template <typename Sender, typename SenderU, typename Reciver, typename... Args, typename F>
-  static void Connect(Sender *sender, Notify<void(Args... args)> SenderU::*signal, Reciver *reciver,
-                      F &&f) {
+  static void Connect(Sender *sender, Notify<Args...> SenderU::*signal, Reciver *reciver, F &&f) {
     static_assert(std::is_base_of<Object, Reciver>::value, "Reciver must derived from Base");
 
     static_assert(std::is_base_of<Object, Sender>::value, "Sender must derived from Base");
@@ -80,7 +79,7 @@ class Object {
   }
 
   template <typename Sender, typename SenderU, typename... Args>
-  static void Emit(Sender *instance, Notify<void(Args...)> SenderU::*signal, Args &&...args) {
+  static void Emit(Sender *instance, Notify<Args...> SenderU::*signal, Args &&...args) {
     if (instance) {
       (instance->*signal)(std::forward<Args>(args)...);
     }

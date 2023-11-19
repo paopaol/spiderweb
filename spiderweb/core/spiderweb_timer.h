@@ -61,7 +61,7 @@ class Timer : public Object {
    *
    * user can connect this timer
    */
-  Notify<void()> timeout;
+  Notify<> timeout;
 
  private:
   class Private;

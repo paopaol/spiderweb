@@ -76,13 +76,13 @@ class SerialPort final : public Object {
 
   void Write(const std::vector<uint8_t> &data);
 
-  Notify<void()> OpenSuccess;
+  Notify<> OpenSuccess;
 
-  Notify<void(const std::error_code &ec)> Error;
+  Notify<const std::error_code &> Error;
 
-  Notify<void(const io::BufferReader &buffer)> BytesRead;
+  Notify<const io::BufferReader &> BytesRead;
 
-  Notify<void(std::size_t n)> BytesWritten;
+  Notify<std::size_t> BytesWritten;
 
  private:
   std::shared_ptr<io::IoPrivate<Private>> d;

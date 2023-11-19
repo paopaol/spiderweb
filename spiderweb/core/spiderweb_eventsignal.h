@@ -26,11 +26,11 @@ namespace spiderweb {
 //   friend class Object;
 // };
 
-template <typename Ret, typename... Args>
+template <typename... Args>
 class Notify;
 
-template <typename Ret, typename... Args>
-class Notify<Ret(Args...)> {
+template <typename... Args>
+class Notify {
  public:
   template <typename... Fargs>
   void operator()(Fargs &&...args) const {
@@ -39,7 +39,7 @@ class Notify<Ret(Args...)> {
     }
   }
 
-  void append(std::function<Ret(Args...)> &&f) {
+  void append(std::function<void(Args...)> &&f) {
     assert(!f_ && "Notify only support append once");
     f_ = std::forward<decltype(f)>(f);
   }
@@ -47,7 +47,7 @@ class Notify<Ret(Args...)> {
   friend class Object;
 
  private:
-  std::function<Ret(Args...)> f_{nullptr};
+  std::function<void(Args...)> f_{nullptr};
 };
 }  // namespace spiderweb
 

@@ -53,20 +53,20 @@ class TcpSocket : public Object {
 
   void Write(const std::vector<uint8_t> &data);
 
-  Notify<void()> ConnectionEstablished;
+  Notify<> ConnectionEstablished;
 
-  Notify<void(const std::error_code &ec)> Error;
+  Notify<const std::error_code &> Error;
 
-  Notify<void(const io::BufferReader &buffer)> BytesRead;
+  Notify<const io::BufferReader &> BytesRead;
 
-  Notify<void(std::size_t n)> BytesWritten;
+  Notify<std::size_t> BytesWritten;
 
   /**
    * @brief when enable reconnect, if the connection is lost,
    *
    * TcpSocket will emit this signal to notify the user, it will reconnect.
    */
-  Notify<void()> ReconnectEvent;
+  Notify<> ReconnectEvent;
 
  private:
   explicit TcpSocket(TcpServer *parent);

@@ -68,7 +68,7 @@ class AsyncWaitGroup : public Object {
 
   void Done();
 
-  Notify<void()> Finished;
+  Notify<> Finished;
 
  private:
   Private *d = nullptr;

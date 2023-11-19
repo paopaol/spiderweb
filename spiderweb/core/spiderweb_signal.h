@@ -28,7 +28,7 @@ class Signals : public Object {
 
   ErrorCode Cancel();
 
-  Notify<void(int sig_number)> Triggered;
+  Notify<int> Triggered;
 
  private:
   class Private;

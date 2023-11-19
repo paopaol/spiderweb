@@ -13,8 +13,8 @@ class EventSpy : public Object {
  public:
   explicit EventSpy(Object *loop);
 
-  template <typename T, typename T2, typename Ret, typename... Args>
-  explicit EventSpy(T *instance, Notify<Ret(Args...)> T2::*event) {
+  template <typename T, typename T2, typename... Args>
+  explicit EventSpy(T *instance, Notify<Args...> T2::*event) {
     Object::Connect(instance, event, instance, [this](Args... args) {
       ++count_;
       std::tuple<decay_t<Args>...> t(std::forward<Args>(args)...);

@@ -35,13 +35,13 @@ class SocketCan final : public Object {
 
   void Write(const CanFrame &frame);
 
-  Notify<void()> OpenSuccess;
+  Notify<> OpenSuccess;
 
-  Notify<void(const std::error_code &ec)> Error;
+  Notify<const std::error_code &> Error;
 
-  Notify<void(const CanFrame &frame)> FrameRead;
+  Notify<const CanFrame &> FrameRead;
 
-  Notify<void(std::size_t n)> BytesWritten;
+  Notify<std::size_t> BytesWritten;
 
  private:
   std::shared_ptr<io::IoPrivate<Private>> d;

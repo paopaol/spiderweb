@@ -16,7 +16,7 @@ class TcpServer : public Object {
 
   void ListenAndServ();
 
-  Notify<void(TcpSocket *conn)> InComingConnection;
+  Notify<TcpSocket *> InComingConnection;
 
  private:
   std::shared_ptr<Private> d;

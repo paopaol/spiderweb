@@ -3,7 +3,7 @@
 
 class MyObject : public spiderweb::Object {
  public:
-  spiderweb::Notify<void(const std::string& a, int b, float c)> voidEvent;
+  spiderweb::Notify<const std::string&, int, float> voidEvent;
 };
 
 static void BM_NotifyConnectLambda(benchmark::State& state) {
