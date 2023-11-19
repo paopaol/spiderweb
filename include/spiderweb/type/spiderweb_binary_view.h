@@ -3,7 +3,7 @@
 
 #include <cstring>
 
-#include "arch/spiderweb_arch.hpp"
+#include "spiderweb/arch/spiderweb_arch.hpp"
 #include "spiderweb/ppk_assert.h"
 
 namespace spiderweb {

@@ -1,6 +1,6 @@
 #include "benchmark/benchmark.h"
-#include "spiderweb_eventloop.h"
-#include "spiderweb_timer.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_timer.h"
 
 static void BM_TimerAdd(benchmark::State &state) {
   spiderweb::EventLoop loop;

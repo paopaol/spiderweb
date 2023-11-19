@@ -2,8 +2,6 @@
 
 #include <gmock/gmock-matchers.h>
 
-#include "core/spiderweb_eventloop.h"
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 TEST(spiderweb_BinaryWriter, Size) {

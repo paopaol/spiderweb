@@ -1,5 +1,5 @@
 #include "benchmark/benchmark.h"
-#include "spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
 
 class MyObject : public spiderweb::Object {
  public:

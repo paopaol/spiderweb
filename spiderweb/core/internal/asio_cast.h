@@ -1,8 +1,8 @@
 #pragma once
 
 #include "asio/io_service.hpp"
-#include "core/spiderweb_object.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_object.h"
 
 namespace spiderweb {
 inline asio::io_service& AsioService(EventLoop* loop) {

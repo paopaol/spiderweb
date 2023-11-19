@@ -5,9 +5,9 @@
 
 #include "asio.hpp"
 #include "core/internal/asio_cast.h"
-#include "core/spiderweb_eventloop.h"
-#include "reflect/reflect_enum.hpp"
 #include "spdlog/spdlog.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
+#include "spiderweb/reflect/reflect_enum.hpp"
 #include "spiderweb/serial/spiderweb_serialport.h"
 
 REFLECT_ENUM(spiderweb::serial::StopBits, asio::serial_port::stop_bits::type,

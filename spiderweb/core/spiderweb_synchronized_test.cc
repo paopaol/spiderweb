@@ -1,4 +1,4 @@
-#include "spiderweb_synchronized.h"
+#include "spiderweb/core/spiderweb_synchronized.h"
 
 #include <thread>
 #include <vector>

@@ -1,7 +1,7 @@
-#include "spiderweb_object.h"
+#include "spiderweb/core/spiderweb_object.h"
 
-#include "core/spiderweb_eventloop.h"
 #include "gtest/gtest.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
 
 class Sender : public spiderweb::Object {
  public:

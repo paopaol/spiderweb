@@ -4,8 +4,8 @@
 #include <system_error>
 
 #include "spiderweb/core/spiderweb_notify.h"
-#include "core/spiderweb_object.h"
-#include "io/spiderweb_buffer.h"
+#include "spiderweb/core/spiderweb_object.h"
+#include "spiderweb/io/spiderweb_buffer.h"
 
 namespace spiderweb {
 

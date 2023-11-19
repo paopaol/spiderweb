@@ -1,4 +1,4 @@
-#include "spiderweb_buffer.h"
+#include "spiderweb/io/spiderweb_buffer.h"
 
 #include <cassert>
 

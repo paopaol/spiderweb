@@ -3,8 +3,8 @@
 
 #include <system_error>
 
-#include "io/spiderweb_buffer.h"
 #include "spiderweb/core/spiderweb_object.h"
+#include "spiderweb/io/spiderweb_buffer.h"
 
 namespace spiderweb {
 

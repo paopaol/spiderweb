@@ -1,7 +1,7 @@
-#include "spiderweb_timer.h"
+#include "spiderweb/core/spiderweb_timer.h"
 
 #include "gtest/gtest.h"
-#include "spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
 
 spiderweb::EventLoop *g_loop = nullptr;
 

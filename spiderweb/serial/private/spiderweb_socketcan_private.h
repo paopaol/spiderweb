@@ -9,11 +9,11 @@
 #include "canary/isotp.hpp"
 #include "canary/raw.hpp"
 #include "canary/socket_options.hpp"
-#include "core/spiderweb_eventloop.h"
-#include "io/spiderweb_buffer.h"
 #include "spdlog/spdlog.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
+#include "spiderweb/io/spiderweb_buffer.h"
 #include "spiderweb/serial/spiderweb_socketcan.h"
-#include "type/spiderweb_binary_view.h"
+#include "spiderweb/type/spiderweb_binary_view.h"
 
 namespace spiderweb {
 namespace serial {

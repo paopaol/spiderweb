@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "spiderweb/arch/spiderweb_arch.hpp"
+#include "arch/spiderweb_arch.hpp"
 
 namespace spiderweb {
 namespace io {

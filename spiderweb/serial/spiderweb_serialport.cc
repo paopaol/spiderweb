@@ -1,8 +1,8 @@
-#include "spiderweb_serialport.h"
+#include "spiderweb/serial/spiderweb_serialport.h"
 
-#include "core/internal/thread_check.h"
 #include "io/private/spiderweb_stream_private.h"
 #include "private/spiderweb_serialport_private.h"
+#include "spiderweb/core/internal/thread_check.h"
 
 namespace spiderweb {
 namespace serial {

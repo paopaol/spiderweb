@@ -1,6 +1,5 @@
-#include "asio.hpp"
-#include "core/internal/thread_check.h"
 #include "io/private/spiderweb_stream_private.h"
+#include "spiderweb/core/internal/thread_check.h"
 #include "spiderweb/io/private/spiderweb_named_pipe_private.h"
 
 namespace spiderweb {

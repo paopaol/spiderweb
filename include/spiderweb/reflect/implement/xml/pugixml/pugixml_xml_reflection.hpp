@@ -4,7 +4,8 @@
 #include <string>
 
 #include "pugixml.hpp"
-#include "spiderweb/reflect/reflect_xml.hpp"
+#include "reflect/reflect_enum.hpp"
+#include "reflect/reflect_xml.hpp"
 
 namespace spiderweb {
 namespace reflect {

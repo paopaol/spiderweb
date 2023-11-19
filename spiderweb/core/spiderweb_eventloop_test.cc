@@ -1,8 +1,8 @@
-#include "core/spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
 
 #include "absl/memory/memory.h"
-#include "core/spiderweb_timer.h"
 #include "gtest/gtest.h"
+#include "spiderweb/core/spiderweb_timer.h"
 
 TEST(spiderweb_EventLoop, construct) {
   spiderweb::EventLoop loop;

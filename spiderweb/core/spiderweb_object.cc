@@ -1,10 +1,10 @@
-#include "spiderweb_object.h"
+#include "spiderweb/core/spiderweb_object.h"
 
 #include <thread>
 
 #include "core/internal/asio_cast.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_timer.h"
-#include "spiderweb_eventloop.h"
 
 namespace spiderweb {
 namespace detail {

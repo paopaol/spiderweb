@@ -1,7 +1,7 @@
-#include "spiderweb_timer.h"
+#include "spiderweb/core/spiderweb_timer.h"
 
 #include "asio/steady_timer.hpp"
-#include "core/internal/asio_cast.h"
+#include "spiderweb/core/internal/asio_cast.h"
 
 namespace spiderweb {
 class Timer::Private {

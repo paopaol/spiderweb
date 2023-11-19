@@ -2,7 +2,7 @@
 #define SPIDERWEB_TCP_SERVER_H
 
 #include "spiderweb/core/spiderweb_notify.h"
-#include "core/spiderweb_object.h"
+#include "spiderweb/core/spiderweb_object.h"
 
 namespace spiderweb {
 namespace net {

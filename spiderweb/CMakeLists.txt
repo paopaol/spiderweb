@@ -2,54 +2,55 @@ add_library(spiderweb SHARED)
 
 target_sources(
   spiderweb
-  PRIVATE core/spiderweb_error_code.cc
-          core/spiderweb_error_code.h
-          core/spiderweb_notify_spy.h
-          core/spiderweb_notify_spy.cc
-          core/spiderweb_notify.h
-          core/spiderweb_eventloop.cc
-          core/spiderweb_eventloop.h
-          core/spiderweb_object.cc
-          core/spiderweb_object.h
-          core/spiderweb_timer.cc
-          core/spiderweb_timer.h
-          core/spiderweb_waiter.cc
-          core/spiderweb_waiter.h
-          core/spiderweb_thread.cc
-          core/spiderweb_thread.h
-          core/spiderweb_thread_data.h
-          core/spiderweb_unbounded_queue.h
-          core/spiderweb_range.h
-          core/spiderweb_synchronized.h
-          core/spiderweb_signal.cc
-          core/spiderweb_signal.h
-          arch/spiderweb_arch.hpp
-          io/spiderweb_binary_writer.hpp
-          io/spiderweb_buffer.cc
-          io/spiderweb_buffer.h
-          io/spiderweb_bitmap_readwriter.h
-          io/spiderweb_named_pipe.cc
-          io/spiderweb_named_pipe.h
-          net/spiderweb_tcp_socket.cc
-          net/spiderweb_tcp_socket.h
-          net/spiderweb_tcp_server.cc
-          net/spiderweb_tcp_server.h
-          serial/spiderweb_serialport.cc
-          serial/spiderweb_serialport.h
-          serial/spiderweb_socketcan.h
-          serial/spiderweb_socketcan.cc
-          reflect/reflect_enum.hpp
-          reflect/reflect_json.hpp
-          reflect/reflect_xml.hpp
-          reflect/macro_map.h
-          type/spiderweb_any_view.h
-          type/spiderweb_binary_view.h
-          type/spiderweb_variant.h
-          type/spiderweb_variant.cc
-  PRIVATE core/internal/index_sequence.hpp
-          core/internal/thread_check.h
-          core/internal/move_tuple_wrapper.h
-          io/private/spiderweb_stream_private.h
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_error_code.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_notify_spy.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_notify.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_eventloop.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_object.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_timer.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_waiter.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_thread.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_thread_data.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_unbounded_queue.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_range.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_synchronized.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_signal.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_binary_writer.hpp
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_buffer.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_bitmap_readwriter.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_named_pipe.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_socket.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_server.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_serialport.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_socketcan.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/reflect_enum.hpp
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/reflect_json.hpp
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/reflect_xml.hpp
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/macro_map.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/type/spiderweb_any_view.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/type/spiderweb_binary_view.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/type/spiderweb_variant.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/arch/spiderweb_arch.hpp
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/internal/index_sequence.hpp
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/internal/thread_check.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/internal/move_tuple_wrapper.h
+    core/spiderweb_error_code.cc
+    core/spiderweb_notify_spy.cc
+    core/spiderweb_eventloop.cc
+    core/spiderweb_object.cc
+    core/spiderweb_timer.cc
+    core/spiderweb_waiter.cc
+    core/spiderweb_thread.cc
+    core/spiderweb_signal.cc
+    io/spiderweb_buffer.cc
+    io/spiderweb_named_pipe.cc
+    net/spiderweb_tcp_socket.cc
+    net/spiderweb_tcp_server.cc
+    serial/spiderweb_serialport.cc
+    serial/spiderweb_socketcan.cc
+    type/spiderweb_variant.cc
+  PRIVATE io/private/spiderweb_stream_private.h
           io/private/spiderweb_named_pipe_private.h
           net/private/spiderweb_tcp_socket_private.h
           net/private/spiderweb_tcp_server_private.h
@@ -59,8 +60,10 @@ target_sources(
           ppk_assert.cpp)
 
 target_include_directories(
-  spiderweb PUBLIC ${PROJECT_SOURCE_DIR}/thrd/asio-1.22.1/include
-                   ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR})
+  spiderweb
+  PUBLIC ${PROJECT_SOURCE_DIR}/thrd/asio-1.22.1/include
+         ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}
+         ${PROJECT_SOURCE_DIR}/include)
 # we do not use any bosst components
 target_compile_definitions(
   spiderweb
@@ -120,8 +123,7 @@ target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 
 # benchmark
 add_executable(spiderweb_benchmark)
-target_sources(
-  spiderweb_benchmark PRIVATE core/spiderweb_notify_benchmark.cc
-                              core/spiderweb_timer_benchmark.cc)
+target_sources(spiderweb_benchmark PRIVATE core/spiderweb_notify_benchmark.cc
+                                           core/spiderweb_timer_benchmark.cc)
 target_link_libraries(spiderweb_benchmark PRIVATE spiderweb benchmark
                                                   benchmark_main)

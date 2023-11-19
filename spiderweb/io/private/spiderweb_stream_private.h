@@ -4,10 +4,10 @@
 #include <type_traits>
 
 #include "asio.hpp"
-#include "core/spiderweb_eventloop.h"
-#include "core/spiderweb_traits.h"
-#include "io/spiderweb_buffer.h"
 #include "spdlog/spdlog.h"
+#include "spiderweb/core/spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_traits.h"
+#include "spiderweb/io/spiderweb_buffer.h"
 
 namespace spiderweb {
 namespace io {

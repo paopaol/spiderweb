@@ -1,11 +1,11 @@
-#include "spiderweb_socketcan.h"
+#include "spiderweb/serial/spiderweb_socketcan.h"
 
 #include "absl/memory/memory.h"
 #include "core/internal/asio_cast.h"
-#include "core/internal/thread_check.h"
 #include "io/private/spiderweb_stream_private.h"
 #include "private/spiderweb_socketcan_private.h"
 #include "spdlog/fmt/bin_to_hex.h"
+#include "spiderweb/core/internal/thread_check.h"
 
 namespace spiderweb {
 namespace serial {
@@ -33,8 +33,7 @@ void SocketCan::Open(const std::string &can, SocketCanType type) {
   switch (d->impl.type) {
     case SocketCanType::kRaw: {
       auto const ep = canary::raw::endpoint{idx};
-      d->impl.raw_sock =
-          absl::make_unique<canary::raw::socket>(AsioService(ownerEventLoop()), ep);
+      d->impl.raw_sock = absl::make_unique<canary::raw::socket>(AsioService(ownerEventLoop()), ep);
       d->impl.raw_sock->set_option(canary::filter_if_any(&filter, 1));
       d->StartOpenEx(*d->impl.raw_sock, false, ec);
     } break;

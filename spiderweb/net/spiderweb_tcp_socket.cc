@@ -1,12 +1,9 @@
-#include "spiderweb_tcp_socket.h"
+#include "spiderweb/net/spiderweb_tcp_socket.h"
 
-#include <thread>
-
-#include "core/internal/thread_check.h"
 #include "io/private/spiderweb_stream_private.h"
 #include "net/private/spiderweb_tcp_socket_private.h"
-#include "spiderweb/io/spiderweb_buffer.h"
-#include "spiderweb_tcp_server.h"
+#include "spiderweb/core/internal/thread_check.h"
+#include "spiderweb/net/spiderweb_tcp_server.h"
 
 namespace spiderweb {
 namespace net {

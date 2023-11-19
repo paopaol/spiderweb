@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "absl/types/any.h"
-#include "core/spiderweb_object.h"
 #include "spiderweb/core/spiderweb_notify.h"
+#include "spiderweb/core/spiderweb_object.h"
 
 namespace spiderweb {
 
