@@ -8,7 +8,7 @@
 namespace spiderweb {
 
 // template <typename Prototype_, typename... Args>
-// class EventSignal : protected eventpp::CallbackList<Prototype_> {
+// class Notify : protected eventpp::CallbackList<Prototype_> {
 //  public:
 //   using super = eventpp::CallbackList<Prototype_, eventpp::DefaultPolicies>;
 //
@@ -27,10 +27,10 @@ namespace spiderweb {
 // };
 
 template <typename Ret, typename... Args>
-class EventSignal;
+class Notify;
 
 template <typename Ret, typename... Args>
-class EventSignal<Ret(Args...)> {
+class Notify<Ret(Args...)> {
  public:
   template <typename... Fargs>
   void operator()(Fargs &&...args) const {
@@ -40,7 +40,7 @@ class EventSignal<Ret(Args...)> {
   }
 
   void append(std::function<Ret(Args...)> &&f) {
-    assert(!f_ && "EventSignal only support append once");
+    assert(!f_ && "Notify only support append once");
     f_ = std::forward<decltype(f)>(f);
   }
 

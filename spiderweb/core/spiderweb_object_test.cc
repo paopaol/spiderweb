@@ -13,7 +13,7 @@ class Sender : public spiderweb::Object {
     std::cout << "Sender deleted" << std::endl;
   }
 
-  spiderweb::EventSignal<void()> a_event;
+  spiderweb::Notify<void()> a_event;
 };
 
 TEST(spiderweb_object, DeleteLater) {

@@ -28,13 +28,13 @@ class NamedPipe : public Object {
 
   void Write(const std::vector<uint8_t> &data);
 
-  EventSignal<void()> OpenSuccess;
+  Notify<void()> OpenSuccess;
 
-  EventSignal<void(const std::error_code &ec)> Error;
+  Notify<void(const std::error_code &ec)> Error;
 
-  EventSignal<void(const io::BufferReader &buffer)> BytesRead;
+  Notify<void(const io::BufferReader &buffer)> BytesRead;
 
-  EventSignal<void(std::size_t n)> BytesWritten;
+  Notify<void(std::size_t n)> BytesWritten;
 
  private:
   std::shared_ptr<io::IoPrivate<Private>> d;

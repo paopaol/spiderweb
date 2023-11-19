@@ -3,10 +3,10 @@
 
 class MyObject : public spiderweb::Object {
  public:
-  spiderweb::EventSignal<void(const std::string& a, int b, float c)> voidEvent;
+  spiderweb::Notify<void(const std::string& a, int b, float c)> voidEvent;
 };
 
-static void BM_EventSignalConnectLambda(benchmark::State& state) {
+static void BM_NotifyConnectLambda(benchmark::State& state) {
   spiderweb::EventLoop loop;
   MyObject             obj;
 
@@ -16,9 +16,9 @@ static void BM_EventSignalConnectLambda(benchmark::State& state) {
     spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &loop, f);
   }
 }
-BENCHMARK(BM_EventSignalConnectLambda);
+BENCHMARK(BM_NotifyConnectLambda);
 
-static void BM_EventSignalConnectClassMethod(benchmark::State& state) {
+static void BM_NotifyConnectClassMethod(benchmark::State& state) {
   spiderweb::EventLoop loop;
   MyObject             obj;
 
@@ -38,9 +38,9 @@ static void BM_EventSignalConnectClassMethod(benchmark::State& state) {
     spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &reciver, &Struct::myslot);
   }
 }
-BENCHMARK(BM_EventSignalConnectClassMethod);
+BENCHMARK(BM_NotifyConnectClassMethod);
 
-static void BM_EventSignalCall(benchmark::State& state) {
+static void BM_NotifyCall(benchmark::State& state) {
   spiderweb::EventLoop loop;
   MyObject             obj;
 
@@ -52,7 +52,7 @@ static void BM_EventSignalCall(benchmark::State& state) {
     obj.voidEvent("123", 2, static_cast<float>(3.33));
   }
 }
-BENCHMARK(BM_EventSignalCall);
+BENCHMARK(BM_NotifyCall);
 
 static void BM_CallDirectly(benchmark::State& state) {
   uint64_t                                                  called = 0;
