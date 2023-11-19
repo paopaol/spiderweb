@@ -124,9 +124,9 @@ class XmlBuilder {
   std::shared_ptr<Private> d;
 };
 
-using PugiXmlReader = reflect::XmlReader<reflect::XmlNode, reflect::XmlBuilder>;
+using XmlDocumentReader = reflect::XmlReader<reflect::XmlNode, reflect::XmlBuilder>;
 
-using PugiXmlWriter = reflect::XmlWriter<reflect::XmlNode, reflect::XmlBuilder>;
+using XmlDocumentWriter = reflect::XmlWriter<reflect::XmlNode, reflect::XmlBuilder>;
 
 }  // namespace reflect
 }  // namespace spiderweb

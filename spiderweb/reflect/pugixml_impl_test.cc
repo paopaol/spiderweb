@@ -53,7 +53,7 @@ TEST(pugixml_impl, FromXml) {
 
   People people;
 
-  spiderweb::reflect::PugiXmlReader reader(xml, strlen(xml));
+  spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
 
   reader.Read("people", people);
   EXPECT_EQ(people.address, 345);
@@ -66,7 +66,7 @@ TEST(pugixml_impl, FromXml) {
 TEST(pugixml_impl, FromXmlInnerHtml) {
   static const char *xml = R"(<address>345</address>)";
 
-  spiderweb::reflect::PugiXmlReader reader(xml, strlen(xml));
+  spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
 
   int64_t value;
   reader.Read(value);
@@ -84,7 +84,7 @@ TEST(pugixml_impl, FromXmlInnerHtmlArray) {
   </root>
   )";
 
-  spiderweb::reflect::PugiXmlReader reader(xml, strlen(xml));
+  spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
 
   std::vector<int64_t> values;
   reader.Read("address", values, "root", "address_list");
@@ -108,7 +108,7 @@ TEST(pugixml_impl, FromXmlArray) {
 </root>
   )";
 
-  spiderweb::reflect::PugiXmlReader reader(xml, strlen(xml));
+  spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
 
   std::vector<People> peoples;
   reader.Read("people", peoples, "root");
@@ -131,7 +131,7 @@ TEST(pugixml_impl, FromXmlByIndex) {
 </root>
   )";
 
-  spiderweb::reflect::PugiXmlReader reader(xml, strlen(xml));
+  spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
 
   People people;
   reader.Read("people", people, 1, "root");
@@ -139,7 +139,7 @@ TEST(pugixml_impl, FromXmlByIndex) {
 }
 
 TEST(pugixml_impl, WriteStruct) {
-  spiderweb::reflect::PugiXmlWriter writer;
+  spiderweb::reflect::XmlDocumentWriter writer;
 
   People people;
 
@@ -158,7 +158,7 @@ TEST(pugixml_impl, WriteStruct) {
 }
 
 TEST(pugixml_impl, WriteSimpleBool) {
-  spiderweb::reflect::PugiXmlWriter writer;
+  spiderweb::reflect::XmlDocumentWriter writer;
 
   int bool_value = false;
   writer.Write("bool", bool_value);
@@ -167,7 +167,7 @@ TEST(pugixml_impl, WriteSimpleBool) {
 }
 
 TEST(pugixml_impl, WriteSimpleInt) {
-  spiderweb::reflect::PugiXmlWriter writer;
+  spiderweb::reflect::XmlDocumentWriter writer;
 
   int int_value = 123;
   writer.Write("int", int_value);
@@ -176,7 +176,7 @@ TEST(pugixml_impl, WriteSimpleInt) {
 }
 
 TEST(pugixml_impl, WriteSimpleArrayInt) {
-  spiderweb::reflect::PugiXmlWriter writer;
+  spiderweb::reflect::XmlDocumentWriter writer;
 
   // or list
   std::vector<int> values({1, 2, 3, 4});
@@ -187,7 +187,7 @@ TEST(pugixml_impl, WriteSimpleArrayInt) {
 }
 
 TEST(pugixml_impl, WriteComplexdArray) {
-  spiderweb::reflect::PugiXmlWriter writer;
+  spiderweb::reflect::XmlDocumentWriter writer;
 
   // or list
   std::vector<People> peoples;
@@ -230,7 +230,7 @@ TEST(pugixml_impl, FromXmlSharedPtr) {
   </people>
   )";
 
-  spiderweb::reflect::PugiXmlReader reader(xml, strlen(xml));
+  spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
 
   std::shared_ptr<People> people;
   reader.Read("people", people);
@@ -245,7 +245,7 @@ TEST(pugixml_impl, FromXmlSharedPtr) {
 }
 
 TEST(pugixml_impl, WriteComplexdArraySharedPtr) {
-  spiderweb::reflect::PugiXmlWriter writer;
+  spiderweb::reflect::XmlDocumentWriter writer;
 
   // or list
   std::vector<std::shared_ptr<People>> peoples;
@@ -318,7 +318,7 @@ TEST(pugixml_impl, WriteNodeTree) {
   root->right = std::make_shared<Node>();
   root->right->value = 6;
 
-  spiderweb::reflect::PugiXmlWriter writer;
+  spiderweb::reflect::XmlDocumentWriter writer;
   writer.Write("rootNode", root);
   std::cout << writer.ToString() << '\n';
 }
@@ -338,7 +338,7 @@ TEST(pugixml_impl, ReadNodeTree) {
 
   std::shared_ptr<Node> tree;
 
-  spiderweb::reflect::PugiXmlReader reader(xml, strlen(xml));
+  spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
   reader.Read("rootNode", tree);
 
   EXPECT_TRUE(tree != nullptr);
