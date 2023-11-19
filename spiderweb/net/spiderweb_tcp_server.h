@@ -1,7 +1,7 @@
 #ifndef SPIDERWEB_TCP_SERVER_H
 #define SPIDERWEB_TCP_SERVER_H
 
-#include "core/spiderweb_eventsignal.h"
+#include "spiderweb/core/spiderweb_notify.h"
 #include "core/spiderweb_object.h"
 
 namespace spiderweb {

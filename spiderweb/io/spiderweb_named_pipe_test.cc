@@ -3,14 +3,14 @@
 #include "absl/types/variant.h"
 #include "fmt/format.h"
 #include "gtest/gtest.h"
-#include "spiderweb/core/spiderweb_event_spy.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_notify_spy.h"
 
 TEST(NamedPipe, Open) {
   spiderweb::EventLoop loop;
 
   spiderweb::NamedPipe pipe("/tmp/testp");
-  spiderweb::EventSpy  spy(&pipe, &spiderweb::NamedPipe::OpenSuccess);
+  spiderweb::NotifySpy spy(&pipe, &spiderweb::NamedPipe::OpenSuccess);
 
   pipe.Open();
 

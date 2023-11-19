@@ -1,14 +1,13 @@
-#include "core/spiderweb_event_spy.h"
-
 #include "core/spiderweb_eventloop.h"
 #include "core/spiderweb_timer.h"
 #include "gtest/gtest.h"
+#include "spiderweb/core/spiderweb_notify_spy.h"
 
-TEST(spiderweb_event_spy, capture) {
+TEST(spiderweb_notify_spy, capture) {
   spiderweb::EventLoop loop;
   spiderweb::Timer     timer;
 
-  spiderweb::EventSpy spy(&timer, &spiderweb::Timer::timeout);
+  spiderweb::NotifySpy spy(&timer, &spiderweb::Timer::timeout);
 
   timer.Start();
   spy.Wait();

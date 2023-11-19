@@ -4,9 +4,9 @@ target_sources(
   spiderweb
   PRIVATE core/spiderweb_error_code.cc
           core/spiderweb_error_code.h
-          core/spiderweb_event_spy.h
-          core/spiderweb_event_spy.cc
-          core/spiderweb_eventsignal.h
+          core/spiderweb_notify_spy.h
+          core/spiderweb_notify_spy.cc
+          core/spiderweb_notify.h
           core/spiderweb_eventloop.cc
           core/spiderweb_eventloop.h
           core/spiderweb_object.cc
@@ -98,7 +98,7 @@ target_sources(
           core/spiderweb_object_test.cc
           core/spiderweb_timer_test.cc
           core/spiderweb_eventloop_test.cc
-          core/spiderweb_event_spy_test.cc
+          core/spiderweb_notify_spy_test.cc
           core/spiderweb_waiter_test.cc
           core/spiderweb_thread_test.cc
           core/spiderweb_thread_data_test.cc
@@ -121,7 +121,7 @@ target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
 # benchmark
 add_executable(spiderweb_benchmark)
 target_sources(
-  spiderweb_benchmark PRIVATE core/spiderweb_eventsignal_benchmark.cc
+  spiderweb_benchmark PRIVATE core/spiderweb_notify_benchmark.cc
                               core/spiderweb_timer_benchmark.cc)
 target_link_libraries(spiderweb_benchmark PRIVATE spiderweb benchmark
                                                   benchmark_main)

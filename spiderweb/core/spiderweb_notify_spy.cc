@@ -1,9 +1,9 @@
-﻿#include "spiderweb/core/spiderweb_event_spy.h"
+﻿#include "spiderweb/core/spiderweb_notify_spy.h"
 
 #include "core/internal/asio_cast.h"
 
 namespace spiderweb {
-void EventSpy::Wait(int ms, uint64_t count) {
+void NotifySpy::Wait(int ms, uint64_t count) {
   auto left = ms;
 
   do {

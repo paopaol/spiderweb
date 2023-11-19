@@ -2,7 +2,7 @@
 
 #include <future>
 
-#include "core/spiderweb_eventsignal.h"
+#include "spiderweb/core/spiderweb_notify.h"
 #include "core/spiderweb_object.h"
 
 namespace spiderweb {

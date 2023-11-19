@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "internal/move_tuple_wrapper.h"
-#include "spiderweb_eventsignal.h"
+#include "spiderweb/core/spiderweb_notify.h"
 
 #define SPIDER_EMIT
 #ifndef SPIDERWEB_NO_EMIT

@@ -83,7 +83,7 @@ TEST(spiderweb_tcp_socket, ConnectToHostSuccess) {
   spiderweb::EventLoop loop;
   MockSocket           mocker(loop);
 
-  spiderweb::EventSpy spy(&mocker.socket, &spiderweb::net::TcpSocket::ConnectionEstablished);
+  spiderweb::NotifySpy spy(&mocker.socket, &spiderweb::net::TcpSocket::ConnectionEstablished);
 
   mocker.SimulateConnectSuccess();
   mocker.ShouldCallReadWhenConnectSuccess();
@@ -97,7 +97,7 @@ TEST(spiderweb_tcp_socket, ConnectToHostFailed_ConnectionRefused) {
   spiderweb::EventLoop loop;
   MockSocket           mocker(loop);
 
-  spiderweb::EventSpy spy(&mocker.socket, &spiderweb::net::TcpSocket::Error);
+  spiderweb::NotifySpy spy(&mocker.socket, &spiderweb::net::TcpSocket::Error);
 
   mocker.SimulateConnectFailed(asio::error::connection_refused);
 
@@ -113,7 +113,7 @@ TEST(spiderweb_tcp_socket, CloseConnectingSocket) {
   spiderweb::EventLoop loop;
   MockSocket           mocker(loop);
 
-  spiderweb::EventSpy spy(&mocker.socket, &spiderweb::net::TcpSocket::Error);
+  spiderweb::NotifySpy spy(&mocker.socket, &spiderweb::net::TcpSocket::Error);
 
   mocker.SimulateConnectFailed(asio::error::connection_aborted);
 
@@ -132,8 +132,8 @@ TEST(spiderweb_tcp_socket, WriteSuccess) {
   spiderweb::EventLoop loop;
   MockSocket           mocker(loop);
 
-  spiderweb::EventSpy spy(&mocker.socket, &spiderweb::net::TcpSocket::BytesWritten);
-  spiderweb::EventSpy on_conn(&mocker.socket, &spiderweb::net::TcpSocket::ConnectionEstablished);
+  spiderweb::NotifySpy spy(&mocker.socket, &spiderweb::net::TcpSocket::BytesWritten);
+  spiderweb::NotifySpy on_conn(&mocker.socket, &spiderweb::net::TcpSocket::ConnectionEstablished);
 
   mocker.SimulateConnectSuccess();
   mocker.ShouldCallReadWhenConnectSuccess();
@@ -155,8 +155,8 @@ TEST(spiderweb_tcp_socket, MultiWrite) {
   spiderweb::EventLoop loop;
   MockSocket           mocker(loop);
 
-  spiderweb::EventSpy spy(&mocker.socket, &spiderweb::net::TcpSocket::BytesWritten);
-  spiderweb::EventSpy on_conn(&mocker.socket, &spiderweb::net::TcpSocket::ConnectionEstablished);
+  spiderweb::NotifySpy spy(&mocker.socket, &spiderweb::net::TcpSocket::BytesWritten);
+  spiderweb::NotifySpy on_conn(&mocker.socket, &spiderweb::net::TcpSocket::ConnectionEstablished);
 
   mocker.SimulateConnectSuccess();
   mocker.ShouldCallReadWhenConnectSuccess();
@@ -197,7 +197,7 @@ TEST(spiderweb_tcp_socket, ReadSuccess) {
   spiderweb::EventLoop loop;
   MockSocket           mocker(loop);
 
-  spiderweb::EventSpy spy(&mocker.socket, &spiderweb::net::TcpSocket::BytesRead);
+  spiderweb::NotifySpy spy(&mocker.socket, &spiderweb::net::TcpSocket::BytesRead);
 
   mocker.SimulateConnectSuccess();
   EXPECT_CALL(mocker.stream, async_read_some(_, _))
@@ -234,7 +234,7 @@ TEST(spiderweb_tcp_socket, ReadFailed) {
   spiderweb::EventLoop loop;
   MockSocket           mocker(loop);
 
-  spiderweb::EventSpy spy(&mocker.socket, &spiderweb::net::TcpSocket::Error);
+  spiderweb::NotifySpy spy(&mocker.socket, &spiderweb::net::TcpSocket::Error);
 
   mocker.SimulateConnectSuccess();
   EXPECT_CALL(mocker.stream, async_read_some(_, _))
@@ -255,7 +255,7 @@ TEST(spiderweb_tcp_socket, WriteClosedSocket) {
 
   spiderweb::net::TcpSocket socket;
 
-  spiderweb::EventSpy spy(&socket, &spiderweb::net::TcpSocket::Error);
+  spiderweb::NotifySpy spy(&socket, &spiderweb::net::TcpSocket::Error);
 
   std::vector<uint8_t> data{0x30, 0x31, 0x32, 0x33, 0x34};
   socket.Write(data.data(), data.size());
@@ -271,8 +271,8 @@ TEST(spiderweb_tcp_socket, WriteClosedSocket) {
 TEST(spiderweb_tcp_socket, SafeDelete1) {
   spiderweb::EventLoop loop;
 
-  auto               *socket = new spiderweb::net::TcpSocket;
-  spiderweb::EventSpy spy(socket, &spiderweb::net::TcpSocket::Error);
+  auto                *socket = new spiderweb::net::TcpSocket;
+  spiderweb::NotifySpy spy(socket, &spiderweb::net::TcpSocket::Error);
 
   std::vector<uint8_t> data{0x30, 0x31, 0x32, 0x33, 0x34};
 
@@ -306,7 +306,7 @@ TEST(spiderweb_tcp_socket, SafeDelete) {
   spiderweb::EventLoop loop;
   auto                *mocker = new MockSocket(loop);
 
-  spiderweb::EventSpy spy(&mocker->socket, &spiderweb::net::TcpSocket::Error);
+  spiderweb::NotifySpy spy(&mocker->socket, &spiderweb::net::TcpSocket::Error);
 
   std::vector<uint8_t> data{0x30, 0x31, 0x32, 0x33, 0x34};
 

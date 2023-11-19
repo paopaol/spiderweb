@@ -3,7 +3,7 @@
 
 #include <system_error>
 
-#include "core/spiderweb_eventsignal.h"
+#include "spiderweb/core/spiderweb_notify.h"
 #include "core/spiderweb_object.h"
 #include "io/spiderweb_buffer.h"
 

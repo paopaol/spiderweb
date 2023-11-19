@@ -1,9 +1,8 @@
-#ifndef SPIDERWEB_EVENTSIGNAL_H
-#define SPIDERWEB_EVENTSIGNAL_H
+#ifndef SPIDERWEB_NOTIFY_H
+#define SPIDERWEB_NOTIFY_H
 
 #include <cassert>
 #include <functional>
-#include <memory>
 
 namespace spiderweb {
 

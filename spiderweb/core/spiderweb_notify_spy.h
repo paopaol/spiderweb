@@ -1,20 +1,20 @@
-﻿#ifndef SPIDERWEB_EVENT_SPY_H
-#define SPIDERWEB_EVENT_SPY_H
+﻿#ifndef SPIDERWEB_NOTIFY_SPY_H
+#define SPIDERWEB_NOTIFY_SPY_H
 
 #include <vector>
 
 #include "absl/types/any.h"
-#include "core/spiderweb_eventsignal.h"
 #include "core/spiderweb_object.h"
+#include "spiderweb/core/spiderweb_notify.h"
 
 namespace spiderweb {
 
-class EventSpy : public Object {
+class NotifySpy : public Object {
  public:
-  explicit EventSpy(Object *loop);
+  explicit NotifySpy(Object *loop);
 
   template <typename T, typename T2, typename... Args>
-  explicit EventSpy(T *instance, Notify<Args...> T2::*event) {
+  explicit NotifySpy(T *instance, Notify<Args...> T2::*event) {
     Object::Connect(instance, event, instance, [this](Args... args) {
       ++count_;
       std::tuple<decay_t<Args>...> t(std::forward<Args>(args)...);

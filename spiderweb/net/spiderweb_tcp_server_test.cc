@@ -4,7 +4,7 @@
 #include "core/spiderweb_eventloop.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "spiderweb/core/spiderweb_event_spy.h"
+#include "spiderweb/core/spiderweb_notify_spy.h"
 #include "spiderweb/net/private/spiderweb_tcp_server_private.h"
 #include "spiderweb/net/spiderweb_tcp_socket.h"
 
@@ -60,7 +60,7 @@ TEST(spiderweb_tcp_server, AcceptFailed) {
   spiderweb::EventLoop loop;
   MockTcpServer        mocker(loop);
 
-  spiderweb::EventSpy spy(&mocker.server, &spiderweb::net::TcpServer::InComingConnection);
+  spiderweb::NotifySpy spy(&mocker.server, &spiderweb::net::TcpServer::InComingConnection);
 
   EXPECT_CALL(mocker.acceptor, async_accept(_, _))
       .WillOnce([&](asio::ip::tcp::socket & /*socket*/, tcp_acceptor::AcceptHandler &&handler) {

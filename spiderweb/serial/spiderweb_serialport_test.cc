@@ -2,8 +2,8 @@
 
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
-#include "spiderweb/core/spiderweb_event_spy.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
+#include "spiderweb/core/spiderweb_notify_spy.h"
 
 class SerialPortTest : public testing::Test {};
 
@@ -13,7 +13,7 @@ TEST_F(SerialPortTest, Construct) {
   spiderweb::EventLoop          loop;
   spiderweb::serial::SerialPort serial;
 
-  spiderweb::EventSpy spy(&serial, &spiderweb::serial::SerialPort::Error);
+  spiderweb::NotifySpy spy(&serial, &spiderweb::serial::SerialPort::Error);
 
   serial.Open("/dev/ttyS1");
 

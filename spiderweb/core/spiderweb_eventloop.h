@@ -1,7 +1,7 @@
 #ifndef SPIDERWEB_EVENTLOOP_H
 #define SPIDERWEB_EVENTLOOP_H
 
-#include "spiderweb_eventsignal.h"
+#include "spiderweb/core/spiderweb_notify.h"
 #include "spiderweb_object.h"
 
 #define SPIDER_EMIT
