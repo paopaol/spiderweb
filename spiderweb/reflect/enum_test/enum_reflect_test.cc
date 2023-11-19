@@ -1,5 +1,6 @@
+#include "spiderweb/reflect/enum_reflect.h"
+
 #include "gtest/gtest.h"
-#include "spiderweb/reflect/reflect_enum.hpp"
 
 enum class State {
   kGood,

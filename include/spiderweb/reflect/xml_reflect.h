@@ -5,7 +5,7 @@
 #include <string>
 #include <type_traits>
 
-#include "reflect_enum.hpp"
+#include "spiderweb/reflect/enum_reflect.h"
 
 namespace spiderweb {
 namespace reflect {

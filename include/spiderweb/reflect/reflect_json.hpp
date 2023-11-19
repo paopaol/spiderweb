@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "reflect_enum.hpp"
+#include "spiderweb/reflect/enum_reflect.h"
 #include "unordered_map"
 
 namespace spiderweb {

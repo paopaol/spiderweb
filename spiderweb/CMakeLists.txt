@@ -24,7 +24,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_server.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_serialport.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_socketcan.h
-    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/reflect_enum.hpp
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/enum_reflect.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/reflect_json.hpp
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/xml_reflect.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/xml_node.h

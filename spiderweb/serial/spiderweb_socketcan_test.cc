@@ -1,26 +1,8 @@
 #include "spiderweb/serial/spiderweb_socketcan.h"
 
 #include <spiderweb/io/spiderweb_binary_writer.hpp>
-#include <thread>
 
-#include "asio/completion_condition.hpp"
-#include "asio/write.hpp"
-#include "canary/filter.hpp"
-#include "canary/frame_header.hpp"
-#include "canary/interface_index.hpp"
-#include "canary/isotp.hpp"
-#include "canary/raw.hpp"
-#include "canary/socket_options.hpp"
-#include "fmt/format.h"
-#include "gtest/gtest.h"
-#include "spdlog/common.h"
-#include "spdlog/fmt/bin_to_hex.h"
-#include "spdlog/spdlog.h"
-#include "spiderweb/core/spiderweb_eventloop.h"
-#include "spiderweb/core/spiderweb_timer.h"
-#include "spiderweb/io/spiderweb_bitmap_readwriter.h"
 #include "spiderweb/ppk_assert.h"
-#include "spiderweb/reflect/reflect_enum.hpp"
 
 // enum class CommandType {
 //   kYkSelect = 0x04,           // 遥控选择
@@ -56,7 +38,7 @@
 // };
 //
 // // clang-format off
-// REFLECT_ENUM(CommandType, int, 
+// REFLECT_ENUM(CommandType, int,
 //   (kYkSelect, 0x04),
 //   (kYkExec ,0x05),
 //   (kYkCancel ,0x06),
@@ -88,7 +70,7 @@
 //   (kWriteSingleValue ,0x97),
 //   (kUnkown ,0xff)
 // )
-// REFLECT_ENUM(CommandType, std::string, 
+// REFLECT_ENUM(CommandType, std::string,
 //   (kYkSelect, "yk-select"),
 //   (kYkExec ,"yk-exec"),
 //   (kYkCancel ,"yk-cancel"),
