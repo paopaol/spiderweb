@@ -267,6 +267,19 @@ class JsonWriter {
                       REFLECT_NUM_OF_ARGS(REFLECT_REMOVE_PARENTHESES(PAIR))) \
   PAIR
 
+#define REFLECT_JSON_READ_CODE_SIMPLE_BLOCK(member) \
+  { serilizer.FromJson(#member, &result->member); }
+
+#define reflect_json_expands_fromjson_simple(member) \
+  { serilizer.FromJson(#member, &result->member); }
+
+#define REFLECT_JSON_WRITE_CODE_SIMPLE_BLOCK(member) serilizer.ToJson(#member, &result->member);
+
+#define REFLECT_JSON_WRITE_CODE_SIMPLE_BLOCK_IMPL(member) \
+  serilizer.ToJson(#member, &result->member);
+
+#define reflect_json_expands_tojson_simple(member) serilizer.ToJson(#member, &result->member);
+
 #define REFLECT_JSON(Type, ...)                                          \
   namespace spiderweb {                                                  \
   namespace reflect {                                                    \
@@ -283,6 +296,27 @@ class JsonWriter {
     void ToJson(const struct_type *result, JsonNodeType &json) const {   \
       reflect::JsonWriter<jsonnode_type> serilizer(&json);               \
       MACRO_MAP(reflect_json_expands_tojson, __VA_ARGS__)                \
+    }                                                                    \
+  };                                                                     \
+  }                                                                      \
+  }
+
+#define REFLECT_JSON_SIMPLE(Type, ...)                                   \
+  namespace spiderweb {                                                  \
+  namespace reflect {                                                    \
+  template <typename JsonNodeType>                                       \
+  struct Meta<Type, JsonNodeType> {                                      \
+    static constexpr bool IsMeta = true;                                 \
+    using struct_type = Type;                                            \
+    using jsonnode_type = JsonNodeType;                                  \
+    bool FromJson(const JsonNodeType &json, struct_type *result) const { \
+      reflect::JsonReader<jsonnode_type> serilizer(&json);               \
+      MACRO_MAP(reflect_json_expands_fromjson_simple, __VA_ARGS__)       \
+      return true;                                                       \
+    }                                                                    \
+    void ToJson(const struct_type *result, JsonNodeType &json) const {   \
+      reflect::JsonWriter<jsonnode_type> serilizer(&json);               \
+      MACRO_MAP(reflect_json_expands_tojson_simple, __VA_ARGS__)         \
     }                                                                    \
   };                                                                     \
   }                                                                      \

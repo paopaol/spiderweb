@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "spiderweb/reflect/json_node.h"
+#include "spiderweb/reflect/json_reflect.h"
+#include "spiderweb/reflect/macro_map.h"
 
 struct Student {
   bool             bool_value;
@@ -57,8 +59,11 @@ struct TestPeople {
            stringList == other.stringList;
   }
 };
-REFLECT_JSON(TestPeople, (name, "name"), (age, "age"), (height, "height"), (intList, "intList"),
-             (stringList, "stringList"))
+
+REFLECT_JSON_SIMPLE(TestPeople, name, age, height, intList, stringList)
+// or below way
+// REFLECT_JSON(TestPeople, (name, "name"), (age, "age"), (height, "height"), (intList, "intList"),
+//              (stringList, "stringList"))
 
 struct TestPeopleList {
   std::vector<TestPeople> peoples;

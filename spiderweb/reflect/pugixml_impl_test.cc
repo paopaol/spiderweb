@@ -21,20 +21,25 @@ struct People {
   Sex         child_value_sex{Sex::kBoy};
   Sex         attr_value_sex{Sex::kBoy};
 };
-// clang-format off
 REFLECT_XML(People,
-            REFLECT_XML_ATTR(
-                (age, "age"),
-                (height, "height"),
-                (name, "name"),
-                (attri_bool_value, "attri_bool_value"),
-                (attr_value_sex, "sex", int)
-            ),
-            (address, "address"),
-            (child, "child"),
-            (child_bool_value, "child_bool_value"),
-            (child_value_sex, "sex", std::string)
-            )
+            REFLECT_XML_ATTR((age, "age"), (height, "height"), (name, "name"),
+                             (attri_bool_value, "attri_bool_value"), (attr_value_sex, "sex", int)),
+            (address, "address"), (child, "child"), (child_bool_value, "child_bool_value"),
+            (child_value_sex, "sex", std::string))
+// clang-format off
+// REFLECT_XML_SIMPLE(People,
+//             REFLECT_XML_ATTR_SIMPLE(
+//                 age,
+//                 height,
+//                 name,
+//                 attri_bool_value,
+//                 attr_value_sex
+//             ),
+//             address,
+//             child,
+//             child_bool_value,
+//             child_value_sex,  std::string)
+//             )
 // clang-format on
 
 struct PeopleList {
@@ -286,7 +291,8 @@ struct Node {
   std::shared_ptr<Node> right;
 };
 
-// REFLECT_XML(Node, REFLECT_XML_ATTR(), (value, "value"), (left, "left"), (right, "right"))
+// REFLECT_XML(Node, REFLECT_XML_ATTR(), (value, "value"), (left, "left"), (right,
+// "right"))
 namespace spiderweb {
 namespace reflect {
 template <typename T>

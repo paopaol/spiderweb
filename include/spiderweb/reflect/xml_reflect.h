@@ -405,6 +405,45 @@ class XmlWriter {
   }                                                                \
   }
 
+#define REFLECT_XML_READ_ATTRIBUTE_SIMPLE(apair)                              \
+  VISIT_STRUCT_CONCAT(REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_,                 \
+                      REFLECT_NUM_OF_ARGS(REFLECT_REMOVE_PARENTHESES(apair))) \
+  apair
+
+#define REFLECT_XML_READ_TAG_SIMPLE(apair)                                    \
+  VISIT_STRUCT_CONCAT(REFLECT_XML_READ_TAG_CODE_BLOCK_,                       \
+                      REFLECT_NUM_OF_ARGS(REFLECT_REMOVE_PARENTHESES(apair))) \
+  apair
+
+#define REFLECT_XML_WRITE_ATTRIBUTE_SIMPLE(apair)                             \
+  VISIT_STRUCT_CONCAT(REFLECT_XML_WRITE_ATTRIBUTE_CODE_BLOCK_,                \
+                      REFLECT_NUM_OF_ARGS(REFLECT_REMOVE_PARENTHESES(apair))) \
+  apair
+
+#define REFLECT_XML_WRITE_TAG_SIMPLE(apair)                                   \
+  VISIT_STRUCT_CONCAT(REFLECT_XML_WRITE_TAG_CODE_BLOCK_,                      \
+                      REFLECT_NUM_OF_ARGS(REFLECT_REMOVE_PARENTHESES(apair))) \
+  apair
+
+#define REFLECT_XML_SIMPLE(Type, ATTRS, ...)                       \
+  namespace spiderweb {                                            \
+  namespace reflect {                                              \
+  template <typename T>                                            \
+  struct XmlMeta<T, Type> {                                        \
+    using XmlValue = T;                                            \
+    using struct_type = Type;                                      \
+    static void Read(const XmlValue &node, struct_type &result) {  \
+      MACRO_MAP(REFLECT_XML_READ_ATTRIBUTE_SIMPLE, ATTRS)          \
+      MACRO_MAP(REFLECT_XML_READ_TAG_SIMPLE, __VA_ARGS__)          \
+    }                                                              \
+    static void Write(XmlValue &node, const struct_type &result) { \
+      MACRO_MAP(REFLECT_XML_WRITE_ATTRIBUTE_SIMPLE, ATTRS)         \
+      MACRO_MAP(REFLECT_XML_WRITE_TAG_SIMPLE, __VA_ARGS__)         \
+    }                                                              \
+  };                                                               \
+  }                                                                \
+  }
+
 }  // namespace reflect
 }  // namespace spiderweb
 #endif
