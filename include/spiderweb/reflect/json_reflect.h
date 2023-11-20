@@ -4,11 +4,9 @@
 #include <memory>
 
 #include "spiderweb/reflect/enum_reflect.h"
-#include "unordered_map"
 
 namespace spiderweb {
 namespace reflect {
-namespace json {
 
 template <typename T>
 struct JsonValueVisitor {
@@ -32,9 +30,9 @@ struct JsonValueVisitor {
 };
 
 template <typename T>
-struct Reader;
+class JsonReader;
 template <typename T>
-struct Writer;
+class JsonWriter;
 template <typename U, typename T>
 struct Meta;
 
@@ -138,12 +136,12 @@ struct ArrayMeta {
 
   template <typename ArrayType>
   inline bool FromJsonArray(const ArrayType &array, Cont<ValueType> *result) const {
-    const auto size = array.size();
-    result->reserve(array.size());
+    const auto size = array.Size();
+    result->reserve(size);
     for (std::size_t i = 0; i < size; ++i) {
-      const JsonType  &json = array[i];
-      Reader<JsonType> reader(&json);
-      ValueType        tmp;
+      const JsonType      &json = array[i];
+      JsonReader<JsonType> reader(&json);
+      ValueType            tmp;
       if (!reader.FromJson(&tmp)) {
         return false;
       }
@@ -163,13 +161,14 @@ template <typename ValueType, template <typename Elem> class Cont, typename Json
 struct Meta<Cont<ValueType>, JsonType> : ArrayMeta<ValueType, Cont, JsonType> {};
 
 template <typename T>
-struct Reader {
+class JsonReader {
+ public:
   using JsonType = T;
   using Visitor = JsonValueVisitor<JsonType>;
 
-  explicit Reader(const JsonType *access) : access_(access) {
+  explicit JsonReader(const JsonType *access) : access_(access) {
   }
-  ~Reader() = default;
+  ~JsonReader() = default;
 
   template <typename U>
   inline bool FromJson(U *result) const {
@@ -182,7 +181,7 @@ struct Reader {
   inline bool FromJson(const char *key, U *result) const {
     const auto &v = Visitor::ValueOfKey(*access_, key);
 
-    Reader<JsonType> reader(&v);
+    JsonReader<JsonType> reader(&v);
     if (Visitor::IsNull(v)) {
       return false;
     }
@@ -192,21 +191,22 @@ struct Reader {
   template <typename U>
   U ToString() const;
 
-  Reader(const Reader &other) = delete;
-  Reader &operator=(const Reader &other) = delete;
+  JsonReader(const JsonReader &other) = delete;
+  JsonReader &operator=(const JsonReader &other) = delete;
 
  private:
   const JsonType *access_;
 };
 
 template <typename T>
-struct Writer {
+class JsonWriter {
+ public:
   using JsonType = T;
   using Visitor = JsonValueVisitor<JsonType>;
 
-  explicit Writer(JsonType *access) : access_(access) {
+  explicit JsonWriter(JsonType *access) : access_(access) {
   }
-  ~Writer() = default;
+  ~JsonWriter() = default;
 
   template <typename U>
   inline void ToJson(const U *result) const {
@@ -230,8 +230,8 @@ struct Writer {
   template <typename U>
   U ToString() const;
 
-  Writer(const Writer &other) = delete;
-  Writer &operator=(const Writer &other) = delete;
+  JsonWriter(const JsonWriter &other) = delete;
+  JsonWriter &operator=(const JsonWriter &other) = delete;
 
  private:
   JsonType *access_;
@@ -270,27 +270,24 @@ struct Writer {
 #define REFLECT_JSON(Type, ...)                                          \
   namespace spiderweb {                                                  \
   namespace reflect {                                                    \
-  namespace json {                                                       \
   template <typename JsonNodeType>                                       \
   struct Meta<Type, JsonNodeType> {                                      \
     static constexpr bool IsMeta = true;                                 \
     using struct_type = Type;                                            \
     using jsonnode_type = JsonNodeType;                                  \
     bool FromJson(const JsonNodeType &json, struct_type *result) const { \
-      reflect::json::Reader<jsonnode_type> serilizer(&json);             \
+      reflect::JsonReader<jsonnode_type> serilizer(&json);               \
       MACRO_MAP(reflect_json_expands_fromjson, __VA_ARGS__)              \
       return true;                                                       \
     }                                                                    \
     void ToJson(const struct_type *result, JsonNodeType &json) const {   \
-      reflect::json::Writer<jsonnode_type> serilizer(&json);             \
+      reflect::JsonWriter<jsonnode_type> serilizer(&json);               \
       MACRO_MAP(reflect_json_expands_tojson, __VA_ARGS__)                \
     }                                                                    \
   };                                                                     \
   }                                                                      \
-  }                                                                      \
   }
 
-}  // namespace json
 }  // namespace reflect
 }  // namespace spiderweb
 #endif

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "spiderweb/reflect/implement/json/yyjson/yyjson_json_reflection.hpp"
+#include "spiderweb/reflect/json_node.h"
 
 struct Student {
   bool             bool_value;
@@ -15,7 +15,7 @@ REFLECT_JSON(Student, (bool_value, "bool_value"), (uint64_value, "uint64_value")
              (int64_value, "int64_value"), (int_value, "int_value"), (float_value, "float_value"),
              (double_value, "double_value"), (str_value, "str_value"), (intList, "intList"))
 
-TEST(yyserilizer, FromJsonBool) {
+TEST(ReflectJson, FromJsonBool) {
   static const char *str = R"(
 {
   "bool_value": true,
@@ -31,7 +31,7 @@ TEST(yyserilizer, FromJsonBool) {
 
   Student st;
 
-  spiderweb::reflect::json::YyJsonReader reader(str);
+  spiderweb::reflect::JsonDocumentReader reader(str);
 
   reader.FromJson(&st);
 
@@ -45,27 +45,27 @@ TEST(yyserilizer, FromJsonBool) {
   EXPECT_EQ(st.intList, std::vector<int>({1, 2, 3}));
 }
 
-struct People {
-  std::string              name;
-  int                      age;
-  float                    height;
+struct TestPeople {
+  std::string              name = "dd";
+  int                      age = 0;
+  float                    height = 0;
   std::vector<int>         intList;
   std::vector<std::string> stringList;
 
-  bool operator==(const People &other) const {
+  bool operator==(const TestPeople &other) const {
     return name == other.name && height == other.height && intList == other.intList &&
            stringList == other.stringList;
   }
 };
-REFLECT_JSON(People, (name, "name"), (age, "age"), (height, "height"), (intList, "intList"),
+REFLECT_JSON(TestPeople, (name, "name"), (age, "age"), (height, "height"), (intList, "intList"),
              (stringList, "stringList"))
 
-struct PeopleList {
-  std::vector<People> peoples;
+struct TestPeopleList {
+  std::vector<TestPeople> peoples;
 };
-REFLECT_JSON(PeopleList, (peoples, "peoples"))
+REFLECT_JSON(TestPeopleList, (peoples, "peoples"))
 
-TEST(yyserilizer, FromJsonStruct) {
+TEST(ReflectJson, FromJsonStruct) {
   const char *json = R"(
 {
   "name": "xiaoming",
@@ -76,9 +76,10 @@ TEST(yyserilizer, FromJsonStruct) {
 }
 )";
 
-  spiderweb::reflect::json::YyJsonReader serilizer(json);
+  spiderweb::reflect::JsonDocumentReader serilizer(json);
 
-  People people;
+  TestPeople people;
+
   serilizer.FromJson(&people);
 
   EXPECT_EQ(people.name, "xiaoming");
@@ -88,7 +89,7 @@ TEST(yyserilizer, FromJsonStruct) {
   EXPECT_EQ(people.stringList, std::vector<std::string>({"a", "b", "c"}));
 }
 
-TEST(yyserilizer, FromJsonStructMissingSome) {
+TEST(ReflectJson, FromJsonStructMissingSome) {
   const char *json = R"(
 {
   "name": "xiaoming",
@@ -98,9 +99,9 @@ TEST(yyserilizer, FromJsonStructMissingSome) {
 }
 )";
 
-  spiderweb::reflect::json::YyJsonReader serilizer(json);
+  spiderweb::reflect::JsonDocumentReader serilizer(json);
 
-  People people;
+  TestPeople people;
   people.age = -1;
   serilizer.FromJson(&people);
 
@@ -111,7 +112,7 @@ TEST(yyserilizer, FromJsonStructMissingSome) {
   EXPECT_EQ(people.stringList, std::vector<std::string>({"a", "b", "c"}));
 }
 
-TEST(yyserilizer, FromJsonArray) {
+TEST(ReflectJson, FromJsonArray) {
   const char *json = R"(
 {
   "peoples": [
@@ -147,19 +148,19 @@ TEST(yyserilizer, FromJsonArray) {
 }
 )";
 
-  spiderweb::reflect::json::YyJsonReader serilizer(json);
+  spiderweb::reflect::JsonDocumentReader serilizer(json);
 
-  PeopleList people;
+  TestPeopleList people;
   serilizer.FromJson(&people);
 
   EXPECT_EQ(people.peoples.size(), 4);
-  EXPECT_EQ(people.peoples[0], (People{"name1", 33, 1.1, {1, 2, 3, 4}, {"a", "b", "c"}}));
-  EXPECT_EQ(people.peoples[1], (People{"name2", 44, 2.2, {1, 2, 3, 4}, {"a", "b", "c"}}));
-  EXPECT_EQ(people.peoples[2], (People{"name3", 55, 3.3, {1, 2, 3, 4}, {"a", "b", "c"}}));
-  EXPECT_EQ(people.peoples[3], (People{"name4", 66, 4.4, {1, 2, 3, 4}, {"a", "b", "c"}}));
+  EXPECT_EQ(people.peoples[0], (TestPeople{"name1", 33, 1.1, {1, 2, 3, 4}, {"a", "b", "c"}}));
+  EXPECT_EQ(people.peoples[1], (TestPeople{"name2", 44, 2.2, {1, 2, 3, 4}, {"a", "b", "c"}}));
+  EXPECT_EQ(people.peoples[2], (TestPeople{"name3", 55, 3.3, {1, 2, 3, 4}, {"a", "b", "c"}}));
+  EXPECT_EQ(people.peoples[3], (TestPeople{"name4", 66, 4.4, {1, 2, 3, 4}, {"a", "b", "c"}}));
 }
 
-TEST(yyserilizer, FromJsonComplexArrayNoKey) {
+TEST(ReflectJson, FromJsonComplexArrayNoKey) {
   const char *json = R"(
 [
   {
@@ -179,22 +180,22 @@ TEST(yyserilizer, FromJsonComplexArrayNoKey) {
 ]
 )";
 
-  spiderweb::reflect::json::YyJsonReader serilizer(json);
+  spiderweb::reflect::JsonDocumentReader serilizer(json);
 
-  std::vector<People> people;
+  std::vector<TestPeople> people;
   serilizer.FromJson(&people);
 
   EXPECT_EQ(people.size(), 2);
-  EXPECT_EQ(people[0], (People{"name1", 33, 1.1, {1, 2, 3, 4}, {"a", "b", "c"}}));
-  EXPECT_EQ(people[1], (People{"name2", 44, 2.2, {1, 2, 3, 4}, {"a", "b", "c"}}));
+  EXPECT_EQ(people[0], (TestPeople{"name1", 33, 1.1, {1, 2, 3, 4}, {"a", "b", "c"}}));
+  EXPECT_EQ(people[1], (TestPeople{"name2", 44, 2.2, {1, 2, 3, 4}, {"a", "b", "c"}}));
 }
 
-TEST(yyserilizer, FromJsonSimpleArrayNoKey) {
+TEST(ReflectJson, FromJsonSimpleArrayNoKey) {
   const char *json = R"(
 [123, 456]
 )";
 
-  spiderweb::reflect::json::YyJsonReader serilizer(json);
+  spiderweb::reflect::JsonDocumentReader serilizer(json);
 
   std::vector<int> intList;
   serilizer.FromJson(&intList);
@@ -202,7 +203,7 @@ TEST(yyserilizer, FromJsonSimpleArrayNoKey) {
   EXPECT_EQ(intList, std::vector<int>({123, 456}));
 }
 
-TEST(yyserilizer, serilizerComplexStruct) {
+TEST(ReflectJson, serilizerComplexStruct) {
   Student st{};
   st.bool_value = true;
   st.uint64_value = 123;
@@ -213,17 +214,17 @@ TEST(yyserilizer, serilizerComplexStruct) {
   st.str_value = "yyjson";
   st.intList = std::vector<int>({1, 2, 3});
 
-  spiderweb::reflect::json::YyJsonWriter writer;
+  spiderweb::reflect::JsonDocumentWriter writer;
 
   writer.ToJson(&st);
-  std::cout << writer.ToString() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
-TEST(yyserilizer, serilizerPeoples) {
-  PeopleList list;
+TEST(ReflectJson, serilizerPeoples) {
+  TestPeopleList list;
 
   for (int i = 0; i < 3; ++i) {
-    People people;
+    TestPeople people;
 
     people.age = i;
     people.height = 1.75;
@@ -234,11 +235,11 @@ TEST(yyserilizer, serilizerPeoples) {
     list.peoples.push_back(people);
   }
 
-  spiderweb::reflect::json::YyJsonWriter writer;
+  spiderweb::reflect::JsonDocumentWriter writer;
 
   writer.ToJson(&list);
 
-  std::cout << writer.ToString() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
 struct MyNode {
@@ -247,7 +248,7 @@ struct MyNode {
 };
 REFLECT_JSON(MyNode, (age, "age"), (next, "next"))
 
-TEST(yyserilizer, FromJsonRecursive) {
+TEST(ReflectJson, FromJsonRecursive) {
   static const char *str = R"(
 {
   "age": 123,
@@ -260,7 +261,7 @@ TEST(yyserilizer, FromJsonRecursive) {
 }
     )";
 
-  spiderweb::reflect::json::YyJsonReader reader(str);
+  spiderweb::reflect::JsonDocumentReader reader(str);
 
   MyNode root;
   reader.FromJson(&root);
@@ -272,8 +273,8 @@ TEST(yyserilizer, FromJsonRecursive) {
   EXPECT_EQ(root.next->next->age, 777);
 }
 
-TEST(yyserilizer, ToJsonRecursive) {
-  spiderweb::reflect::json::YyJsonWriter writer;
+TEST(ReflectJson, ToJsonRecursive) {
+  spiderweb::reflect::JsonDocumentWriter writer;
 
   MyNode root;
 
@@ -287,7 +288,7 @@ TEST(yyserilizer, ToJsonRecursive) {
 
   writer.ToJson(&root);
 
-  std::cout << writer.ToString() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
 struct ListNode {
@@ -296,7 +297,7 @@ struct ListNode {
 };
 REFLECT_JSON(ListNode, (age, "age"), (childs, "childs"))
 
-TEST(yyserilizer, ToJsonArrayRecursive) {
+TEST(ReflectJson, ToJsonArrayRecursive) {
   ListNode root;
 
   root.age = 1;
@@ -312,13 +313,13 @@ TEST(yyserilizer, ToJsonArrayRecursive) {
     root.childs.push_back(std::move(child));
   }
 
-  spiderweb::reflect::json::YyJsonWriter writer;
+  spiderweb::reflect::JsonDocumentWriter writer;
   writer.ToJson(&root);
 
-  std::cout << writer.ToString() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
-TEST(yyserilizer, FromJsonArrayRecursive) {
+TEST(ReflectJson, FromJsonArrayRecursive) {
   static const char *str = R"(
 {
   "age": 1,
@@ -330,7 +331,7 @@ TEST(yyserilizer, FromJsonArrayRecursive) {
     )";
   ListNode           root{};
 
-  spiderweb::reflect::json::YyJsonReader writer(str);
+  spiderweb::reflect::JsonDocumentReader writer(str);
   writer.FromJson(&root);
 
   EXPECT_EQ(root.age, 1);
@@ -351,16 +352,16 @@ struct Object {
 };
 REFLECT_JSON(Object, (value, "enumValue", std::string))
 
-TEST(yyserilizer, ToJsonEnum) {
+TEST(ReflectJson, ToJsonEnum) {
   Object obj;
   obj.value = EnumValue::kSuccess;
-  spiderweb::reflect::json::YyJsonWriter writer;
+  spiderweb::reflect::JsonDocumentWriter writer;
   writer.ToJson(&obj);
 
-  std::cout << writer.ToString() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
-TEST(yyserilizer, FromJsonEnum) {
+TEST(ReflectJson, FromJsonEnum) {
   static const char *xml = R"(
 {
   "enumValue": "failed"
@@ -370,7 +371,7 @@ TEST(yyserilizer, FromJsonEnum) {
   Object obj;
   obj.value = EnumValue::kSuccess;
 
-  spiderweb::reflect::json::YyJsonReader reader(xml);
+  spiderweb::reflect::JsonDocumentReader reader(xml);
   reader.FromJson(&obj);
 
   EXPECT_EQ(obj.value, EnumValue::kFailed);

@@ -1,7 +1,7 @@
 #include "benchmark/benchmark.h"
 #include "spiderweb/reflect/implement/json/yyjson/yyjson_json_reflection.hpp"
 
-struct People {
+struct TestPeople {
   std::string              name;
   int                      age;
   float                    height;
@@ -9,8 +9,8 @@ struct People {
   std::vector<std::string> stringList;
 };
 
-struct PeopleList {
-  std::vector<People> peoples;
+struct TestPeopleList {
+  std::vector<TestPeople> peoples;
 };
 
 REFLECT_JSON(People, (name, "name"), (age, "age"), (height, "height"), (intList, "intList"),
@@ -18,7 +18,7 @@ REFLECT_JSON(People, (name, "name"), (age, "age"), (height, "height"), (intList,
 REFLECT_JSON(PeopleList, (peoples, "peoples"))
 
 static void BM_copy(benchmark::State &state) {
-  std::vector<People> peoples;
+  std::vector<TestPeople> peoples;
   for (auto _ : state) {
     peoples.emplace_back();
   }
@@ -62,16 +62,16 @@ static void BM_FromJson(benchmark::State &state) {
 )";
   spiderweb::reflect::json::YyJsonReader serilizer(json);
   for (auto _ : state) {
-    PeopleList people;
+    TestPeopleList people;
     serilizer.FromJson(&people);
   }
 }
 BENCHMARK(BM_FromJson);
 
 static void BM_ToJsonReflect(benchmark::State &state) {
-  PeopleList people;
+  TestPeopleList people;
   for (int i = 0; i < 3; ++i) {
-    People p;
+    TestPeople p;
 
     p.age = 123;
     p.name = "xiaoming";
