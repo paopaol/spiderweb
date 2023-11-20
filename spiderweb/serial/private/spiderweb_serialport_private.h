@@ -1,11 +1,9 @@
 #ifndef SPIDERWEB_SERIALPORT_PRIVATE_H
 #define SPIDERWEB_SERIALPORT_PRIVATE_H
 
-#include <map>
-
 #include "asio.hpp"
+#include "asio/serial_port.hpp"
 #include "core/internal/asio_cast.h"
-#include "spdlog/spdlog.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/reflect/enum_reflect.h"
 #include "spiderweb/serial/spiderweb_serialport.h"
@@ -39,20 +37,23 @@ class SerialPort::Private {
   }
 
   void SetParity(Parity parity, std::error_code &ec) {
-    serial_port.set_option(asio::serial_port_base::parity(
-                               reflect::ToAliasType<asio::serial_port::parity::type>(parity)),
-                           ec);
+    asio::serial_port::parity::type v;
+    reflect::EnumTo(parity, v);
+    (void)serial_port.set_option(asio::serial_port_base::parity(v), ec);
   }
 
   Parity GetParity() const {
     asio::serial_port_base::parity opt;
     serial_port.get_option(opt);
 
-    return reflect::FromAliasType(opt.value(), Parity::kNoParity);
+    return reflect::EnumFrom(opt.value(), Parity::kNoParity);
   }
 
   void SetBaudRate(BaudRate baudrate, std::error_code &ec) {
-    serial_port.set_option(asio::serial_port::baud_rate(reflect::ToAliasType<int>(baudrate)), ec);
+    int v;
+    reflect::EnumTo(baudrate, v);
+
+    (void)serial_port.set_option(asio::serial_port::baud_rate(v), ec);
   }
 
   BaudRate GetBaudRate() const {
@@ -60,11 +61,13 @@ class SerialPort::Private {
 
     serial_port.get_option(opt);
 
-    return reflect::FromAliasType(opt.value(), BaudRate::k115200);
+    return reflect::EnumFrom(opt.value(), BaudRate::k115200);
   }
 
   void SetDataBits(DataBits bits, std::error_code &ec) {
-    serial_port.set_option(asio::serial_port::character_size(reflect::ToAliasType<int>(bits)), ec);
+    int v;
+    reflect::EnumTo(bits, v);
+    (void)serial_port.set_option(asio::serial_port::character_size(v), ec);
   }
 
   DataBits GetDataBits() const {
@@ -72,13 +75,15 @@ class SerialPort::Private {
 
     serial_port.get_option(opt);
 
-    return reflect::FromAliasType(opt.value(), DataBits::k8);
+    return reflect::EnumFrom(opt.value(), DataBits::k8);
   }
 
   void SetStopBits(StopBits stopbits, std::error_code &ec) {
-    serial_port.set_option(asio::serial_port::stop_bits(
-                               reflect::ToAliasType<asio::serial_port::stop_bits::type>(stopbits)),
-                           ec);
+    asio::serial_port::stop_bits::type v;
+
+    reflect::EnumTo(stopbits, v);
+
+    (void)serial_port.set_option(asio::serial_port::stop_bits(v), ec);
   }
 
   StopBits GetStopBits() const {
@@ -86,7 +91,7 @@ class SerialPort::Private {
 
     serial_port.get_option(opt);
 
-    return reflect::FromAliasType(opt.value(), StopBits::kOne);
+    return reflect::EnumFrom(opt.value(), StopBits::kOne);
   }
 
   //////////////

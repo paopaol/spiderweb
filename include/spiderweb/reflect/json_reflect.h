@@ -241,20 +241,21 @@ class JsonWriter {
 #define REFLECT_JSON_READ_CODE_BLOCK_2(member, name) \
   { serilizer.FromJson(name, &result->member); }
 
-#define REFLECT_JSON_READ_CODE_BLOCK_3(member, name, type)          \
-  {                                                                 \
-    using XmlStorageType = type;                                    \
-    XmlStorageType value;                                           \
-    serilizer.FromJson(name, &value);                               \
-    result->member = reflect::FromAliasType(value, result->member); \
+#define REFLECT_JSON_READ_CODE_BLOCK_3(member, name, type)     \
+  {                                                            \
+    using XmlStorageType = type;                               \
+    XmlStorageType value;                                      \
+    serilizer.FromJson(name, &value);                          \
+    result->member = reflect::EnumFrom(value, result->member); \
   }
 
 #define REFLECT_JSON_WRITE_CODE_BLOCK_1
 #define REFLECT_JSON_WRITE_CODE_BLOCK_2(member, name) serilizer.ToJson(name, &result->member);
-#define REFLECT_JSON_WRITE_CODE_BLOCK_3(member, name, type)        \
-  {                                                                \
-    const auto value = reflect::ToAliasType<type>(result->member); \
-    serilizer.ToJson(name, &value);                                \
+#define REFLECT_JSON_WRITE_CODE_BLOCK_3(member, name, type) \
+  {                                                         \
+    type value;                                             \
+    reflect::EnumTo(result->member, value);                 \
+    serilizer.ToJson(name, &value);                         \
   }
 
 #define reflect_json_expands_fromjson(PAIR)                                  \

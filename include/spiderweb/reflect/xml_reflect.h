@@ -328,7 +328,7 @@ class XmlWriter {
     if (XmlValue::HasAtrributeValue(node, name)) {                  \
       type value;                                                   \
       node.GetAttribute(name, value);                               \
-      result.member = reflect::FromAliasType(value, result.member); \
+      result.member = reflect::EnumFrom(value, result.member);      \
     }                                                               \
   }
 
@@ -336,7 +336,11 @@ class XmlWriter {
   { node.SetAttribute(name, result.member); }
 
 #define REFLECT_XML_WRITE_ATTRIBUTE_CODE_BLOCK_3(member, name, type) \
-  { node.SetAttribute(name, reflect::ToAliasType<type>(result.member)); }
+  {                                                                  \
+    type value;                                                      \
+    reflect::EnumTo(result.member, value);                           \
+    node.SetAttribute(name, value);                                  \
+  }
 
 #define REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_1
 #define REFLECT_XML_WRITE_ATTRIBUTE_CODE_BLOCK_1
@@ -350,17 +354,18 @@ class XmlWriter {
     XmlStorageType value{};                                              \
     bool           ok = reflect::detail::ReadTagImpl(node, name, value); \
     if (ok) {                                                            \
-      result.member = reflect::FromAliasType(value, result.member);      \
+      result.member = reflect::EnumFrom(value, result.member);           \
     }                                                                    \
   }
 
 #define REFLECT_XML_WRITE_TAG_CODE_BLOCK_2(member, name) \
   { reflect::detail::WriteTagImpl(node, name, result.member); }
 
-#define REFLECT_XML_WRITE_TAG_CODE_BLOCK_3(member, name, type)    \
-  {                                                               \
-    const auto value = reflect::ToAliasType<type>(result.member); \
-    reflect::detail::WriteTagImpl(node, name, value);             \
+#define REFLECT_XML_WRITE_TAG_CODE_BLOCK_3(member, name, type) \
+  {                                                            \
+    type value;                                                \
+    reflect::EnumTo(result.member, value);                     \
+    reflect::detail::WriteTagImpl(node, name, value);          \
   }
 
 #define REFLECT_XML_READ_TAG_CODE_BLOCK_1
