@@ -328,7 +328,7 @@ class XmlWriter {
     if (XmlValue::HasAtrributeValue(node, name)) {                  \
       type value;                                                   \
       node.GetAttribute(name, value);                               \
-      result.member = reflect::EnumFrom(value, result.member);      \
+      result.member = reflect::MapFrom(value, result.member);       \
     }                                                               \
   }
 
@@ -338,7 +338,7 @@ class XmlWriter {
 #define REFLECT_XML_WRITE_ATTRIBUTE_CODE_BLOCK_3(member, name, type) \
   {                                                                  \
     type value;                                                      \
-    reflect::EnumTo(result.member, value);                           \
+    reflect::MapTo(result.member, value);                           \
     node.SetAttribute(name, value);                                  \
   }
 
@@ -354,7 +354,7 @@ class XmlWriter {
     XmlStorageType value{};                                              \
     bool           ok = reflect::detail::ReadTagImpl(node, name, value); \
     if (ok) {                                                            \
-      result.member = reflect::EnumFrom(value, result.member);           \
+      result.member = reflect::MapFrom(value, result.member);            \
     }                                                                    \
   }
 
@@ -364,7 +364,7 @@ class XmlWriter {
 #define REFLECT_XML_WRITE_TAG_CODE_BLOCK_3(member, name, type) \
   {                                                            \
     type value;                                                \
-    reflect::EnumTo(result.member, value);                     \
+    reflect::MapTo(result.member, value);                     \
     reflect::detail::WriteTagImpl(node, name, value);          \
   }
 

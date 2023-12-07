@@ -27,14 +27,14 @@ namespace reflect {
   namespace spiderweb {                                                              \
   namespace reflect {                                                                \
   template <typename = typename std::enable_if<std::is_enum<EnumType>::value>::type> \
-  inline EnumType EnumFrom(const AliasType &value, EnumType defaultValue) {          \
+  inline EnumType MapFrom(const AliasType &value, EnumType defaultValue) {           \
     using Type = EnumType;                                                           \
     static const std::map<AliasType, EnumType> _map{                                 \
         MACRO_MAP(reflect_enum_expand_alias_enum_pair, __VA_ARGS__)};                \
     const auto it = _map.find(value);                                                \
     return it == _map.end() ? defaultValue : it->second;                             \
   }                                                                                  \
-  inline void EnumTo(EnumType value, AliasType &to) {                                \
+  inline void MapTo(EnumType value, AliasType &to) {                                \
     using Type = EnumType;                                                           \
     static const std::map<EnumType, AliasType> _map{                                 \
         MACRO_MAP(reflect_enum_expand_enum_alias_pair, __VA_ARGS__)};                \

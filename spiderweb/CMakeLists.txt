@@ -89,7 +89,6 @@ target_link_libraries(
          ghc_filesystem
          fmt
          spdlog
-         restinio
          yyjson
          pugixml
          date

@@ -241,12 +241,12 @@ class JsonWriter {
 #define REFLECT_JSON_READ_CODE_BLOCK_2(member, name) \
   { serilizer.FromJson(name, &result->member); }
 
-#define REFLECT_JSON_READ_CODE_BLOCK_3(member, name, type)     \
-  {                                                            \
-    using XmlStorageType = type;                               \
-    XmlStorageType value;                                      \
-    serilizer.FromJson(name, &value);                          \
-    result->member = reflect::EnumFrom(value, result->member); \
+#define REFLECT_JSON_READ_CODE_BLOCK_3(member, name, type)    \
+  {                                                           \
+    using XmlStorageType = type;                              \
+    XmlStorageType value;                                     \
+    serilizer.FromJson(name, &value);                         \
+    result->member = reflect::MapFrom(value, result->member); \
   }
 
 #define REFLECT_JSON_WRITE_CODE_BLOCK_1
@@ -254,7 +254,7 @@ class JsonWriter {
 #define REFLECT_JSON_WRITE_CODE_BLOCK_3(member, name, type) \
   {                                                         \
     type value;                                             \
-    reflect::EnumTo(result->member, value);                 \
+    reflect::MapTo(result->member, value);                 \
     serilizer.ToJson(name, &value);                         \
   }
 

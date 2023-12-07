@@ -7,7 +7,7 @@ FetchContent_Declare(
   pugixml URL file://${PROJECT_SOURCE_DIR}/thrd/pugixml-1.12.1.tar.gz)
 FetchContent_MakeAvailable(pugixml)
 
-# restinio(date)
+# (date)
 FetchContent_Declare(date URL file:///${CMAKE_CURRENT_SOURCE_DIR}/date.tar.gz)
 set(BUILD_TZ_LIB
     ON
@@ -68,21 +68,6 @@ unset(compile_options)
 # if(NOT absl_POPULATED) FetchContent_Populate(absl)
 # add_subdirectory(${absl_SOURCE_DIR} ${absl_BINARY_DIR}) target_link_options
 # endif()
-
-# restinio(http)
-FetchContent_Declare(http_parser
-                     URL file:///${CMAKE_CURRENT_SOURCE_DIR}/http_parser.tar.gz)
-FetchContent_MakeAvailable(http_parser)
-
-FetchContent_Declare(
-  restinio URL file:///${CMAKE_CURRENT_SOURCE_DIR}/restinio-0.6.16.tar.gz)
-FetchContent_GetProperties(restinio)
-if(NOT restinio_POPULATED)
-  FetchContent_Populate(restinio)
-  set(RESTINIO_FMT_HEADER_ONLY Off)
-  add_subdirectory(${restinio_SOURCE_DIR}/dev ${restinio_BINARY_DIR}
-                   EXCLUDE_FROM_ALL)
-endif()
 
 FetchContent_Declare(canary
                      URL file://${CMAKE_CURRENT_SOURCE_DIR}/canary.tar.gz)

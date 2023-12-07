@@ -38,7 +38,7 @@ class SerialPort::Private {
 
   void SetParity(Parity parity, std::error_code &ec) {
     asio::serial_port::parity::type v;
-    reflect::EnumTo(parity, v);
+    reflect::MapTo(parity, v);
     (void)serial_port.set_option(asio::serial_port_base::parity(v), ec);
   }
 
@@ -46,12 +46,12 @@ class SerialPort::Private {
     asio::serial_port_base::parity opt;
     serial_port.get_option(opt);
 
-    return reflect::EnumFrom(opt.value(), Parity::kNoParity);
+    return reflect::MapFrom(opt.value(), Parity::kNoParity);
   }
 
   void SetBaudRate(BaudRate baudrate, std::error_code &ec) {
     int v;
-    reflect::EnumTo(baudrate, v);
+    reflect::MapTo(baudrate, v);
 
     (void)serial_port.set_option(asio::serial_port::baud_rate(v), ec);
   }
@@ -61,12 +61,12 @@ class SerialPort::Private {
 
     serial_port.get_option(opt);
 
-    return reflect::EnumFrom(opt.value(), BaudRate::k115200);
+    return reflect::MapFrom(opt.value(), BaudRate::k115200);
   }
 
   void SetDataBits(DataBits bits, std::error_code &ec) {
     int v;
-    reflect::EnumTo(bits, v);
+    reflect::MapTo(bits, v);
     (void)serial_port.set_option(asio::serial_port::character_size(v), ec);
   }
 
@@ -75,13 +75,13 @@ class SerialPort::Private {
 
     serial_port.get_option(opt);
 
-    return reflect::EnumFrom(opt.value(), DataBits::k8);
+    return reflect::MapFrom(opt.value(), DataBits::k8);
   }
 
   void SetStopBits(StopBits stopbits, std::error_code &ec) {
     asio::serial_port::stop_bits::type v;
 
-    reflect::EnumTo(stopbits, v);
+    reflect::MapTo(stopbits, v);
 
     (void)serial_port.set_option(asio::serial_port::stop_bits(v), ec);
   }
@@ -91,7 +91,7 @@ class SerialPort::Private {
 
     serial_port.get_option(opt);
 
-    return reflect::EnumFrom(opt.value(), StopBits::kOne);
+    return reflect::MapFrom(opt.value(), StopBits::kOne);
   }
 
   //////////////

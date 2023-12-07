@@ -1,5 +1,8 @@
-﻿#include "gtest/gtest.h"
+﻿#include <map>
+
+#include "gtest/gtest.h"
 #include "spiderweb/reflect/xml_node.h"
+#include "spiderweb/type/spiderweb_variant.h"
 
 struct Child {
   int64_t id = 0;
@@ -168,7 +171,7 @@ TEST(pugixml_impl, WriteSimpleBool) {
   int bool_value = false;
   writer.Write("bool", bool_value);
 
-  std::cout << writer.ToString() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
 TEST(pugixml_impl, WriteSimpleInt) {
@@ -447,3 +450,164 @@ REFLECT_XML(MaxSupportedStruct,
                              (a57, "a57"), (a58, "a58"), (a59, "a59"), (a60, "a60"), (a61, "a61"),
                              (a62, "a62"), (a63, "a63"), (a64, "a64"), (a65, "a65"), (a66, "a66"),
                              (a67, "a67"), (a68, "a68"), (a69, "a69"), (a70, "a70"), (a71, "a71")))
+
+enum class ProperyType : uint8_t {
+  kBool,
+  kNumber,
+  kString,
+  kEnum,
+  kColor,
+  kVariables,
+  kByteArray,
+  kFloat,
+  kRect,
+  kAlignment,
+  kFont,
+};
+
+REFLECT_ENUM(ProperyType, std::string, (kBool, "Bool"), (kNumber, "Number"), (kString, "String"),
+             (kEnum, "Enum"), (kColor, "Color"), (kVariables, "Variables"),
+             (kByteArray, "ByteArray"), (kFloat, "Float"), (kRect, "Rect"),
+             (kAlignment, "Alignment"), (kFont, "Font"))
+
+template <typename K, typename V>
+class Map : public std::map<K, V> {
+ public:
+  explicit Map(const std::string &key) : key_tag_(key) {
+  }
+
+  const std::string &KeyTag() const {
+    return key_tag_;
+  }
+
+ private:
+  std::string key_tag_;
+};
+
+namespace spiderweb {
+namespace reflect {
+namespace detail {
+template <typename XmlValue, typename KeyType, typename ValueType,
+          template <typename, typename> class Map>
+inline bool ReadTagImpl(XmlValue &node, const char *name, Map<KeyType, ValueType> &value) {
+  using MetaType = reflect::XmlMeta<XmlValue, ValueType>;
+
+  node.ForEachChilds(name, [&](const XmlValue &child) {
+    ValueType result{};
+    MetaType::Read(child, result);
+
+    std::string key_tag;
+    child.GetAttribute(value.KeyTag().c_str(), key_tag);
+    value[std::move(key_tag)] = std::move(result);
+  });
+  return true;
+}
+
+}  // namespace detail
+}  // namespace reflect
+}  // namespace spiderweb
+
+struct Property;
+using PropertyPtr = std::shared_ptr<Property>;
+
+struct Property {
+  std::string                   name;
+  ProperyType                   type;
+  std::string                   var;
+  Map<std::string, PropertyPtr> fields{"name"};
+};
+
+REFLECT_XML(Property, REFLECT_XML_ATTR((type, "type", std::string), (name, "name"), (var, "value")),
+            (fields, "Property"))
+
+struct Object {
+  std::string type;
+  std::string uuid;
+
+  Map<std::string, PropertyPtr> fields{"name"};
+};
+
+REFLECT_XML(Object, REFLECT_XML_ATTR((type, "type"), (uuid, "uuid")), (fields, "Property"))
+
+struct Public {
+  std::string color;
+  int         height;
+  bool        showPoint;
+  bool        transparent;
+  int         width;
+
+  std::vector<Object> objects;
+};
+
+REFLECT_XML(Public,
+            REFLECT_XML_ATTR((color, "color"), (height, "height"), (width, "width"),
+                             (showPoint, "showPoint"), (transparent, "transparent")),
+            (objects, "Object"))
+
+TEST(pugixml_impl, FromPublic) {
+  static const char *xml = R"(
+<Public color="#ffffff" containerdev="" height="1013" showPoint="0" transparent="1" width="1570">
+    <Object type="2_display_widgets.label" uuid="{9a2c7b65-3367-4a5b-9833-596c8bbae6c1}">
+        <Property name="objectName" type="ByteArray" value="label_1120"/>
+        <Property name="lock" type="Bool" value=""/>
+        <Property name="visiblegroup" type="Number" value=""/>
+        <Property name="geometry" type="Rect">
+            <Property name="x" type="Number" value="67"/>
+            <Property name="y" type="Number" value="808"/>
+            <Property name="Width" type="Number" value="81"/>
+            <Property name="Height" type="Number" value="45"/>
+        </Property>
+
+        <Property name="z" type="Number" value="0"/>
+        <Property name="type" tr="false" type="String" value="ProxyWidget"/>
+        <Property name="transformOriginPoint" type="Transform">
+            <Property name="rotate_x" type="Number" value="0"/>
+            <Property name="rotate_y" type="Number" value="0"/>
+        </Property>
+        <Property name="rotation" type="Number" value="0"/>
+        <Property name="frameShape" type="Enum" value="0"/>
+        <Property name="frameShadow" type="Enum" value="16"/>
+        <Property name="text" tr="false" type="String" value="11"/>
+        <Property name="activated1" type="Bool" value=""/>
+        <Property name="text0" tr="false" type="String" value="label1"/>
+        <Property name="text1" tr="false" type="String" value="label2"/>
+
+        <Property name="text2" tr="false" type="String" value=""/>
+        <Property name="text3" tr="false" type="String" value=""/>
+        <Property name="text4" tr="false" type="String" value=""/>
+        <Property name="alignment" type="Alignment">
+            <Property name="Horizonta" type="Enum" value="4"/>
+            <Property name="Vertical" type="Enum" value="128"/>
+        </Property>
+        <Property name="font" type="Font">
+            <Property name="Family" type="Enum" value="Cantarell"/>
+            <Property name="Size" type="Number" value="18"/>
+            <Property name="Bold" type="Bool" value="false"/>
+            <Property name="Italic" type="Bool" value="false"/>
+            <Property name="Underline" type="Bool" value="false"/>
+            <Property name="Strikeout" type="Bool" value="false"/>
+        </Property>
+        <Property name="colorOfText" type="Color" value="#c7e6ff"/>
+        <Property name="currentuser" type="Bool" value="false"/>
+        <Property name="activated" type="Bool" value=""/>
+        <Property name="variable" type="Variables" value="">
+            <Property name="tag" type="ByteArray" value=""/>
+            <Property name="rtdb_id" type="Number" value=""/>
+            <Property name="sel_id" type="Number" value=""/>
+            <Property name="desc" type="ByteArray" value=""/>
+            <Property name="unit" type="ByteArray" value=""/>
+        </Property>
+        <Property name="value" type="Float" value="0"/>
+        <Property name="quality" type="Number" value="-1"/>
+    </Object>
+</Public>
+
+  )";
+
+  spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
+
+  Public root;
+  reader.Read(root);
+  int a = 1;
+  printf("%d\n", a);
+}
