@@ -18,14 +18,16 @@ set(USE_SYSTEM_TZ_DB
 FetchContent_MakeAvailable(date)
 
 # gtest
-set(gtest_force_shared_crt
-    ON
-    CACHE INTERNAL "")
-FetchContent_Declare(
-  googletest
-  URL file:///${CMAKE_CURRENT_SOURCE_DIR}/googletest-release-1.10.0.tar.gz)
-FetchContent_MakeAvailable(googletest)
-target_compile_options(gtest PRIVATE -Wno-error=maybe-uninitialized)
+if(NOT googletest_POPULATED)
+  set(gtest_force_shared_crt
+      ON
+      CACHE INTERNAL "")
+  FetchContent_Declare(
+    googletest
+    URL file:///${CMAKE_CURRENT_SOURCE_DIR}/googletest-release-1.10.0.tar.gz)
+  FetchContent_MakeAvailable(googletest)
+  target_compile_options(gtest PRIVATE -Wno-error=maybe-uninitialized)
+endif()
 
 # benchmark
 FetchContent_Declare(benchmark
