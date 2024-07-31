@@ -8,11 +8,11 @@ class MyObject : public spiderweb::Object {
 
 static void BM_NotifyConnectLambda(benchmark::State& state) {
   spiderweb::EventLoop loop;
-  MyObject             obj;
 
   static const auto f = [](const std::string& a, int b, float c) {};
 
   for (auto _ : state) {
+    MyObject obj;
     spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &loop, f);
   }
 }
@@ -20,7 +20,6 @@ BENCHMARK(BM_NotifyConnectLambda);
 
 static void BM_NotifyConnectClassMethod(benchmark::State& state) {
   spiderweb::EventLoop loop;
-  MyObject             obj;
 
   struct Struct : public spiderweb::Object {
     explicit Struct(spiderweb::Object* parent = nullptr) : Object(parent) {
@@ -35,6 +34,7 @@ static void BM_NotifyConnectClassMethod(benchmark::State& state) {
 
   Struct reciver;
   for (auto _ : state) {
+    MyObject obj;
     spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &reciver, &Struct::myslot);
   }
 }
@@ -42,13 +42,13 @@ BENCHMARK(BM_NotifyConnectClassMethod);
 
 static void BM_NotifyCall(benchmark::State& state) {
   spiderweb::EventLoop loop;
-  MyObject             obj;
 
   uint64_t          called = 0;
   static const auto f = [&](const std::string& /*a*/, int /*b*/, float /*c*/) { called++; };
-  spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &loop, f);
 
   for (auto _ : state) {
+    MyObject obj;
+    spiderweb::Object::Connect(&obj, &MyObject::voidEvent, &loop, f);
     obj.voidEvent("123", 2, static_cast<float>(3.33));
   }
 }

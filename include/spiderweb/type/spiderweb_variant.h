@@ -3,18 +3,14 @@
 #include <string>
 
 #include "absl/types/any.h"
-#include "absl/types/variant.h"
+#include "private/spiderweb_variant_private.h"
 #include "spiderweb/core/spiderweb_type_traits.h"
 
 namespace spiderweb {
 
-struct Monostate {};
-
 class Variant {
  public:
-  using Var = absl::variant<Monostate, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t,
-                            std::string, float, double, bool, absl::any>;
-  enum class Type {
+  enum class Type : uint8_t {
     kBool,
     kInt16,
     kUint16,
@@ -84,7 +80,7 @@ class Variant {
   };
 
   template <typename Dumy>
-  struct CurrentType<Monostate, Dumy> {
+  struct CurrentType<detail::Monostate, Dumy> {
     static constexpr Type type = Type::kNull;
   };
 
@@ -171,10 +167,12 @@ class Variant {
 
   bool ToBool() const;
 
-  float ToFloat(bool *ok = nullptr) const;
+  inline float ToFloat(bool *ok = nullptr) const {
+    return detail::ToIntOrFloat<float>(v_, ok);
+  }
 
   inline void Clear() {
-    v_ = Monostate{};
+    v_ = detail::Monostate{};
     current_type_ = Type::kNull;
   }
 
@@ -201,7 +199,7 @@ class Variant {
     v_ = std::move(rh.v_);
   }
 
-  Var  v_{Monostate{}};
-  Type current_type_ = Type::kNull;
+  detail::Var v_{detail::Monostate{}};
+  Type        current_type_ = Type::kNull;
 };
 }  // namespace spiderweb

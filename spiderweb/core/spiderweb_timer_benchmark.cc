@@ -23,10 +23,10 @@ static void BM_TimerAdd(benchmark::State &state) {
     ++count;
     timer->Start();
   }
-  // printf("value %d count %d\n", value, count);
+  printf("value %d count %d\n", value, count);
 
   loop.Exec();
-  // printf("value %d count %d\n", value, count);
+  printf("value %d count %d\n", value, count);
 }
 
 BENCHMARK(BM_TimerAdd);

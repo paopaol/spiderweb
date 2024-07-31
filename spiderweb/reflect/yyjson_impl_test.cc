@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "spiderweb/reflect/json_node.h"
 #include "spiderweb/reflect/json_reflect.h"
-#include "spiderweb/reflect/macro_map.h"
 
 struct Student {
   bool             bool_value;
@@ -346,7 +345,7 @@ TEST(ReflectJson, FromJsonArrayRecursive) {
   EXPECT_EQ(root.childs[1]->age, 3);
 }
 
-enum class EnumValue {
+enum class EnumValue : uint8_t {
   kSuccess,
   kFailed,
 };
@@ -380,4 +379,150 @@ TEST(ReflectJson, FromJsonEnum) {
   reader.FromJson(&obj);
 
   EXPECT_EQ(obj.value, EnumValue::kFailed);
+}
+
+enum class ErrorCode : uint8_t {
+  kSuccess,
+  kPassowdWrong,
+  kUserNotFound,
+};
+REFLECT_ENUM(ErrorCode, std::string, (kSuccess, "ok"), (kPassowdWrong, "password"),
+             (kUserNotFound, "user-not-found"))
+
+struct LoginRequest {
+  std::string user_name;
+  std::string passwd;
+};
+REFLECT_JSON(LoginRequest, (user_name, "user_name"), (passwd, "password"))
+
+struct LoginResponse {
+  ErrorCode error;
+};
+REFLECT_JSON(LoginResponse, (error, "code", std::string))
+
+struct ChangePasswdRequest {
+  std::string user_name;
+  std::string old_passwd;
+  std::string new_passwd;
+};
+
+struct ChangePasswdResponse {
+  ErrorCode error;
+};
+
+struct User {
+  std::string user;
+  std::string display;
+};
+REFLECT_JSON(User, (user, "user"), (display, "display"))
+
+struct ListUsersRequest {
+  int code;
+};
+REFLECT_JSON(ListUsersRequest, )
+
+struct ListUsersResponse {
+  std::vector<User> users;
+};
+REFLECT_JSON(ListUsersResponse, (users, "users"))
+
+class RpcService {
+ public:
+  using MethodString = std::string;
+  using Handler = std::function<void(const std::string &request, std::string &response)>;
+
+  RpcService() = default;
+
+  void Dispatch(const std::string &method, const std::string &request, std::string &response) {
+    routes_[method](request, response);
+  }
+
+  template <typename Request, typename Response, typename T>
+  void Register(const std::string &method, T *impl, void (T::*func)(const Request &, Response &)) {
+    const auto handler = [=](const std::string &request, std::string &response) {
+      Request                                req;
+      Response                               resp;
+      spiderweb::reflect::JsonDocumentReader reader(request.c_str());
+
+      reader.FromJson(&req);
+
+      (impl->*func)(req, resp);
+
+      spiderweb::reflect::JsonDocumentWriter writer;
+
+      writer.ToJson(&resp);
+      response = writer.ToString();
+    };
+
+    routes_[method] = handler;
+  }
+
+ private:
+  std::map<MethodString, Handler> routes_;
+};
+
+class UserService {
+ public:
+  explicit UserService(RpcService *service) {
+    service->Register<LoginRequest, LoginResponse>("Login", this, &UserService::Login);
+    service->Register<ListUsersRequest, ListUsersResponse>("UserList", this,
+                                                           &UserService::UserList);
+  }
+
+  virtual ~UserService() = default;
+
+  virtual void Login(const LoginRequest &req, LoginResponse &resp){};
+
+  virtual void UserList(const ListUsersRequest &, ListUsersResponse &resp) {
+  }
+
+  virtual void ChangePasswd(const ChangePasswdRequest &req, ChangePasswdResponse &resp) {
+  }
+};
+
+class UserServiceImpl : public UserService {
+ public:
+  explicit UserServiceImpl(RpcService *service) : UserService(service) {
+  }
+
+  void Login(const LoginRequest &req, LoginResponse &resp) override {
+    if (req.user_name != user_name_) {
+      resp.error = ErrorCode::kUserNotFound;
+      return;
+    }
+    resp.error = ErrorCode::kSuccess;
+  }
+
+  void UserList(const ListUsersRequest &, ListUsersResponse &resp) override {
+    resp.users.push_back(User{"1", "用户1"});
+    resp.users.push_back(User{"2", "用户2"});
+  }
+
+  void ChangePasswd(const ChangePasswdRequest &req, ChangePasswdResponse &resp) override {
+    if (req.user_name != user_name_) {
+      resp.error = ErrorCode::kUserNotFound;
+      return;
+    }
+
+    if (req.old_passwd != passwd_) {
+      resp.error = ErrorCode::kPassowdWrong;
+      return;
+    }
+
+    passwd_ = req.new_passwd;
+    resp.error = ErrorCode::kSuccess;
+  }
+  std::string user_name_ = "user";
+  std::string passwd_ = "pass";
+};
+
+TEST(Service, run) {
+  RpcService      service;
+  UserServiceImpl impl(&service);
+
+  std::string response;
+  service.Dispatch("Login", R"---({"user_name":"abc", "password":"mypass"})---", response);
+  puts(response.c_str());
+  service.Dispatch("UserList", R"---({})---", response);
+  puts(response.c_str());
 }

@@ -19,7 +19,9 @@ extern "C" {
 #define VAR_DECAL(val, doc)                               \
   auto *(val) = reinterpret_cast<yyjson_mut_val *>(val_); \
   auto *(doc) = reinterpret_cast<yyjson_mut_doc *>(doc_); \
-  assert((val) && (doc));
+  assert((val) && (doc));                                 \
+  (void)(doc);                                            \
+  (void)(val);
 
 namespace spiderweb {
 namespace reflect {
@@ -180,7 +182,8 @@ bool JsonValue::SetValue(const std::string &key, const JsonValue &value) {
   VAR_DECAL(val, doc)
   auto *obj_val = reinterpret_cast<yyjson_mut_val *>(value.val_);
 
-  return yyjson_mut_obj_add_val(doc, val, key.c_str(), obj_val);
+  char *k = unsafe_yyjson_mut_strncpy(doc, key.c_str(), key.size());
+  return yyjson_mut_obj_add_val(doc, val, k, obj_val);
 }
 
 void JsonValue::Append(const JsonValue &value) {
@@ -259,6 +262,7 @@ JsonValue JsonArray::operator[](std::size_t index) const {
 
 bool JsonArray::IsValid() const {
   auto *(val) = reinterpret_cast<yyjson_mut_val *>(value_.val_);
+  (void)(val);
 
   assert(val);
   assert(yyjson_mut_is_arr(val));
