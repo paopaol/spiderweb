@@ -9,7 +9,7 @@ float ToFloat(const VVV &v) {
 }
 
 static void BM_ToFloat(benchmark::State &state) {
-  spiderweb::Variant v = std::string("1");
+  spiderweb::Variant v = 1.f;
 
   int count = 0;
   for (auto _ : state) {
@@ -52,3 +52,25 @@ static void BM_ToFloatUnion(benchmark::State &state) {
 }
 
 BENCHMARK(BM_ToFloatUnion);
+
+static void BM_GetString(benchmark::State &state) {
+  spiderweb::Variant v = std::string("1234567890");
+
+  for (auto _ : state) {
+    const auto &g = v.Get<std::string>();
+    g.begin();
+  }
+}
+
+BENCHMARK(BM_GetString);
+
+static void BM_GetStringRaw(benchmark::State &state) {
+  std::string v("1234567890");
+
+  for (auto _ : state) {
+    const auto &g = v;
+    g.begin();
+  }
+}
+
+BENCHMARK(BM_GetStringRaw);

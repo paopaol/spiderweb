@@ -112,25 +112,31 @@ struct VisitorAs<double> {
 };
 
 template <typename TargetType>
-TargetType ToIntOrFloat(const Var &v, bool *ok = nullptr) {
-  if (absl::holds_alternative<float>(v)) {
+TargetType ToIntOrFloat(const Var &v) {
+  if (absl::holds_alternative<int16_t>(v)) {
+    return absl::get<int16_t>(v);
+  } else if (absl::holds_alternative<uint16_t>(v)) {
+    return absl::get<uint16_t>(v);
+  } else if (absl::holds_alternative<int32_t>(v)) {
+    return absl::get<int32_t>(v);
+  } else if (absl::holds_alternative<uint32_t>(v)) {
+    return absl::get<uint32_t>(v);
+  } else if (absl::holds_alternative<int64_t>(v)) {
+    return absl::get<int64_t>(v);
+  } else if (absl::holds_alternative<uint64_t>(v)) {
+    return absl::get<uint64_t>(v);
+  } else if (absl::holds_alternative<double>(v)) {
+    return absl::get<double>(v);
+  } else if (absl::holds_alternative<bool>(v)) {
+    return absl::get<bool>(v);
+  } else if (absl::holds_alternative<float>(v)) {
     return absl::get<float>(v);
+  } else if (absl::holds_alternative<std::string>(v)) {
+    return std::stof(absl::get<std::string>(v));
+  } else if (absl::holds_alternative<Monostate>(v) || absl::holds_alternative<absl::any>(v)) {
+    return 0;
   }
   return 0;
-  // bool       success = true;
-  // TargetType result = 0;
-  //
-  // try {
-  //   result = absl::visit(detail::VisitorAs<TargetType>(), v);
-  // } catch (const std::exception &e) {
-  //   success = false;
-  // }
-  //
-  // if (ok) {
-  //   *ok = success;
-  // }
-  //
-  // return result;
 }
 
 }  // namespace detail

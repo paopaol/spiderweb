@@ -1,7 +1,5 @@
 #include "spiderweb/io/spiderweb_named_pipe.h"
 
-#include "absl/types/variant.h"
-#include "fmt/format.h"
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_notify_spy.h"

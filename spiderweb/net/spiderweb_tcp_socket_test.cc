@@ -1,8 +1,8 @@
 #include "spiderweb/net/spiderweb_tcp_socket.h"
 
 #include "core/internal/asio_cast.h"
-#include "fmt/ranges.h"
 #include "gtest/gtest.h"
+#include "spdlog/fmt/bin_to_hex.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_notify_spy.h"
 #include "spiderweb/io/private/spiderweb_stream_private.h"
@@ -225,7 +225,7 @@ TEST(spiderweb_tcp_socket, ReadSuccess) {
   std::vector<char> data;
   last.Read(data);
 
-  fmt::print("{}\n", data);
+  fmt::print("{}\n", spdlog::to_hex(data));
 }
 
 TEST(spiderweb_tcp_socket, ReadFailed) {

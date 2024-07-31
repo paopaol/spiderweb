@@ -79,4 +79,3 @@ if(NOT canary_POPULATED)
       "${CMAKE_CURRENT_SOURCE_DIR}/../spiderweb/asio-1.22.1"
       CACHE INTERNAL "")
   add_subdirectory(${canary_SOURCE_DIR} ${canary_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()

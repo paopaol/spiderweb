@@ -54,14 +54,14 @@ target_sources(
     type/spiderweb_variant.cc
     reflect/pugixml_impl.cc
     reflect/yyjson_impl.cc
-  PRIVATE io/private/spiderweb_stream_private.h
-          io/private/spiderweb_named_pipe_private.h
-          net/private/spiderweb_tcp_socket_private.h
-          net/private/spiderweb_tcp_server_private.h
-          serial/private/spiderweb_serialport_private.h
-          serial/private/spiderweb_socketcan_private.h
-          ppk_assert.h
-          ppk_assert.cpp)
+    io/private/spiderweb_stream_private.h
+    io/private/spiderweb_named_pipe_private.h
+    net/private/spiderweb_tcp_socket_private.h
+    net/private/spiderweb_tcp_server_private.h
+    serial/private/spiderweb_serialport_private.h
+    serial/private/spiderweb_socketcan_private.h
+    ppk_assert.h
+    ppk_assert.cpp)
 
 target_include_directories(
   spiderweb
@@ -86,13 +86,12 @@ target_link_libraries(
   PUBLIC absl::any
          absl::variant
          absl::strings
-         ghc_filesystem
-         fmt
-         spdlog
-         yyjson
+         ghcFilesystem::ghc_filesystem
+         spdlog::spdlog
+         yyjson::yyjson
          pugixml
-         date
-         date-tz
+         date::date
+         date::date-tz
          canary::canary)
 add_subdirectory(reflect)
 
@@ -124,7 +123,8 @@ target_sources(
           type/spiderweb_variant_test.cc
           reflect/pugixml_impl_test.cc
           reflect/yyjson_impl_test.cc)
-target_link_libraries(spiderweb_test PRIVATE spiderweb gtest_main gtest gmock)
+target_link_libraries(spiderweb_test PRIVATE spiderweb GTest::gtest_main
+                                             GTest::gtest GTest::gmock)
 
 # benchmark
 add_executable(spiderweb_benchmark)
@@ -132,5 +132,6 @@ target_sources(
   spiderweb_benchmark
   PRIVATE core/spiderweb_notify_benchmark.cc core/spiderweb_timer_benchmark.cc
           type/spiderweb_variant_benchmark.cc)
-target_link_libraries(spiderweb_benchmark PRIVATE spiderweb benchmark
-                                                  benchmark_main)
+target_link_libraries(
+  spiderweb_benchmark PRIVATE spiderweb benchmark::benchmark
+                              benchmark::benchmark_main)

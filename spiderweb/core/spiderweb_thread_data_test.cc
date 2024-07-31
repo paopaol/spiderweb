@@ -3,8 +3,8 @@
 
 #include <sstream>
 
-#include "fmt/format.h"
 #include "gtest/gtest.h"
+#include "spdlog/fmt/fmt.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_thread.h"
 #include "spiderweb/core/spiderweb_timer.h"
@@ -85,6 +85,11 @@ TEST(a, b) {
 
   EXPECT_EQ(server->Call(&Service::SetCurrent, 123), 123);
 
+  loop.RunAfter(3000, [&]() {
+    thread.Quit();
+    loop.Quit();
+  });
+
   loop.Exec();
 }
 
@@ -96,7 +101,13 @@ TEST(a, AsyncDelete) {
 
   auto *server = spiderweb::ThreadData<Service>::New(&thread, 1, "name");
 
-  spiderweb::ThreadData<Service>::AsyncDelete(server, []() { fmt::print("destory called \n"); });
+  spiderweb::ThreadData<Service>::AsyncDelete(server, [&]() {
+    fmt::print("destory called \n");
+    loop.QueueTask([&]() {
+      thread.Quit();
+      loop.Quit();
+    });
+  });
 
   loop.Exec();
 }
@@ -112,7 +123,12 @@ TEST(a, AsyncCall) {
   server->AsyncCallThen(&Service::GetName,
                         [](const std::string &name) { fmt::print("name {}\n", name); });
 
-  server->AsyncCallThen(&Service::SetUp, []() {});
+  server->AsyncCallThen(&Service::SetUp, [&]() {
+    loop.QueueTask([&]() {
+      thread.Quit();
+      loop.Quit();
+    });
+  });
 
   loop.Exec();
 }

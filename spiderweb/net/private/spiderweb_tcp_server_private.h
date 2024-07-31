@@ -2,7 +2,6 @@
 #define SPIDERWEB_TCP_SERVER_PRIVATE_H
 
 #include "asio.hpp"
-#include "fmt/format.h"
 #include "spdlog/spdlog.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/io/private/spiderweb_stream_private.h"
