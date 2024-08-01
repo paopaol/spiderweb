@@ -1,6 +1,7 @@
 #include "spiderweb/type/spiderweb_variant.h"
 
 #include "gtest/gtest.h"
+#include "spiderweb/type/spiderweb_variant_match.h"
 
 struct St {};
 
@@ -222,4 +223,27 @@ TEST(Variant, AssginOtherTypes) {
     v1 = "fff";
     v1 = true;
   }
+}
+
+TEST(Variant, Match) {
+  absl::variant<int, std::string> var;
+
+  var = 123;
+
+  int         int_v = 0;
+  std::string str_v = "";
+
+  spiderweb::Match<int, std::string>(
+      var, [&](int v) { int_v = v; }, [&](const std::string &v) { str_v = v; });
+  EXPECT_EQ(int_v, 123);
+  EXPECT_EQ(str_v, "");
+
+  var = "abc";
+
+  int_v = 0;
+  str_v = "";
+  spiderweb::Match<int, std::string>(
+      var, [&](int v) { int_v = v; }, [&](const std::string &v) { str_v = v; });
+  EXPECT_EQ(int_v, 0);
+  EXPECT_EQ(str_v, "abc");
 }
