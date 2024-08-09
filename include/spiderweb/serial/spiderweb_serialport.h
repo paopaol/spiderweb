@@ -15,12 +15,12 @@ class IoPrivate;
 
 namespace serial {
 
-enum class StopBits {
+enum class StopBits : uint8_t {
   kOne,
   kTwo,
 };
 
-enum class BaudRate {
+enum class BaudRate : uint8_t {
   k1200,
   k2400,
   k4800,
@@ -31,14 +31,14 @@ enum class BaudRate {
   k115200,
 };
 
-enum class DataBits {
+enum class DataBits : uint8_t {
   k5,
   k6,
   k7,
   k8,
 };
 
-enum class Parity {
+enum class Parity : uint8_t {
   kNoParity,
   kEvenParity,
   kOddParity,
