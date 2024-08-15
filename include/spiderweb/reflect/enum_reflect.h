@@ -1,8 +1,8 @@
 #ifndef SPIDERWEB_REFLECT_ENUM_H
 #define SPIDERWEB_REFLECT_ENUM_H
 
-#include <map>
 #include <type_traits>
+#include <unordered_map>
 
 #include "macro_map.h"
 
@@ -29,14 +29,14 @@ namespace reflect {
   template <typename = typename std::enable_if<std::is_enum<EnumType>::value>::type> \
   inline EnumType MapFrom(const AliasType &value, EnumType defaultValue) {           \
     using Type = EnumType;                                                           \
-    static const std::map<AliasType, EnumType> _map{                                 \
+    static const std::unordered_map<AliasType, EnumType> _map{                       \
         MACRO_MAP(reflect_enum_expand_alias_enum_pair, __VA_ARGS__)};                \
     const auto it = _map.find(value);                                                \
     return it == _map.end() ? defaultValue : it->second;                             \
   }                                                                                  \
-  inline void MapTo(EnumType value, AliasType &to) {                                \
+  inline void MapTo(EnumType value, AliasType &to) {                                 \
     using Type = EnumType;                                                           \
-    static const std::map<EnumType, AliasType> _map{                                 \
+    static const std::unordered_map<EnumType, AliasType> _map{                       \
         MACRO_MAP(reflect_enum_expand_enum_alias_pair, __VA_ARGS__)};                \
     to = _map.at(value);                                                             \
   }                                                                                  \
