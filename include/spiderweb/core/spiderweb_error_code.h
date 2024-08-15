@@ -31,7 +31,8 @@ class ErrorCode : public std::error_code {
 
   ErrorCode &operator=(ErrorCode &&other) noexcept {
     if (this != &other) {
-      *this = std::move(other);
+      long_error_ = std::move(other.long_error_);
+      SetErrorCode(other);
     }
     return *this;
   }

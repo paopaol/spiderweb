@@ -1,6 +1,8 @@
 #ifndef SPIDERWEB_IO_BUFFER_H
 #define SPIDERWEB_IO_BUFFER_H
 
+#include <absl/types/span.h>
+
 #include <string>
 #include <vector>
 
@@ -41,7 +43,11 @@ class Buffer {
 
   void Reset();
 
+  void Skip(uint32_t size);
+
   bool PeekAt(std::vector<char> &p, size_t index, size_t size);
+
+  bool PointerAt(char **p, size_t index, size_t size);
 
   void Optimization();
 
@@ -104,6 +110,21 @@ class BufferReader {
 
   inline size_t ZeroCopyRead(char *&ptr, size_t n) const {
     return buffer_.ZeroCopyRead(ptr, n);
+  }
+
+  inline void Skip(uint32_t size) const {
+    buffer_.Skip(size);
+  }
+
+  inline size_t PointerAt(char *&ptr, size_t index, size_t size) const {
+    return buffer_.PointerAt(&ptr, index, size);
+  }
+
+  inline absl::Span<uint8_t> PointerAt(size_t index, size_t size) const {
+    char *p = nullptr;
+    PointerAt(p, index, size);
+
+    return absl::Span<uint8_t>(reinterpret_cast<uint8_t *>(p), size);
   }
 
   inline bool PeekAt(std::vector<char> &p, size_t index, size_t size) const {

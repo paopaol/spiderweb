@@ -38,7 +38,7 @@ struct BitmapReader {
   }
 
   inline T Value() const {
-    const auto num = sizeof(T) * 8 - 1 - high;
+    constexpr auto num = sizeof(T) * 8 - 1 - high;
     static_assert(num >= 0, "bad arg");
 
     T result = value << num;

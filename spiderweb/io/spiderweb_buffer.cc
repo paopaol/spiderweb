@@ -85,8 +85,21 @@ void Buffer::Reset() {
   ridx = 0;
   widx = 0;
 }
+void Buffer::Skip(uint32_t size) {
+  char *ptr;
+  ZeroCopyRead(ptr, size);
+}
 
 bool Buffer::PeekAt(std::vector<char> &p, size_t index, size_t size) {
+  char *pointer = nullptr;
+  if (!PointerAt(&pointer, index, size)) {
+    return false;
+  }
+  std::copy(pointer, pointer + size, std::back_inserter(p));
+  return true;
+}
+
+bool Buffer::PointerAt(char **p, size_t index, size_t size) {
   if (index < 0 || index >= Len()) {
     return false;
   }
@@ -99,8 +112,7 @@ bool Buffer::PeekAt(std::vector<char> &p, size_t index, size_t size) {
     return false;
   }
 
-  p.clear();
-  std::copy(b.data() + index, b.data() + index + size, std::back_inserter(p));
+  *p = b.data() + index;
   return true;
 }
 

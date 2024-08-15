@@ -25,13 +25,13 @@ class Timer::Private {
       if (e.value() == asio::error::operation_aborted || !is_running) {
         return;
       }
-
+      is_running = false;
       spider_emit q->timeout();
 
       if (singal_shot) {
-        is_running = false;
         return;
       }
+      is_running = true;
       SetExpired(timeout_ms);
     });
   }
