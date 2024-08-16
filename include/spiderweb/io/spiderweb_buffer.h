@@ -120,7 +120,7 @@ class BufferReader {
     return buffer_.PointerAt(&ptr, index, size);
   }
 
-  inline absl::Span<uint8_t> PointerAt(size_t index, size_t size) const {
+  inline absl::Span<uint8_t> SpanAt(size_t index, size_t size) const {
     char *p = nullptr;
     PointerAt(p, index, size);
 
