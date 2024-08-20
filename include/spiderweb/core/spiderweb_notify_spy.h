@@ -35,6 +35,13 @@ class NotifySpy : public Object {
     return absl::any_cast<std::tuple<Args...>>(last);
   }
 
+  template <typename... Args>
+  const std::tuple<Args...> ResultAt(uint32_t index) const {
+    assert(!results_.empty());
+    const auto &last = results_[index];
+    return absl::any_cast<std::tuple<Args...>>(last);
+  }
+
  private:
   uint64_t               count_ = 0;
   std::vector<absl::any> results_;

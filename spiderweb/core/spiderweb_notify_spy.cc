@@ -9,7 +9,7 @@ void NotifySpy::Wait(int ms, uint64_t count, uint64_t tick_ms) {
   do {
     std::error_code ec;
     AsioService(ownerEventLoop()).run_for(std::chrono::milliseconds(tick_ms));
-    left -= 10;
+    left -= tick_ms;
   } while (left > 0 && count_ < count);
 }
 
