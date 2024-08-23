@@ -26,6 +26,11 @@ class NotifySpy : public Object {
     return count_;
   }
 
+  inline void Clear() {
+    count_ = 0;
+    results_.clear();
+  }
+
   void Wait(int ms = 3000, uint64_t count = 1, uint64_t tick_ms = 10);
 
   template <typename... Args>
