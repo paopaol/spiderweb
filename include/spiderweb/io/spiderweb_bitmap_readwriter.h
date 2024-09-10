@@ -58,28 +58,12 @@ struct BitmapWriter {
   }
 
   inline void Set(const T v) {
-    constexpr std::size_t kMaxBits = sizeof(T) * 8;
-    constexpr std::size_t low_bound = Max<0, low - 1>::value;
-    constexpr std::size_t high_bound = Min<high + 1, kMaxBits - 1>::value;
-
-    const BitmapReader<T, 0, high - low>            adjusted(v);
-    const BitmapReader<T, 0, low_bound>             low_value(value);
-    const BitmapReader<T, high_bound, kMaxBits - 1> high_value(value);
-
-    value = (high_value.Value() << high_bound) | (adjusted.Value() << low) | low_value.Value();
+    T mask = ((1 << (high - low + 1)) - 1) << low;
+    value &= ~mask;
+    value |= (v << low) & mask;
   }
 
  private:
-  template <int32_t a, int32_t b>
-  struct Max {
-    static constexpr int32_t value = a > b ? a : b;
-  };
-
-  template <int32_t a, int32_t b>
-  struct Min {
-    static constexpr int32_t value = a < b ? a : b;
-  };
-
   T &value;
 };
 
