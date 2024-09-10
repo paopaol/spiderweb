@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <type_traits>
 
 namespace spiderweb {
@@ -20,7 +21,7 @@ namespace io {
  *
  * @example
  *
- * //access bit 0
+ * //access bit 31
  * uint32_t id = 0;
  * spiderweb::io::BitmapWriter<uint32_t, 31, 31> w(id);
  * w.Set(1); //id should be 0x80000000
@@ -69,14 +70,14 @@ struct BitmapWriter {
   }
 
  private:
-  template <std::size_t a, std::size_t b>
+  template <int32_t a, int32_t b>
   struct Max {
-    static constexpr std::size_t value = a > b ? a : b;
+    static constexpr int32_t value = a > b ? a : b;
   };
 
-  template <std::size_t a, std::size_t b>
+  template <int32_t a, int32_t b>
   struct Min {
-    static constexpr std::size_t value = a < b ? a : b;
+    static constexpr int32_t value = a < b ? a : b;
   };
 
   T &value;
