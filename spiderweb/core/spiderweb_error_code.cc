@@ -1,5 +1,7 @@
 #include "spiderweb/core/spiderweb_error_code.h"
 
+#include <utility>
+
 namespace spiderweb {
 std::string ErrorCode::FormatedMessage() const {
   std::string s;
@@ -44,7 +46,7 @@ ErrorCode MakeErrorCode(ErrC e) {
 }
 
 ErrorCode MakeErrorCode(ErrC e, std::string long_err) {
-  return {static_cast<int>(e), error_cate, long_err};
+  return {static_cast<int>(e), error_cate, std::move(long_err)};
 }
 
 ErrorCode MakeErrorCode(std::error_code e, const std::string &long_err) {

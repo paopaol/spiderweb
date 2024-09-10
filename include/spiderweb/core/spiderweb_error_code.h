@@ -39,7 +39,8 @@ class ErrorCode : public std::error_code {
 
   ErrorCode &operator=(const ErrorCode &other) {
     if (this != &other) {
-      *this = other;
+      long_error_ = std::move(other.long_error_);
+      SetErrorCode(other);
     }
 
     return *this;
