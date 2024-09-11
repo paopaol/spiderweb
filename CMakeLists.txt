@@ -10,6 +10,7 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+option(SPIDERWEB_INSTALL "use find_package for absl" ON)
 option(SPIDERWEB_ABSL_USE_PACKAGE "use find_package for absl" ON)
 option(SPIDERWEB_PUGIXML_USE_PACKAGE "use find_package for pugixml" ON)
 option(SPIDERWEB_GTEST_USE_PACKAGE "use find_package for gtest" ON)
@@ -64,21 +65,20 @@ add_subdirectory(spiderweb)
 
 # ------------------------------------------------------------------------------
 # Install
-include(GNUInstallDirs)
-
-install(
-  TARGETS spiderweb
-  EXPORT spiderweb-targets
-  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-  INCLUDES
-  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-install(
-  EXPORT spiderweb-targets
-  FILE spiderweb-config.cmake
-  NAMESPACE spiderweb::
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spiderweb")
-install(DIRECTORY include DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-# install( DIRECTORY include/libwebsockets DESTINATION
-# "${LWS_INSTALL_INCLUDE_DIR}" COMPONENT dev)
+if(SPIDERWEB_INSTALL)
+  include(GNUInstallDirs)
+  install(
+    TARGETS spiderweb
+    EXPORT spiderweb-targets
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    INCLUDES
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+  install(
+    EXPORT spiderweb-targets
+    FILE spiderweb-config.cmake
+    NAMESPACE spiderweb::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spiderweb")
+  install(DIRECTORY include/spiderweb DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+endif()
