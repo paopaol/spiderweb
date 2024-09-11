@@ -64,10 +64,10 @@ target_sources(
     ppk_assert.cpp)
 
 target_include_directories(
-  spiderweb
-  PUBLIC ${PROJECT_SOURCE_DIR}/thrd/asio-1.22.1/include
-         ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}
-         ${PROJECT_SOURCE_DIR}/include)
+  spiderweb PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+target_include_directories(
+  spiderweb PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 # we do not use any bosst components
 target_compile_definitions(
   spiderweb

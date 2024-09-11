@@ -61,3 +61,24 @@ if(NOT WIN32)
 endif()
 
 add_subdirectory(spiderweb)
+
+# ------------------------------------------------------------------------------
+# Install
+include(GNUInstallDirs)
+
+install(
+  TARGETS spiderweb
+  EXPORT spiderweb-targets
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+  INCLUDES
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(
+  EXPORT spiderweb-targets
+  FILE spiderweb-config.cmake
+  NAMESPACE spiderweb::
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spiderweb")
+install(DIRECTORY include DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+# install( DIRECTORY include/libwebsockets DESTINATION
+# "${LWS_INSTALL_INCLUDE_DIR}" COMPONENT dev)
