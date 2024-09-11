@@ -2,7 +2,10 @@
 
 #include "core/internal/asio_cast.h"
 #include "gtest/gtest.h"
+// clang-format off
+#include "spdlog/spdlog.h"
 #include "spdlog/fmt/bin_to_hex.h"
+// clang-format on
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_notify_spy.h"
 #include "spiderweb/io/private/spiderweb_stream_private.h"
