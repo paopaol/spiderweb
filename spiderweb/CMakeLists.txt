@@ -3,6 +3,7 @@ add_library(spiderweb SHARED)
 target_sources(
   spiderweb
   PRIVATE
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/ppk_assert.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_error_code.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_notify_spy.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_notify.h
@@ -60,7 +61,6 @@ target_sources(
     net/private/spiderweb_tcp_server_private.h
     serial/private/spiderweb_serialport_private.h
     serial/private/spiderweb_socketcan_private.h
-    ppk_assert.h
     ppk_assert.cpp)
 
 target_include_directories(
@@ -83,16 +83,16 @@ target_compile_definitions(
 
 target_link_libraries(
   spiderweb
-  PUBLIC absl::any
-         absl::variant
-         absl::strings
-         ghcFilesystem::ghc_filesystem
-         spdlog::spdlog
-         yyjson::yyjson
-         pugixml
-         date::date
-         date::date-tz
-         canary::canary)
+  PUBLIC $<BUILD_INTERFACE:absl::any>
+         $<BUILD_INTERFACE:absl::variant>
+         $<BUILD_INTERFACE:absl::strings>
+         $<BUILD_INTERFACE:ghcFilesystem::ghc_filesystem>
+         $<BUILD_INTERFACE:spdlog::spdlog>
+         $<BUILD_INTERFACE:yyjson::yyjson>
+         $<BUILD_INTERFACE:pugixml>
+         $<BUILD_INTERFACE:date::date>
+         $<BUILD_INTERFACE:date::date-tz>
+         $<BUILD_INTERFACE:canary::canary>)
 add_subdirectory(reflect)
 
 # unit test

@@ -61,6 +61,9 @@ if(NOT WIN32)
   add_compile_options("-Wall" "-Werror" "-Wno-unused-function")
 endif()
 
+set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 add_subdirectory(spiderweb)
 
 # ------------------------------------------------------------------------------
