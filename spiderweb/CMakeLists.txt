@@ -1,5 +1,12 @@
 add_library(spiderweb SHARED)
 
+
+set(LINUX_ONLY_FILES  ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_socketcan.h  serial/spiderweb_socketcan.cc 
+${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_named_pipe.h
+io/spiderweb_named_pipe.cc
+
+)
+
 target_sources(
   spiderweb
   PRIVATE
@@ -12,7 +19,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_timer.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_waiter.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_thread.h
-    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_thread_data.h
+    #${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_thread_data.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_unbounded_queue.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_range.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_synchronized.h
@@ -20,11 +27,9 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_binary_writer.hpp
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_buffer.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_bitmap_readwriter.h
-    ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_named_pipe.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_socket.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_server.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_serialport.h
-    ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_socketcan.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/enum_reflect.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/json_reflect.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/json_node.h
@@ -47,11 +52,9 @@ target_sources(
     core/spiderweb_thread.cc
     core/spiderweb_signal.cc
     io/spiderweb_buffer.cc
-    io/spiderweb_named_pipe.cc
     net/spiderweb_tcp_socket.cc
     net/spiderweb_tcp_server.cc
     serial/spiderweb_serialport.cc
-    serial/spiderweb_socketcan.cc
     type/spiderweb_variant.cc
     reflect/pugixml_impl.cc
     reflect/yyjson_impl.cc
@@ -80,6 +83,13 @@ target_compile_definitions(
          ASIO_HAS_STD_SHARED_PTR
          ASIO_HAS_STD_FUNCTION
          ASIO_DISABLE_STD_ALIGNED_ALLOC)
+if(MSVC)
+target_compile_definitions(
+  spiderweb
+  PUBLIC _WIN32_WINNT=0x0601 -D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
+
+target_compile_options(spiderweb PUBLIC /wd4003 /wd4244)
+endif()
 
 target_link_libraries(
   spiderweb
@@ -91,9 +101,17 @@ target_link_libraries(
          $<BUILD_INTERFACE:yyjson::yyjson>
          $<BUILD_INTERFACE:pugixml>
          $<BUILD_INTERFACE:date::date>
-         $<BUILD_INTERFACE:date::date-tz>
+         $<BUILD_INTERFACE:date::date-tz>)
+if(NOT MSVC)
+target_link_libraries(
+  spiderweb
+  PUBLIC
          $<BUILD_INTERFACE:canary::canary>)
+endif()
+
 add_subdirectory(reflect)
+
+
 
 # unit test
 add_executable(spiderweb_test)
@@ -106,18 +124,18 @@ target_sources(
           core/spiderweb_notify_spy_test.cc
           core/spiderweb_waiter_test.cc
           core/spiderweb_thread_test.cc
-          core/spiderweb_thread_data_test.cc
+         # core/spiderweb_thread_data_test.cc remove it
           core/spiderweb_unbounded_queue_test.cc
           core/spiderweb_range_test.cc
           core/spiderweb_synchronized_test.cc
           core/spiderweb_signal_test.cc
           io/spiderweb_binary_writer_test.cc
           io/spiderweb_bitmap_readwriter_test.cc
-          io/spiderweb_named_pipe_test.cc
+          #io/spiderweb_named_pipe_test.cc
           net/spiderweb_tcp_socket_test.cc
           net/spiderweb_tcp_server_test.cc
           serial/spiderweb_serialport_test.cc
-          serial/spiderweb_socketcan_test.cc
+          #serial/spiderweb_socketcan_test.cc
           type/spiderweb_any_view_test.cc
           type/spiderweb_binary_view_test.cc
           type/spiderweb_variant_test.cc

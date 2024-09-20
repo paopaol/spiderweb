@@ -69,6 +69,7 @@ TEST(pugixml_impl, FromXml) {
   EXPECT_EQ(people.child.id, 123);
   EXPECT_EQ(people.attri_bool_value, true);
   EXPECT_EQ(people.child_bool_value, false);
+  
 }
 
 TEST(pugixml_impl, FromXmlInnerHtml) {

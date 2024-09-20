@@ -208,13 +208,13 @@ TEST(spiderweb_tcp_socket, ReadSuccess) {
           [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {
             asio::buffer_copy(buffers, asio::buffer("hello", 5));
             const auto size = 5;
-            loop.QueueTask([handler]() { handler(asio::error_code(), size); });
+            loop.QueueTask([handler,size]() { handler(asio::error_code(), size); });
           })
       .WillOnce(
           [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {
             asio::buffer_copy(buffers, asio::buffer("world", 5));
             const auto size = 5;
-            loop.QueueTask([handler]() { handler(asio::error_code(), size); });
+            loop.QueueTask([handler,size]() { handler(asio::error_code(), size); });
           })
       .WillOnce(
           [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {});

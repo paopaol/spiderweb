@@ -54,6 +54,9 @@ endif()
 
 if(SPIDERWEB_ASIO_USE_PACKAGE)
   pkg_check_modules(asio REQUIRED)
+endif()
+
+if(NOT MSVC)
   find_package(canary REQUIRED)
 endif()
 
@@ -63,6 +66,8 @@ endif()
 
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 
 add_subdirectory(spiderweb)
 

@@ -1,7 +1,13 @@
 
 #pragma once
 
+#ifdef WIN32
+#include <WinSock2.h>
+#else
 #include <arpa/inet.h>
+#endif
+
+#include "spiderweb/arch/spiderweb_endian.h"
 
 #include <cstdint>
 #include <type_traits>

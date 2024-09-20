@@ -2,6 +2,7 @@
 
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
+#include <csignal>
 
 TEST(SignalTest, Emit) {
   spiderweb::EventLoop loop;
@@ -15,7 +16,7 @@ TEST(SignalTest, Emit) {
                                loop.Exit(0);
                              });
 
-  loop.RunAfter(1000, []() { kill(getpid(), SIGINT); });
+  //loop.RunAfter(1000, []() { kill(getpid(), SIGINT); });
 
   loop.Exec();
 

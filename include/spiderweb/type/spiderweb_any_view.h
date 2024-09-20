@@ -2,6 +2,7 @@
 #define SPIDERWEB_TYPE_ANY_VIEW_H
 
 #include "absl/types/any.h"
+#include <string>
 
 namespace spiderweb {
 namespace type {
@@ -64,19 +65,19 @@ class AnyView {
     return ToPodType<float>(var);
   }
 
-  inline static float ToDouble(const absl::any &var) {
+  inline static double ToDouble(const absl::any &var) {
     return ToPodType<double>(var);
   }
 
-  inline static float ToBool(const absl::any &var) {
+  inline static bool ToBool(const absl::any &var) {
     return ToPodType<bool>(var);
   }
 
-  inline static float ToUint64(const absl::any &var) {
+  inline static uint64_t ToUint64(const absl::any &var) {
     return ToPodType<uint64_t>(var);
   }
 
-  inline static float ToInt64(const absl::any &var) {
+  inline static int64_t ToInt64(const absl::any &var) {
     return ToPodType<int64_t>(var);
   }
 

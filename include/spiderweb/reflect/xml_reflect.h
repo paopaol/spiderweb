@@ -259,7 +259,7 @@ class XmlReader {
 template <typename XmlValueType, typename BuilderType>
 class XmlWriter {
  public:
-  using StringType = decltype(std::declval<XmlValueType>().template ToString());
+  using StringType = decltype(std::declval<XmlValueType>().ToString());
   XmlWriter() = default;
 
   ~XmlWriter() = default;
@@ -304,7 +304,7 @@ class XmlWriter {
   }
 
   StringType ToString() const {
-    return builder_.Root().template ToString();
+    return builder_.Root().ToString();
   }
 
  private:

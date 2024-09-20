@@ -118,21 +118,21 @@ TargetType ToIntOrFloat(const Var &v) {
   } else if (absl::holds_alternative<uint16_t>(v)) {
     return absl::get<uint16_t>(v);
   } else if (absl::holds_alternative<int32_t>(v)) {
-    return absl::get<int32_t>(v);
+    return static_cast<TargetType>(absl::get<int32_t>(v));
   } else if (absl::holds_alternative<uint32_t>(v)) {
-    return absl::get<uint32_t>(v);
+    return static_cast<TargetType>(absl::get<uint32_t>(v));
   } else if (absl::holds_alternative<int64_t>(v)) {
-    return absl::get<int64_t>(v);
+    return static_cast<TargetType>(absl::get<int64_t>(v));
   } else if (absl::holds_alternative<uint64_t>(v)) {
-    return absl::get<uint64_t>(v);
+    return static_cast<TargetType>(absl::get<uint64_t>(v));
   } else if (absl::holds_alternative<double>(v)) {
-    return absl::get<double>(v);
+    return static_cast<TargetType>(absl::get<double>(v));
   } else if (absl::holds_alternative<bool>(v)) {
     return absl::get<bool>(v);
   } else if (absl::holds_alternative<float>(v)) {
-    return absl::get<float>(v);
+    return static_cast<TargetType>(absl::get<float>(v));
   } else if (absl::holds_alternative<std::string>(v)) {
-    return std::stof(absl::get<std::string>(v));
+    return static_cast<TargetType>(std::stof(absl::get<std::string>(v)));
   } else if (absl::holds_alternative<Monostate>(v) || absl::holds_alternative<absl::any>(v)) {
     return 0;
   }
