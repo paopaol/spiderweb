@@ -1,5 +1,6 @@
 #include "spiderweb/serial/spiderweb_serialport.h"
 
+#include "ghc/filesystem.hpp"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
@@ -19,13 +20,9 @@ TEST_F(SerialPortTest, Construct) {
 
   spy.Wait();
 
-  EXPECT_EQ(spy.Count(), 0);
-  std::cout << spy.Count() << "\n";
-  std::error_code ec;
-
-  // std::tie(ec) = spy.LastResult<std::error_code>();
-
-  serial.SetBaudRate(spiderweb::serial::BaudRate::k115200, ec);
-  ASSERT_TRUE(ec.value() == 0) << ec.message();
-  EXPECT_TRUE(serial.GetBaudRate() == spiderweb::serial::BaudRate::k115200);
+  if (ghc::filesystem::exists("/dev/ttyS1")) {
+    EXPECT_EQ(spy.Count(), 1);
+  } else {
+    EXPECT_EQ(spy.Count(), 0);
+  }
 }

@@ -1,6 +1,7 @@
 #ifndef SPIDERWEB_TCP_SERVER_H
 #define SPIDERWEB_TCP_SERVER_H
 
+#include "spiderweb/core/spiderweb_error_code.h"
 #include "spiderweb/core/spiderweb_notify.h"
 #include "spiderweb/core/spiderweb_object.h"
 
@@ -16,7 +17,11 @@ class TcpServer : public Object {
 
   void ListenAndServ();
 
+  void Stop();
+
   Notify<TcpSocket *> InComingConnection;
+
+  Notify<spiderweb::ErrorCode> Stopped;
 
  private:
   std::shared_ptr<Private> d;

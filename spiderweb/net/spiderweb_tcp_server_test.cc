@@ -83,3 +83,25 @@ TEST(spiderweb_tcp_server, SafeDelete) {
   server->ListenAndServ();
   delete server;
 }
+
+TEST(spiderweb_tcp_server, Stop) {
+  using ::testing::_;
+
+  spiderweb::EventLoop loop;
+  auto                *server = new spiderweb::net::TcpServer(1234);
+
+  spiderweb::NotifySpy spy(server, &spiderweb::net::TcpServer::Stopped);
+
+  server->ListenAndServ();
+
+  loop.RunAfter(100, [&]() { server->Stop(); });
+
+  spy.Wait();
+  EXPECT_EQ(spy.Count(), 1);
+  spy.Clear();
+
+  server->ListenAndServ();
+  loop.RunAfter(100, [&]() { server->Stop(); });
+  spy.Wait(100000);
+  EXPECT_EQ(spy.Count(), 1);
+}

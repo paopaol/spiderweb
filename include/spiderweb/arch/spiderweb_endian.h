@@ -109,10 +109,10 @@
 
 #endif
 
-#define __BYTE_ORDER BYTE_ORDER
-#define __BIG_ENDIAN BIG_ENDIAN
-#define __LITTLE_ENDIAN LITTLE_ENDIAN
-#define __PDP_ENDIAN PDP_ENDIAN
+// #define __BYTE_ORDER BYTE_ORDER
+// #define __BIG_ENDIAN BIG_ENDIAN
+// #define __LITTLE_ENDIAN LITTLE_ENDIAN
+// #define __PDP_ENDIAN PDP_ENDIAN
 
 #else
 

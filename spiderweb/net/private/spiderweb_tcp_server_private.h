@@ -15,6 +15,7 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
  public:
   explicit Private(uint16_t port, TcpServer *qq)
       : q(qq),
+        port_(port),
         /**
          * @brief currently, only support ipv4
          */
@@ -26,7 +27,7 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
 
   template <typename Acceptor>
   void StartAccept(Acceptor &tcp_acceptor) {
-    if (!q) {
+    if (!q || !acceptor.is_open()) {
       return;
     }
 
@@ -53,6 +54,7 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
   }
 
   TcpServer              *q = nullptr;
+  uint16_t                port_;
   asio::ip::tcp::acceptor acceptor;
 };
 
