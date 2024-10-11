@@ -1,12 +1,12 @@
 #include "spiderweb/net/spiderweb_tcp_server.h"
 
-#include "asio.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_notify_spy.h"
 #include "spiderweb/net/private/spiderweb_tcp_server_private.h"
 #include "spiderweb/net/spiderweb_tcp_socket.h"
+#include "spiderweb/spiderweb_check.h"
 
 class tcp_acceptor {
  public:
@@ -104,4 +104,7 @@ TEST(spiderweb_tcp_server, Stop) {
   loop.RunAfter(100, [&]() { server->Stop(); });
   spy.Wait(100000);
   EXPECT_EQ(spy.Count(), 1);
+
+  SPIDERWEB_VERIFY(1 == 1, return);
+  SPIDERWEB_VERIFY(1 == 1, spy.Clear(); return);
 }
