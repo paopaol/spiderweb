@@ -56,7 +56,7 @@ if(SPIDERWEB_ASIO_USE_PACKAGE)
   pkg_check_modules(asio REQUIRED)
 endif()
 
-if(NOT MSVC)
+if(NOT MSVC AND SPIDERWEB_ASIO_USE_PACKAGE)
   find_package(canary REQUIRED)
 endif()
 
