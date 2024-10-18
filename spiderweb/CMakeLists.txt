@@ -15,6 +15,7 @@ target_sources(
   spiderweb
   PRIVATE
     ${PROJECT_SOURCE_DIR}/include/spiderweb/ppk_assert.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_async_wait_group.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_error_code.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_notify_spy.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_notify.h
