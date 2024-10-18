@@ -33,6 +33,14 @@ JsonValue::JsonValue(Document *doc, NodeValue *val) : doc_(doc), val_(val) {
 
 JsonValue::~JsonValue() = default;
 
+bool JsonValue::GetValue(int16_t &result) const {
+  YYJSON_GET_VALUE(int)
+}
+
+bool JsonValue::GetValue(uint16_t &result) const {
+  YYJSON_GET_VALUE(int)
+}
+
 bool JsonValue::GetValue(int32_t &result) const {
   YYJSON_GET_VALUE(int)
 }
@@ -68,6 +76,14 @@ bool JsonValue::GetValue(std::string &result) const {
     result = v;
   }
   return v != nullptr;
+}
+
+bool JsonValue::SetValue(int16_t value) {
+  return SetValue(static_cast<int64_t>(value));
+}
+
+bool JsonValue::SetValue(uint16_t value) {
+  return SetValue(static_cast<int64_t>(value));
 }
 
 bool JsonValue::SetValue(int32_t value) {
