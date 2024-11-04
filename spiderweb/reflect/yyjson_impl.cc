@@ -16,11 +16,11 @@ extern "C" {
   }                                                     \
   return false;
 
-#define VAR_DECAL(val, doc)                               \
-  auto *(val) = reinterpret_cast<yyjson_mut_val *>(val_); \
-  auto *(doc) = reinterpret_cast<yyjson_mut_doc *>(doc_); \
-  assert((val) && (doc));                                 \
-  (void)(doc);                                            \
+#define VAR_DECAL(val, doc)                             \
+  auto *val = reinterpret_cast<yyjson_mut_val *>(val_); \
+  auto *doc = reinterpret_cast<yyjson_mut_doc *>(doc_); \
+  assert((val) && (doc));                               \
+  (void)(doc);                                          \
   (void)(val);
 
 namespace spiderweb {
@@ -277,7 +277,7 @@ JsonValue JsonArray::operator[](std::size_t index) const {
 }
 
 bool JsonArray::IsValid() const {
-  auto *(val) = reinterpret_cast<yyjson_mut_val *>(value_.val_);
+  auto *val = reinterpret_cast<yyjson_mut_val *>(value_.val_);
   (void)(val);
 
   assert(val);

@@ -42,7 +42,7 @@ class BinaryView {
                                                            std::is_floating_point<T>::value>::type>
   static T ViewAs(const uint8_t *buf, std::size_t size, arch::ArchType type) {
     constexpr int kTypeSize = sizeof(T);
-    PPK_ASSERT_FATAL(size >= kTypeSize, "%lu < type size %d", size, kTypeSize);
+    PPK_ASSERT_FATAL(size >= kTypeSize, "%lu < type size %d", (long unsigned)size, kTypeSize);
 
     detail::Pack<T, kTypeSize> pack{};
     std::memcpy(pack.buf, buf, kTypeSize);

@@ -100,6 +100,35 @@ struct Meta<std::shared_ptr<U>, T> {
   }
 };
 
+template <typename T>
+struct Meta<std::string, T> {
+  static constexpr bool IsMeta = false;
+  using ValueType = std::string;
+  using JsonType = T;
+  using Visitor = JsonValueVisitor<JsonType>;
+
+  inline bool FromJson(const JsonType &json, std::string *result) const {
+    if (Visitor::IsNull(json)) {
+      return false;
+    }
+    return Visitor::Get(json, *result);
+  }
+
+  inline void ToJson(const std::string *result, JsonType &json) const {
+    if (!result) {
+      return;
+    }
+    Visitor::Write(json, *result);
+  }
+
+  inline void ToJson(const std::string *result, const char *key, JsonType &json) const {
+    if (!result) {
+      return;
+    }
+    Visitor::Write(json, key, *result);
+  }
+};
+
 // array type
 template <typename ValueType, template <typename Elem, typename...> class Cont, typename JsonType>
 struct ArrayMeta {
@@ -239,7 +268,9 @@ class JsonWriter {
 
 #define REFLECT_JSON_READ_CODE_BLOCK_1
 #define REFLECT_JSON_READ_CODE_BLOCK_2(member, name) \
-  { serilizer.FromJson(name, &result->member); }
+  {                                                  \
+    serilizer.FromJson(name, &result->member);       \
+  }
 
 #define REFLECT_JSON_READ_CODE_BLOCK_3(member, name, type)    \
   {                                                           \
@@ -254,7 +285,7 @@ class JsonWriter {
 #define REFLECT_JSON_WRITE_CODE_BLOCK_3(member, name, type) \
   {                                                         \
     type value;                                             \
-    reflect::MapTo(result->member, value);                 \
+    reflect::MapTo(result->member, value);                  \
     serilizer.ToJson(name, &value);                         \
   }
 
@@ -269,10 +300,14 @@ class JsonWriter {
   PAIR
 
 #define REFLECT_JSON_READ_CODE_SIMPLE_BLOCK(member) \
-  { serilizer.FromJson(#member, &result->member); }
+  {                                                 \
+    serilizer.FromJson(#member, &result->member);   \
+  }
 
 #define reflect_json_expands_fromjson_simple(member) \
-  { serilizer.FromJson(#member, &result->member); }
+  {                                                  \
+    serilizer.FromJson(#member, &result->member);    \
+  }
 
 #define REFLECT_JSON_WRITE_CODE_SIMPLE_BLOCK(member) serilizer.ToJson(#member, &result->member);
 
