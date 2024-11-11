@@ -5,11 +5,13 @@
 #include "spiderweb/type/spiderweb_variant.h"
 
 struct Child {
-  int64_t id = 0;
+  int64_t                              id = 0;
+  spiderweb::reflect::PlaceHolderValue placeholder;
 };
-REFLECT_XML(Child, REFLECT_XML_ATTR((id, "id")))
+REFLECT_XML(Child, REFLECT_XML_ATTR((id, "id"), (placeholder)), (placeholder))
 
-enum class Sex { kBoy, kGril };
+enum class Sex : uint8_t { kBoy, kGril };
+
 REFLECT_ENUM(Sex, std::string, (kBoy, "boy"), (kGril, "gril"))
 REFLECT_ENUM(Sex, int, (kBoy, 1), (kGril, 2))
 
@@ -24,25 +26,20 @@ struct People {
   Sex         child_value_sex{Sex::kBoy};
   Sex         attr_value_sex{Sex::kBoy};
 };
-REFLECT_XML(People,
-            REFLECT_XML_ATTR((age, "age"), (height, "height"), (name, "name"),
-                             (attri_bool_value, "attri_bool_value"), (attr_value_sex, "sex", int)),
-            (address, "address"), (child, "child"), (child_bool_value, "child_bool_value"),
-            (child_value_sex, "sex", std::string))
 // clang-format off
-// REFLECT_XML_SIMPLE(People,
-//             REFLECT_XML_ATTR_SIMPLE(
-//                 age,
-//                 height,
-//                 name,
-//                 attri_bool_value,
-//                 attr_value_sex
-//             ),
-//             address,
-//             child,
-//             child_bool_value,
-//             child_value_sex,  std::string)
-//             )
+REFLECT_XML(People,
+            REFLECT_XML_ATTR(
+                (age, "age"), 
+                (height, "height"), 
+                (name, "name"),
+                (attri_bool_value, "attri_bool_value"), 
+                (attr_value_sex, "sex", int)
+            ),
+            (address, "address"), 
+            (child, "child"), 
+            (child_bool_value, "child_bool_value"),
+            (child_value_sex, "sex", std::string)
+            )
 // clang-format on
 
 struct PeopleList {
@@ -69,7 +66,6 @@ TEST(pugixml_impl, FromXml) {
   EXPECT_EQ(people.child.id, 123);
   EXPECT_EQ(people.attri_bool_value, true);
   EXPECT_EQ(people.child_bool_value, false);
-  
 }
 
 TEST(pugixml_impl, FromXmlInnerHtml) {
@@ -163,7 +159,7 @@ TEST(pugixml_impl, WriteStruct) {
   people.attr_value_sex = Sex::kGril;
   writer.Write("people", people);
 
-  std::cout << writer.ToString() << std::endl;
+  std::cout << writer.ToString() << '\n';
 }
 
 TEST(pugixml_impl, WriteSimpleBool) {
@@ -304,14 +300,26 @@ struct XmlMeta<T, Node> {
   using XmlValue = T;
   using struct_type = Node;
   static void Read(XmlValue &node, struct_type &result) {
-    { reflect ::detail ::ReadTagImpl(node, "value", result.value); }
-    { reflect ::detail ::ReadTagImpl(node, "left", result.left); }
-    { reflect ::detail ::ReadTagImpl(node, "right", result.right); }
+    {
+      reflect ::detail ::ReadTagImpl(node, "value", result.value);
+    }
+    {
+      reflect ::detail ::ReadTagImpl(node, "left", result.left);
+    }
+    {
+      reflect ::detail ::ReadTagImpl(node, "right", result.right);
+    }
   }
   static void Write(XmlValue &node, const struct_type &result) {
-    { reflect ::detail ::WriteTagImpl(node, "value", result.value); }
-    { reflect ::detail ::WriteTagImpl(node, "left", result.left); }
-    { reflect ::detail ::WriteTagImpl(node, "right", result.right); }
+    {
+      reflect ::detail ::WriteTagImpl(node, "value", result.value);
+    }
+    {
+      reflect ::detail ::WriteTagImpl(node, "left", result.left);
+    }
+    {
+      reflect ::detail ::WriteTagImpl(node, "right", result.right);
+    }
   }
 };
 }  // namespace reflect
@@ -434,6 +442,8 @@ struct MaxSupportedStruct {
   int a69;
   int a70;
   int a71;
+
+  spiderweb::reflect::PlaceHolderValue placeholder;
 };
 
 REFLECT_XML(MaxSupportedStruct,
@@ -450,7 +460,8 @@ REFLECT_XML(MaxSupportedStruct,
                              (a52, "a52"), (a53, "a53"), (a54, "a54"), (a55, "a55"), (a56, "a56"),
                              (a57, "a57"), (a58, "a58"), (a59, "a59"), (a60, "a60"), (a61, "a61"),
                              (a62, "a62"), (a63, "a63"), (a64, "a64"), (a65, "a65"), (a66, "a66"),
-                             (a67, "a67"), (a68, "a68"), (a69, "a69"), (a70, "a70"), (a71, "a71")))
+                             (a67, "a67"), (a68, "a68"), (a69, "a69"), (a70, "a70"), (a71, "a71")),
+            (placeholder))
 
 enum class ProperyType : uint8_t {
   kBool,

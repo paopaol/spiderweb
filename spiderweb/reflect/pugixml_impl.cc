@@ -70,6 +70,9 @@ XmlNode &XmlNode::operator=(const XmlNode &other) {
   return *this;
 }
 
+void XmlNode::GetAttribute(const char *, PlaceHolderValue &) const {
+}
+
 void XmlNode::GetAttribute(const char *name, uint32_t &value) const {
   value = d->root_.attribute(name).as_uint();
 }
@@ -100,6 +103,9 @@ void XmlNode::GetAttribute(const char *name, bool &value) const {
 
 void XmlNode::GetAttribute(const char *name, std::string &value) const {
   value = d->root_.attribute(name).as_string();
+}
+
+void XmlNode::SetAttribute(const char *name, PlaceHolderValue value) {
 }
 
 void XmlNode::SetAttribute(const char *name, uint32_t value) {

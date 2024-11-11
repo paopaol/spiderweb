@@ -206,6 +206,14 @@ class JsonReader {
     return meta.FromJson(*this->access_, result);
   }
 
+  inline bool FromJson(PlaceHolderValue * /*result*/) const {
+    return true;
+  }
+
+  inline bool FromJson(const char * /*key*/, PlaceHolderValue * /*result*/) const {
+    return true;
+  }
+
   template <typename U>
   inline bool FromJson(const char *key, U *result) const {
     const auto &v = Visitor::ValueOfKey(*access_, key);
@@ -245,6 +253,9 @@ class JsonWriter {
     meta.ToJson(result, *this->access_);
   }
 
+  inline void ToJson(const PlaceHolderValue *result) const {
+  }
+
   template <typename U>
   inline void ToJson(const char *key, const U *result) const {
     using ThisMeta = Meta<U, JsonType>;
@@ -254,6 +265,9 @@ class JsonWriter {
     meta.ToJson(result, value);
 
     Visitor::Write(*access_, key, value);
+  }
+
+  inline void ToJson(const char *key, const PlaceHolderValue *result) const {
   }
 
   template <typename U>
@@ -266,12 +280,9 @@ class JsonWriter {
   JsonType *access_;
 };
 
-#define REFLECT_JSON_READ_CODE_BLOCK_1
-#define REFLECT_JSON_READ_CODE_BLOCK_2(member, name) \
-  {                                                  \
-    serilizer.FromJson(name, &result->member);       \
-  }
-
+#define REFLECT_JSON_READ_CODE_BLOCK_0()
+#define REFLECT_JSON_READ_CODE_BLOCK_1(member) serilizer.FromJson(#member, &result->member);
+#define REFLECT_JSON_READ_CODE_BLOCK_2(member, name) serilizer.FromJson(name, &result->member);
 #define REFLECT_JSON_READ_CODE_BLOCK_3(member, name, type)    \
   {                                                           \
     using XmlStorageType = type;                              \
@@ -280,7 +291,8 @@ class JsonWriter {
     result->member = reflect::MapFrom(value, result->member); \
   }
 
-#define REFLECT_JSON_WRITE_CODE_BLOCK_1
+#define REFLECT_JSON_WRITE_CODE_BLOCK_0()
+#define REFLECT_JSON_WRITE_CODE_BLOCK_1(member) serilizer.ToJson(#member, &result->member);
 #define REFLECT_JSON_WRITE_CODE_BLOCK_2(member, name) serilizer.ToJson(name, &result->member);
 #define REFLECT_JSON_WRITE_CODE_BLOCK_3(member, name, type) \
   {                                                         \
@@ -294,9 +306,9 @@ class JsonWriter {
                       REFLECT_NUM_OF_ARGS(REFLECT_REMOVE_PARENTHESES(PAIR))) \
   PAIR
 
-#define reflect_json_expands_tojson(PAIR)                                    \
-  VISIT_STRUCT_CONCAT(REFLECT_JSON_WRITE_CODE_BLOCK_,                        \
-                      REFLECT_NUM_OF_ARGS(REFLECT_REMOVE_PARENTHESES(PAIR))) \
+#define reflect_json_expands_tojson(PAIR)                                        \
+  VISIT_STRUCT_CONCAT(REFLECT_JSON_WRITE_CODE_BLOCK_,                            \
+                      REFLECT_NUM_OF_ARGS(REFLECT_REMOVE_PARENTHESES_IMPL PAIR)) \
   PAIR
 
 #define REFLECT_JSON_READ_CODE_SIMPLE_BLOCK(member) \

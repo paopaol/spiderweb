@@ -3,18 +3,29 @@
 #include "spiderweb/reflect/json_reflect.h"
 
 struct Student {
-  bool             bool_value;
-  uint64_t         uint64_value;
-  int64_t          int64_value;
-  int              int_value;
-  float            float_value;
-  double           double_value;
-  std::string      str_value;
-  std::vector<int> intList;
+  bool                                 bool_value;
+  uint64_t                             uint64_value;
+  int64_t                              int64_value;
+  int                                  int_value;
+  float                                float_value;
+  double                               double_value;
+  std::string                          str_value;
+  std::vector<int>                     intList;
+  spiderweb::reflect::PlaceHolderValue placeholder;
 };
-REFLECT_JSON(Student, (bool_value, "bool_value"), (uint64_value, "uint64_value"),
-             (int64_value, "int64_value"), (int_value, "int_value"), (float_value, "float_value"),
-             (double_value, "double_value"), (str_value, "str_value"), (intList, "intList"))
+
+// clang-format off
+REFLECT_JSON(Student, 
+        (bool_value), 
+        (uint64_value, "uint64_value"),
+        (int64_value, "int64_value"),
+        (int_value, "int_value"),
+        (float_value, "float_value"),
+        (double_value, "double_value"),
+        (str_value, "str_value"), 
+        (intList, "intList")
+)
+// clang-format off
 
 TEST(ReflectJson, FromJsonBool) {
   static const char *str = R"(
@@ -61,7 +72,8 @@ struct TestPeople {
 
 REFLECT_JSON_SIMPLE(TestPeople, name, age, height, intList, stringList)
 // or below way
-// REFLECT_JSON(TestPeople, (name, "name"), (age, "age"), (height, "height"), (intList, "intList"),
+// REFLECT_JSON(TestPeople, (name, "name"), (age, "age"), (height, "height"), (intList,
+// "intList"),
 //              (stringList, "stringList"))
 
 struct TestPeopleList {
@@ -414,12 +426,12 @@ struct User {
   std::string user;
   std::string display;
 };
-REFLECT_JSON(User, (user, "user"), (display, "display"))
+REFLECT_JSON(User, (user), (display, "display"))
 
 struct ListUsersRequest {
   int code;
 };
-REFLECT_JSON(ListUsersRequest, )
+REFLECT_JSON(ListUsersRequest, (code))
 
 struct ListUsersResponse {
   std::vector<User> users;
@@ -471,7 +483,7 @@ class UserService {
 
   virtual ~UserService() = default;
 
-  virtual void Login(const LoginRequest &req, LoginResponse &resp){};
+  virtual void Login(const LoginRequest &req, LoginResponse &resp) {};
 
   virtual void UserList(const ListUsersRequest &, ListUsersResponse &resp) {
   }

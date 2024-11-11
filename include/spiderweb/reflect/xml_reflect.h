@@ -9,6 +9,7 @@
 
 namespace spiderweb {
 namespace reflect {
+
 template <typename XmlValueType, typename ValueType>
 struct XmlMeta;
 
@@ -19,6 +20,16 @@ struct IsSimpleT {
 };
 
 namespace detail {
+
+template <typename XmlValue>
+inline bool ReadTagImpl(XmlValue & /*node*/, const char * /*name*/, PlaceHolderValue & /*value*/) {
+  return true;
+}
+
+template <typename XmlValue>
+inline void WriteTagImpl(XmlValue &node, const char *name, const PlaceHolderValue &value) {
+}
+
 template <typename XmlValue, typename ValueType>
 inline bool ReadTagImpl(XmlValue &node, const char *name, ValueType &value) {
   // we If it is a null pointer, we consider reading data from the node itself
@@ -316,37 +327,44 @@ class XmlWriter {
 
 #define REFLECT_XML_ATTR(...) __VA_ARGS__
 
+#define REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_0
+
+#define REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_1(member) \
+  if (XmlValue::HasAtrributeValue(node, #member)) {     \
+    node.GetAttribute(#member, result.member);          \
+  }
+
 #define REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_2(member, name) \
-  {                                                           \
-    if (XmlValue::HasAtrributeValue(node, name)) {            \
-      node.GetAttribute(name, result.member);                 \
-    }                                                         \
+  if (XmlValue::HasAtrributeValue(node, name)) {              \
+    node.GetAttribute(name, result.member);                   \
   }
 
 #define REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_3(member, name, type) \
-  {                                                                 \
-    if (XmlValue::HasAtrributeValue(node, name)) {                  \
-      type value;                                                   \
-      node.GetAttribute(name, value);                               \
-      result.member = reflect::MapFrom(value, result.member);       \
-    }                                                               \
+  if (XmlValue::HasAtrributeValue(node, name)) {                    \
+    type value;                                                     \
+    node.GetAttribute(name, value);                                 \
+    result.member = reflect::MapFrom(value, result.member);         \
   }
 
+#define REFLECT_XML_WRITE_ATTRIBUTE_CODE_BLOCK_1(member) node.SetAttribute(#member, result.member);
+
 #define REFLECT_XML_WRITE_ATTRIBUTE_CODE_BLOCK_2(member, name) \
-  { node.SetAttribute(name, result.member); }
+  node.SetAttribute(name, result.member);
 
 #define REFLECT_XML_WRITE_ATTRIBUTE_CODE_BLOCK_3(member, name, type) \
   {                                                                  \
     type value;                                                      \
-    reflect::MapTo(result.member, value);                           \
+    reflect::MapTo(result.member, value);                            \
     node.SetAttribute(name, value);                                  \
   }
 
-#define REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_1
-#define REFLECT_XML_WRITE_ATTRIBUTE_CODE_BLOCK_1
+#define REFLECT_XML_READ_TAG_CODE_BLOCK_0 ddd
+
+#define REFLECT_XML_READ_TAG_CODE_BLOCK_1(member) \
+  reflect::detail::ReadTagImpl(node, #member, result.member);
 
 #define REFLECT_XML_READ_TAG_CODE_BLOCK_2(member, name) \
-  { reflect::detail::ReadTagImpl(node, name, result.member); }
+  reflect::detail::ReadTagImpl(node, name, result.member);
 
 #define REFLECT_XML_READ_TAG_CODE_BLOCK_3(member, name, type)            \
   {                                                                      \
@@ -358,18 +376,18 @@ class XmlWriter {
     }                                                                    \
   }
 
+#define REFLECT_XML_WRITE_TAG_CODE_BLOCK_1(member) \
+  reflect::detail::WriteTagImpl(node, #member, result.member);
+
 #define REFLECT_XML_WRITE_TAG_CODE_BLOCK_2(member, name) \
-  { reflect::detail::WriteTagImpl(node, name, result.member); }
+  reflect::detail::WriteTagImpl(node, name, result.member);
 
 #define REFLECT_XML_WRITE_TAG_CODE_BLOCK_3(member, name, type) \
   {                                                            \
     type value;                                                \
-    reflect::MapTo(result.member, value);                     \
+    reflect::MapTo(result.member, value);                      \
     reflect::detail::WriteTagImpl(node, name, value);          \
   }
-
-#define REFLECT_XML_READ_TAG_CODE_BLOCK_1
-#define REFLECT_XML_WRITE_TAG_CODE_BLOCK_1
 
 #define REFLECT_XML_READ_ATTRIBUTE(apair)                                     \
   VISIT_STRUCT_CONCAT(REFLECT_XML_READ_ATTRIBUTE_CODE_BLOCK_,                 \

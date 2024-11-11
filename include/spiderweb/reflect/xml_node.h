@@ -21,6 +21,8 @@ class XmlNode {
 
   XmlNode &operator=(const XmlNode &other);
 
+  void GetAttribute(const char *name, PlaceHolderValue &value) const;
+
   void GetAttribute(const char *name, uint32_t &value) const;
 
   void GetAttribute(const char *name, uint64_t &value) const;
@@ -36,6 +38,8 @@ class XmlNode {
   void GetAttribute(const char *name, bool &value) const;
 
   void GetAttribute(const char *name, std::string &value) const;
+
+  void SetAttribute(const char *name, PlaceHolderValue value);
 
   void SetAttribute(const char *name, uint32_t value);
 
