@@ -8,7 +8,7 @@ struct Child {
   int64_t                              id = 0;
   spiderweb::reflect::PlaceHolderValue placeholder;
 };
-REFLECT_XML(Child, REFLECT_XML_ATTR((id, "id"), (placeholder)), (placeholder))
+REFLECT_XML(Child, REFLECT_XML_ATTR((id, "id")), (placeholder))
 
 enum class Sex : uint8_t { kBoy, kGril };
 
