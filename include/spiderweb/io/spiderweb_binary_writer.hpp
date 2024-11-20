@@ -1,7 +1,5 @@
 #pragma once
 
-#include <arpa/inet.h>
-
 #include <array>
 #include <cassert>
 #include <cstddef>
