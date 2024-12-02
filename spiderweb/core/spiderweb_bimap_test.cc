@@ -110,6 +110,32 @@ TEST(BiMap, Range) {
   }
 }
 
+TEST(BiMap, Erase) {
+  spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
+
+  m.Set(1, {1, "xiaoming", 23});
+  m.Set(2, {2, "lilei", 23});
+  m.Set(3, {3, "dapeng", 23});
+
+  EXPECT_EQ(m.Size(), 3);
+  m.Erase(2);
+  EXPECT_EQ(m.Size(), 2);
+}
+
+TEST(BiMap, InverseErase) {
+  spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
+
+  m.Set(1, {1, "xiaoming", 23});
+  m.Set(2, {2, "lilei", 23});
+  m.Set(3, {3, "dapeng", 23});
+
+  EXPECT_EQ(m.Size(), 3);
+
+  auto inverse = m.Inserse();
+  inverse.Erase(2);
+  EXPECT_EQ(m.Size(), 2);
+}
+
 TEST(BiMap, Insert) {
   spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
 
