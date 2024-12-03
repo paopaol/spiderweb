@@ -145,3 +145,22 @@ TEST(BiMap, Insert) {
 
   EXPECT_EQ(m.Size(), 1);
 }
+
+TEST(BiMap, Modify) {
+  spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
+
+  m.Set(5, {1, "xiaoming", 23});
+  m.Set(5, {2, "lilei", 23});   // change 1 to 2
+  m.Set(6, {2, "dapeng", 23});  // change 5 to 6
+
+  auto it = m.Find(6);
+
+  m.ModifyData(it, {10, "dapeng", 25});
+  EXPECT_EQ(m.Size(), 1);
+
+  it = m.Find(6);
+  EXPECT_EQ(it->second->right_value.age, 25);
+  EXPECT_EQ(it->second->right_value.id, 10);
+  EXPECT_EQ(it->second->right_value.name, "dapeng");
+  EXPECT_EQ(it->second->left_key, 6);
+}

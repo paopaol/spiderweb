@@ -103,10 +103,14 @@ class UnorderedBiMap {
 
   InversedMap Inserse();
 
+  void ModifyData(left_const_iterator left_iterator, right_value_type &&value);
+
  private:
   StoreValue *InsertLeft(left_key_type key, right_value_type &&value);
 
   void InsertRight(StoreValue *value);
+
+  StoreValue *UpdateLeftRightValue(left_const_iterator left_iterator, right_value_type &&value);
 
   left_map_type  left_;
   right_map_type right_;
@@ -218,6 +222,12 @@ UnorderedBiMap<K, V, RightValueKey>::Inserse() {
 }
 
 template <typename K, typename V, typename RightValueKey>
+void UnorderedBiMap<K, V, RightValueKey>::ModifyData(left_const_iterator left_iterator,
+                                                     right_value_type  &&value) {
+  InsertRight(UpdateLeftRightValue(left_iterator, std::forward<right_value_type>(value)));
+}
+
+template <typename K, typename V, typename RightValueKey>
 typename UnorderedBiMap<K, V, RightValueKey>::StoreValue *
 UnorderedBiMap<K, V, RightValueKey>::InsertLeft(left_key_type left_key, right_value_type &&value) {
   auto it = left_.insert({left_key, nullptr});
@@ -225,9 +235,7 @@ UnorderedBiMap<K, V, RightValueKey>::InsertLeft(left_key_type left_key, right_va
     it.first->second = new StoreValue(left_key, std::forward<right_value_type>(value));
     return it.first->second;
   }
-
-  right_.erase(RightValueKey()(it.first->second->right_value));
-  *it.first->second = StoreValue(left_key, std::forward<right_value_type>(value));
+  UpdateLeftRightValue(it.first, std::forward<right_value_type>(value));
   return it.first->second;
 }
 
@@ -235,11 +243,29 @@ template <typename K, typename V, typename RightValueKey>
 void UnorderedBiMap<K, V, RightValueKey>::InsertRight(StoreValue *v) {
   auto it = right_.insert({RightValueKey()(v->right_value), v});
   if (!it.second) {
+    /**
+     * @brief if insert failed
+     *
+     * this means, it.first->second->left_key aleady exits,
+     *
+     * but the v of  left key for current insertion may be already changed
+     */
     const auto left_key = it.first->second->left_key;
     delete it.first->second;
     left_.erase(left_key);
+
     it.first->second = v;
   }
+}
+
+template <typename K, typename V, typename RightValueKey>
+typename UnorderedBiMap<K, V, RightValueKey>::StoreValue *
+UnorderedBiMap<K, V, RightValueKey>::UpdateLeftRightValue(left_const_iterator left_iterator,
+                                                          right_value_type  &&value) {
+  right_.erase(RightValueKey()(left_iterator->second->right_value));
+  *left_iterator->second =
+      StoreValue(left_iterator->second->left_key, std::forward<right_value_type>(value));
+  return left_iterator->second;
 }
 
 }  // namespace spiderweb
