@@ -31,7 +31,7 @@ class UnorderedBiMap {
   using left_map_type = std::unordered_map<left_key_type, StoreValue *>;
   using left_const_iterator = typename left_map_type::const_iterator;
 
-  using right_map_type = std::unordered_map<right_key_type, StoreValue *>;
+  using right_map_type = std::unordered_map<right_key_type, const StoreValue *>;
   using right_const_iterator = typename right_map_type::const_iterator;
 
   class InversedMap {
