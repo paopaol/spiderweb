@@ -1,13 +1,13 @@
 add_library(spiderweb SHARED)
 
 if(NOT MSVC)
-    set(PLATFORM_SOURCE_FILES
+  set(PLATFORM_SOURCE_FILES
       ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_socketcan.h
       serial/spiderweb_socketcan.cc
       ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_named_pipe.h
       io/spiderweb_named_pipe.cc)
 
-    set(PLATFORM_TEST_FILES io/spiderweb_named_pipe_test.cc
+  set(PLATFORM_TEST_FILES io/spiderweb_named_pipe_test.cc
                           serial/spiderweb_socketcan_test.cc)
 endif()
 
@@ -29,6 +29,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_synchronized.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_signal.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_bimap.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_object_pool.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_binary_writer.hpp
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_buffer.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_bitmap_readwriter.h
@@ -91,11 +92,11 @@ target_compile_definitions(
          ASIO_HAS_STD_FUNCTION
          ASIO_DISABLE_STD_ALIGNED_ALLOC)
 if(MSVC)
-    target_compile_definitions(
+  target_compile_definitions(
     spiderweb PUBLIC _WIN32_WINNT=0x0601
                      -D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 
-    target_compile_options(spiderweb PUBLIC /wd4003 /wd4244)
+  target_compile_options(spiderweb PUBLIC /wd4003 /wd4244)
 endif()
 
 target_link_libraries(
@@ -110,7 +111,7 @@ target_link_libraries(
          $<BUILD_INTERFACE:date::date>
          $<BUILD_INTERFACE:date::date-tz>)
 if(NOT MSVC)
-    target_link_libraries(spiderweb PUBLIC $<BUILD_INTERFACE:canary::canary>)
+  target_link_libraries(spiderweb PUBLIC $<BUILD_INTERFACE:canary::canary>)
 endif()
 
 add_subdirectory(reflect)
@@ -131,6 +132,7 @@ target_sources(
           core/spiderweb_synchronized_test.cc
           core/spiderweb_signal_test.cc
           core/spiderweb_bimap_test.cc
+          core/spiderweb_object_pool_test.cc
           io/spiderweb_binary_writer_test.cc
           io/spiderweb_bitmap_readwriter_test.cc
           net/spiderweb_tcp_socket_test.cc
@@ -150,7 +152,8 @@ add_executable(spiderweb_benchmark)
 target_sources(
   spiderweb_benchmark
   PRIVATE core/spiderweb_notify_benchmark.cc core/spiderweb_timer_benchmark.cc
-          type/spiderweb_variant_benchmark.cc)
+          type/spiderweb_variant_benchmark.cc
+          core/spiderweb_object_pool_benchmark.cc)
 target_link_libraries(
   spiderweb_benchmark PRIVATE spiderweb benchmark::benchmark
                               benchmark::benchmark_main)
