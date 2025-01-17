@@ -69,6 +69,11 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address ")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address ")
+endif()
+
 add_subdirectory(spiderweb)
 
 # ------------------------------------------------------------------------------

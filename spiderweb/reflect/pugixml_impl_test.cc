@@ -285,10 +285,10 @@ TEST(pugixml_impl, WriteComplexdArraySharedPtr) {
   std::cout << writer.ToString() << '\n';
 }
 
-struct Node {
+struct Element {
   int                   value;
-  std::shared_ptr<Node> left;
-  std::shared_ptr<Node> right;
+  std::shared_ptr<Element> left;
+  std::shared_ptr<Element> right;
 };
 
 // REFLECT_XML(Node, REFLECT_XML_ATTR(), (value, "value"), (left, "left"), (right,
@@ -296,9 +296,9 @@ struct Node {
 namespace spiderweb {
 namespace reflect {
 template <typename T>
-struct XmlMeta<T, Node> {
+struct XmlMeta<T, Element> {
   using XmlValue = T;
-  using struct_type = Node;
+  using struct_type = Element;
   static void Read(XmlValue &node, struct_type &result) {
     {
       reflect ::detail ::ReadTagImpl(node, "value", result.value);
@@ -326,14 +326,14 @@ struct XmlMeta<T, Node> {
 }  // namespace spiderweb
 
 TEST(pugixml_impl, WriteNodeTree) {
-  auto root = std::make_shared<Node>();
+  auto root = std::make_shared<Element>();
 
   root->value = 5;
 
-  root->left = std::make_shared<Node>();
+  root->left = std::make_shared<Element>();
   root->left->value = 4;
 
-  root->right = std::make_shared<Node>();
+  root->right = std::make_shared<Element>();
   root->right->value = 6;
 
   spiderweb::reflect::XmlDocumentWriter writer;
@@ -354,7 +354,7 @@ TEST(pugixml_impl, ReadNodeTree) {
 </rootNode>
             )";
 
-  std::shared_ptr<Node> tree;
+  std::shared_ptr<Element> tree;
 
   spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
   reader.Read("rootNode", tree);

@@ -29,6 +29,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_synchronized.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_signal.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_bimap.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_tree.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_object_pool.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_binary_writer.hpp
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_buffer.h
@@ -132,6 +133,7 @@ target_sources(
           core/spiderweb_synchronized_test.cc
           core/spiderweb_signal_test.cc
           core/spiderweb_bimap_test.cc
+          core/spiderweb_tree_test.cc
           core/spiderweb_object_pool_test.cc
           io/spiderweb_binary_writer_test.cc
           io/spiderweb_bitmap_readwriter_test.cc
