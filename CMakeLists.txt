@@ -20,6 +20,7 @@ option(SPIDERWEB_GHC_USE_PACKAGE "use find_package for ghc_filesystem" ON)
 option(SPIDERWEB_BENCHMARK_USE_PACKAGE "use find_package for benchmark" ON)
 option(SPIDERWEB_SPDLOG_USE_PACKAGE "use find_package for spdlog" ON)
 option(SPIDERWEB_ASIO_USE_PACKAGE "use find_package for asio" ON)
+option(SPIDERWEB_ENABLE_ASAN "enable libasan" OFF)
 
 if(SPIDERWEB_ABSL_USE_PACKAGE)
   find_package(absl REQUIRED)
@@ -69,7 +70,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND SPIDERWEB_ENABLE_ASAN)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address ")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address ")
 endif()
