@@ -19,8 +19,17 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
         /**
          * @brief currently, only support ipv4
          */
-        acceptor(AsioService(qq->ownerEventLoop()),
-                 asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)) {
+        acceptor(AsioService(qq->ownerEventLoop())) {
+    asio::error_code        ec;
+    asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port);
+
+    acceptor.open(endpoint.protocol(), ec);
+    acceptor.bind(endpoint, ec);
+    if (ec) {
+      spdlog::warn("TcpServer({}) {}", fmt::ptr(q), ec.message());
+      return;
+    }
+    acceptor.listen();
   }
 
   ~Private() = default;
@@ -41,13 +50,13 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
 
   template <typename Acceptor>
   void HandleAccept(Acceptor &tcp_acceptor, TcpSocket *client, const asio::error_code &ec) {
-    StartAccept(tcp_acceptor);
     if (ec) {
       spdlog::warn("TcpServer({}) {}", fmt::ptr(q), ec.message());
 
       client->DeleteLater();
       return;
     }
+    StartAccept(tcp_acceptor);
 
     client->d->StartRead(client->d->impl.socket);
     spider_emit Object::Emit(q, &TcpServer::InComingConnection, std::forward<TcpSocket *>(client));
