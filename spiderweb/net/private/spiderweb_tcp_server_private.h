@@ -23,6 +23,7 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
     asio::error_code        ec;
     asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port);
 
+    acceptor.set_option(asio::ip::tcp::acceptor::reuse_address(true));
     acceptor.open(endpoint.protocol(), ec);
     acceptor.bind(endpoint, ec);
     if (ec) {
