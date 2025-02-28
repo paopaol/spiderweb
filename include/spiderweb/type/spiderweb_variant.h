@@ -154,7 +154,7 @@ const T &Variant::Get() const {
 
 template <typename T>
 bool Variant::Is() const {
-  return absl::holds_alternative<int16_t>(v_);
+  return absl::holds_alternative<T>(v_);
 }
 
 inline void Variant::Assign(const Variant &rh) {
