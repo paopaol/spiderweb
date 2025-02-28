@@ -57,6 +57,9 @@ class Variant {
   template <typename T>
   const T &Get() const;
 
+  template <typename T>
+  bool Is() const;
+
  private:
   void Assign(const Variant &rh);
 
@@ -147,6 +150,11 @@ T &Variant::Get() {
 template <typename T>
 const T &Variant::Get() const {
   return absl::get<T>(v_);
+}
+
+template <typename T>
+bool Variant::Is() const {
+  return absl::holds_alternative<int16_t>(v_);
 }
 
 inline void Variant::Assign(const Variant &rh) {
