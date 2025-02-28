@@ -55,6 +55,12 @@ TEST(Variant, ContructInt) {
   }
 }
 
+TEST(Variant, ContructString) {
+  spiderweb::Variant v("123");
+
+  EXPECT_EQ("123", v.ToString());
+}
+
 TEST(Variant, ContructFloat) {
   spiderweb::Variant v(123.f);
 
@@ -62,8 +68,8 @@ TEST(Variant, ContructFloat) {
 }
 
 TEST(Variant, ContructAny) {
-  spiderweb::Variant v;  //(St{});
-  v.SetValue(St{});
+  spiderweb::Variant v(St{});  //(St{});
+  v = St{};
 
   EXPECT_EQ("", v.ToString());
 }
@@ -130,7 +136,7 @@ TEST(Variant, MoveConstruct) {
 
 TEST(Variant, CopyAssgin) {
   spiderweb::Variant v1(123);
-  spiderweb::Variant v2 = v1;
+  spiderweb::Variant v2(v1);
 
   v2 = v1;
 
@@ -157,22 +163,26 @@ TEST(Variant, AssginOtherTypes) {
   {
     std::string abc = "abc";
 
-    spiderweb::Variant v1 = abc;
+    spiderweb::Variant v1(abc);
   }
   /**
    * @brief copy construct
    */
   {
-    int                abc = 123;
-    spiderweb::Variant v1 = abc;
+    int abc = 123;
+
+    spiderweb::Variant v2;
+
+    v2 = abc;
+    spiderweb::Variant v1(abc);
   }
   /**
    * @brief move construct
    */
   {
     std::string        abc = "abc";
-    spiderweb::Variant v1 = std::move(abc);
-    EXPECT_EQ(abc, "");
+    spiderweb::Variant v1(abc);
+    EXPECT_EQ(abc, "abc");
   }
 
   /**
@@ -222,6 +232,8 @@ TEST(Variant, AssginOtherTypes) {
     v1 = 3.f;
     v1 = "fff";
     v1 = true;
+    v1 = "zzz";
+    EXPECT_EQ(v1.ToString(), "zzz");
   }
 }
 

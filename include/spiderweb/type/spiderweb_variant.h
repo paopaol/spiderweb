@@ -11,46 +11,27 @@ class Variant {
  public:
   Variant() = default;
 
-  template <typename T, typename = typename std::enable_if<std::is_integral<T>::value ||
-                                                           std::is_floating_point<T>::value>::type>
-  Variant(T def);
+  template <typename T, typename = typename std::enable_if<
+                            !std::is_constructible<std::string, T>::value &&
+                            !std::is_same_v<typename std::decay<T>::type, Variant>>::type>
+  explicit Variant(T &&v);
 
-  template <typename T,
-            typename = typename std::enable_if<std::is_convertible<T, std::string>::value>::type,
-            typename = void>
-  Variant(T &&def);
+  explicit Variant(std::string v);
 
-  /**
-   * @brief copy construct
-   */
-  Variant(const Variant &rh);
+  Variant(const Variant &v);
 
-  /**
-   * @brief move construct
-   */
-  Variant(Variant &&rh) noexcept;
+  Variant(Variant &&v) noexcept;
 
-  /**
-   * @brief copy assgin
-   */
-  Variant &operator=(const Variant &rh);
+  Variant &operator=(const Variant &v);
 
-  /**
-   * @brief move assgin
-   */
-  Variant &operator=(Variant &&rh) noexcept;
+  Variant &operator=(Variant &&v) noexcept;
 
-  /**
-   * @brief copy/move assgin
-   */
-  template <typename T, typename = typename std::enable_if<std::is_integral<T>::value ||
-                                                           std::is_floating_point<T>::value>::type>
-  Variant &operator=(T &&sub_v);
+  Variant &operator=(std::string v);
 
-  template <typename T,
-            typename = typename std::enable_if<std::is_convertible<T, std::string>::value>::type,
-            typename = void>
-  Variant &operator=(T &&v);
+  template <typename T, typename = typename std::enable_if<
+                            !std::is_constructible<std::string, T>::value &&
+                            !std::is_same_v<typename std::decay<T>::type, Variant>>::type>
+  Variant &operator=(T &&v) noexcept;
 
   bool IsNull() const;
 
@@ -87,47 +68,43 @@ class Variant {
 };
 
 template <typename T, typename U>
-Variant::Variant(T def) : v_(std::forward<T>(def)) {
+Variant::Variant(T &&v) : v_(std::forward<T>(v)) {
 }
 
-template <typename T, typename U, typename R>
-Variant::Variant(T &&def) : v_(std::string(std::forward<T>(def))) {
+inline Variant::Variant(std::string v) : v_(std::move(v)) {
 }
 
-inline Variant::Variant(const Variant &rh) {
-  Assign(rh);
+inline Variant::Variant(const Variant &v) {
+  Assign(v);
 }
 
-inline Variant::Variant(Variant &&rh) noexcept {
-  StealFrom(rh);
+inline Variant::Variant(Variant &&v) noexcept {
+  StealFrom(v);
 }
 
-inline Variant &Variant::operator=(const Variant &rh) {
-  Assign(rh);
+inline Variant &Variant::operator=(const Variant &v) {
+  Assign(v);
   return *this;
 }
 
-inline Variant &Variant::operator=(Variant &&rh) noexcept {
-  StealFrom(rh);
+inline Variant &Variant::operator=(Variant &&v) noexcept {
+  StealFrom(v);
+  return *this;
+}
+
+inline Variant &Variant::operator=(std::string v) {
+  v_ = std::move(v);
   return *this;
 }
 
 template <typename T, typename U>
-Variant &Variant::operator=(T &&sub_v) {
-  v_ = std::forward<T>(sub_v);
-
+Variant &Variant::operator=(T &&v) noexcept {
+  v_ = std::forward<T>(v);
   return *this;
 }
 
 inline bool Variant::IsNull() const {
   return v_.index() == 0;
-}
-
-template <typename T, typename U, typename R>
-inline Variant &Variant::operator=(T &&v) {
-  v_ = std::forward<T>(v);
-
-  return *this;
 }
 
 inline void Variant::Swap(Variant &rh) {

@@ -150,12 +150,12 @@ target_link_libraries(spiderweb_test PRIVATE spiderweb GTest::gtest_main
                                              GTest::gtest GTest::gmock)
 
 # benchmark
-add_executable(spiderweb_benchmark)
-target_sources(
-  spiderweb_benchmark
-  PRIVATE core/spiderweb_notify_benchmark.cc core/spiderweb_timer_benchmark.cc
-          type/spiderweb_variant_benchmark.cc
-          core/spiderweb_object_pool_benchmark.cc)
-target_link_libraries(
-  spiderweb_benchmark PRIVATE spiderweb benchmark::benchmark
-                              benchmark::benchmark_main)
+ add_executable(spiderweb_benchmark)
+ target_sources(
+   spiderweb_benchmark
+   PRIVATE core/spiderweb_notify_benchmark.cc core/spiderweb_timer_benchmark.cc
+           type/spiderweb_variant_benchmark.cc
+           core/spiderweb_object_pool_benchmark.cc)
+ target_link_libraries(
+   spiderweb_benchmark PRIVATE spiderweb benchmark::benchmark
+                               benchmark::benchmark_main)

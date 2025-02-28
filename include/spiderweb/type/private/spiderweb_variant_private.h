@@ -9,8 +9,8 @@ namespace detail {
 
 struct Monostate {};
 
-using Var = absl::variant<Monostate, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t,
-                          std::string, float, double, bool, absl::any>;
+using Var = absl::variant<Monostate, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, float,
+                          double, bool, std::string, absl::any>;
 
 template <typename T, typename = typename std::enable_if<std::is_integral<T>::value ||
                                                          std::is_floating_point<T>::value ||
