@@ -13,10 +13,10 @@ class Variant {
 
   template <typename T, typename = typename std::enable_if<
                             !std::is_constructible<std::string, T>::value &&
-                            !std::is_same_v<typename std::decay<T>::type, Variant>>::type>
-  explicit Variant(T &&v);
+                            !std::is_same<typename std::decay<T>::type, Variant>::value>::type>
+  Variant(T &&v);
 
-  explicit Variant(std::string v);
+  Variant(std::string v);
 
   Variant(const Variant &v);
 
@@ -30,7 +30,7 @@ class Variant {
 
   template <typename T, typename = typename std::enable_if<
                             !std::is_constructible<std::string, T>::value &&
-                            !std::is_same_v<typename std::decay<T>::type, Variant>>::type>
+                            !std::is_same<typename std::decay<T>::type, Variant>::value>::type>
   Variant &operator=(T &&v) noexcept;
 
   bool IsNull() const;

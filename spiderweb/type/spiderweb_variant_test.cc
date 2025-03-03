@@ -53,6 +53,19 @@ TEST(Variant, ContructInt) {
 
     EXPECT_EQ("123", v.ToString());
   }
+  {
+    spiderweb::Variant v = 123;
+
+    EXPECT_EQ("123", v.ToString());
+  }
+  {
+    spiderweb::Variant v = std::string("123");
+
+    v = 123;
+    v = "123";
+
+    EXPECT_EQ("123", v.ToString());
+  }
 }
 
 TEST(Variant, ContructString) {
