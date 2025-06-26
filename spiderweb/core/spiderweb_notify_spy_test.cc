@@ -6,11 +6,11 @@
 
 TEST(spiderweb_notify_spy, capture) {
   spiderweb::EventLoop loop;
-  spiderweb::Timer     timer;
+  auto                 timer = std::make_shared<spiderweb::Timer>();
 
-  spiderweb::NotifySpy spy(&timer, &spiderweb::Timer::timeout);
+  spiderweb::NotifySpy spy(timer.get(), &spiderweb::Timer::timeout);
 
-  timer.Start();
+  timer->Start();
   spy.Wait();
 
   loop.QueueTask([&]() { loop.Quit(); });

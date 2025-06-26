@@ -50,6 +50,8 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/internal/index_sequence.hpp
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/internal/thread_check.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/internal/move_tuple_wrapper.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_complete_queue.h
+    core/spiderweb_complete_queue.cc
     core/spiderweb_error_code.cc
     core/spiderweb_notify_spy.cc
     core/spiderweb_eventloop.cc
@@ -135,6 +137,7 @@ target_sources(
           core/spiderweb_bimap_test.cc
           core/spiderweb_tree_test.cc
           core/spiderweb_object_pool_test.cc
+          core/spiderweb_complete_queue_test.cc
           io/spiderweb_binary_writer_test.cc
           io/spiderweb_bitmap_readwriter_test.cc
           net/spiderweb_tcp_socket_test.cc

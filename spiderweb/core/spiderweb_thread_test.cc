@@ -10,7 +10,7 @@
 
 class ThreadTest : public testing::Test {
  public:
-  using TimerPtr = std::unique_ptr<spiderweb::Timer>;
+  using TimerPtr = std::shared_ptr<spiderweb::Timer>;
 
   spiderweb::Waiter<bool> waiter;
   spiderweb::Thread       r;
@@ -20,7 +20,7 @@ class ThreadTest : public testing::Test {
 
 TEST_F(ThreadTest, Run) {
   const auto task = [&]() {
-    timer = absl::make_unique<spiderweb::Timer>();
+    timer = std::make_shared<spiderweb::Timer>();
 
     timer->SetInterval(100);
     timer->SetSingalShot(true);

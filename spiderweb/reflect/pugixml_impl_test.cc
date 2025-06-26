@@ -285,55 +285,24 @@ TEST(pugixml_impl, WriteComplexdArraySharedPtr) {
   std::cout << writer.ToString() << '\n';
 }
 
-struct Element {
-  int                   value;
-  std::shared_ptr<Element> left;
-  std::shared_ptr<Element> right;
+struct MyElement {
+  int                                  value = 0;
+  std::shared_ptr<MyElement>           left;
+  std::shared_ptr<MyElement>           right;
+  spiderweb::reflect::PlaceHolderValue v;
 };
 
-// REFLECT_XML(Node, REFLECT_XML_ATTR(), (value, "value"), (left, "left"), (right,
-// "right"))
-namespace spiderweb {
-namespace reflect {
-template <typename T>
-struct XmlMeta<T, Element> {
-  using XmlValue = T;
-  using struct_type = Element;
-  static void Read(XmlValue &node, struct_type &result) {
-    {
-      reflect ::detail ::ReadTagImpl(node, "value", result.value);
-    }
-    {
-      reflect ::detail ::ReadTagImpl(node, "left", result.left);
-    }
-    {
-      reflect ::detail ::ReadTagImpl(node, "right", result.right);
-    }
-  }
-  static void Write(XmlValue &node, const struct_type &result) {
-    {
-      reflect ::detail ::WriteTagImpl(node, "value", result.value);
-    }
-    {
-      reflect ::detail ::WriteTagImpl(node, "left", result.left);
-    }
-    {
-      reflect ::detail ::WriteTagImpl(node, "right", result.right);
-    }
-  }
-};
-}  // namespace reflect
-}  // namespace spiderweb
+REFLECT_XML(MyElement, REFLECT_XML_ATTR((v, "v")), (value), (left), (right))
 
 TEST(pugixml_impl, WriteNodeTree) {
-  auto root = std::make_shared<Element>();
+  auto root = std::make_shared<MyElement>();
 
   root->value = 5;
 
-  root->left = std::make_shared<Element>();
+  root->left = std::make_shared<MyElement>();
   root->left->value = 4;
 
-  root->right = std::make_shared<Element>();
+  root->right = std::make_shared<MyElement>();
   root->right->value = 6;
 
   spiderweb::reflect::XmlDocumentWriter writer;
@@ -354,7 +323,7 @@ TEST(pugixml_impl, ReadNodeTree) {
 </rootNode>
             )";
 
-  std::shared_ptr<Element> tree;
+  std::shared_ptr<MyElement> tree;
 
   spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
   reader.Read("rootNode", tree);

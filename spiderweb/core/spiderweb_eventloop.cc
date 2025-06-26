@@ -49,8 +49,6 @@ spiderweb::EventLoop *EventLoop::LoopOfCurrentThread() {
 }
 
 NativeIoService EventLoop::IoService() {
-  asio::io_service s;
-
   return &d->io;
 }
 

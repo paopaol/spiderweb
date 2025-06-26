@@ -21,7 +21,8 @@ class Timer::Private {
     }
 
     timer.expires_from_now(std::chrono::milliseconds(timeout_ms));
-    timer.async_wait([this, timeout_ms](const asio::error_code &e) {
+    auto self = q->shared_from_this();
+    timer.async_wait([this, timeout_ms, self](const asio::error_code &e) {
       if (e.value() == asio::error::operation_aborted || !is_running) {
         return;
       }

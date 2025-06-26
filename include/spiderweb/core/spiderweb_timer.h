@@ -65,7 +65,7 @@ class Timer : public Object {
 
  private:
   class Private;
-  std::unique_ptr<Private> d;
+  std::shared_ptr<Private> d;
 };
 }  // namespace spiderweb
 

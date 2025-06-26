@@ -1,10 +1,10 @@
 #include "spiderweb/core/spiderweb_object.h"
 
+#include <asio/steady_timer.hpp>
 #include <thread>
 
 #include "core/internal/asio_cast.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
-#include "spiderweb/core/spiderweb_timer.h"
 
 namespace spiderweb {
 namespace detail {
@@ -44,22 +44,23 @@ spiderweb::EventLoop *Object::ownerEventLoop() {
   return d->loop;
 }
 
+EventLoop *Object::ownerEventLoop() const {
+  return d->loop;
+}
+
 void Object::QueueTask(std::function<void()> &&f) const {
   AsioService(d->loop).post(std::forward<decltype(f)>(f));
 }
 
 void Object::RunAfter(uint64_t delay_ms, std::function<void()> &&f) const {
-  auto *timer = new Timer(d->loop);
-
-  Connect(timer, &Timer::timeout, timer, [ff = std::move(f), timer]() {
-    timer->DeleteLater();
+  auto timer = std::make_shared<asio::steady_timer>(AsioService(ownerEventLoop()),
+                                                    std::chrono::milliseconds(delay_ms));
+  timer->async_wait([timer, ff = std::move(f)](const asio::error_code &ec) {
+    if (ec.value() == asio::error::operation_aborted) {
+      return;
+    }
     ff();
   });
-
-  timer->SetSingalShot(true);
-
-  timer->SetInterval(delay_ms);
-  timer->Start();
 }
 
 std::thread::id Object::ThreadId() const {

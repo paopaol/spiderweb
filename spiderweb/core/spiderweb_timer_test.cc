@@ -15,32 +15,32 @@ class Reciver : public spiderweb::Object {
 TEST(spiderweb_timer, State) {
   spiderweb::EventLoop loop;
 
-  spiderweb::Timer timer;
+  auto timer = std::make_shared<spiderweb::Timer>();
 
-  timer.SetInterval(10000);
+  timer->SetInterval(10000);
 
-  EXPECT_FALSE(timer.IsRunning());
-  EXPECT_EQ(timer.Interval(), 10000);
+  EXPECT_FALSE(timer->IsRunning());
+  EXPECT_EQ(timer->Interval(), 10000);
 
-  timer.Start();
-  EXPECT_TRUE(timer.IsRunning());
+  timer->Start();
+  EXPECT_TRUE(timer->IsRunning());
 }
 
 TEST(spiderweb_timer, Timeout) {
   spiderweb::EventLoop loop;
   g_loop = &loop;
 
-  spiderweb::Timer timer;
-  Reciver          reciver;
+  auto    timer = std::make_shared<spiderweb::Timer>();
+  Reciver reciver;
 
   bool called = false;
 
-  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &reciver, [&]() {
+  spiderweb::Object::Connect(timer.get(), &spiderweb::Timer::timeout, &reciver, [&]() {
     called = true;
     g_loop->Quit();
   });
 
-  timer.Start();
+  timer->Start();
 
   loop.Exec();
   EXPECT_EQ(called, true);
@@ -50,12 +50,12 @@ TEST(spiderweb_timer, Stop) {
   spiderweb::EventLoop loop;
   g_loop = &loop;
 
-  spiderweb::Timer timer;
+  auto timer = std::make_shared<spiderweb::Timer>();
 
-  timer.SetInterval(3000);
-  timer.Start();
+  timer->SetInterval(3000);
+  timer->Start();
 
-  timer.Stop();
+  timer->Stop();
 
-  EXPECT_FALSE(timer.IsRunning());
+  EXPECT_FALSE(timer->IsRunning());
 }

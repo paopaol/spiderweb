@@ -1,12 +1,13 @@
 #include "spiderweb/core/spiderweb_signal.h"
 
+#include <csignal>
+
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
-#include <csignal>
 
 TEST(SignalTest, Emit) {
   spiderweb::EventLoop loop;
-  auto                 signals = spiderweb::MakeObject<spiderweb::Signals>(SIGINT);
+  auto                 signals = std::make_shared<spiderweb::Signals>(SIGINT);
 
   bool called;
   spiderweb::Object::Connect(signals.get(), &spiderweb::Signals::Triggered, signals.get(),
@@ -16,7 +17,9 @@ TEST(SignalTest, Emit) {
                                loop.Exit(0);
                              });
 
-  //loop.RunAfter(1000, []() { kill(getpid(), SIGINT); });
+  signals->Start();
+
+  // loop.RunAfter(1000, []() { kill(getpid(), SIGINT); });
 
   loop.Exec();
 

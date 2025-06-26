@@ -8,11 +8,11 @@ class Signals::Private {
  public:
   Private(Signals* qq, Object* parent, int sig_number)
       : q(qq), set_(AsioService(GetLoop(parent)), sig_number) {
-    SetUp();
   }
 
   void SetUp() {
-    set_.async_wait([=](const asio::error_code& ec, int signal_number) {
+    auto self = q->shared_from_this();
+    set_.async_wait([self, this](const asio::error_code& ec, int signal_number) {
       if (ec) {
         return;
       }
@@ -30,6 +30,10 @@ Signals::Signals(int sig_number, Object* parent)
 }
 
 Signals::~Signals() = default;
+
+void Signals::Start() {
+  d->SetUp();
+}
 
 ErrorCode Signals::AddSignal(int sig_number) {
   ErrorCode ec;

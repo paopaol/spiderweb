@@ -22,6 +22,8 @@ class Signals : public Object {
 
   ~Signals() override;
 
+  void Start();
+
   ErrorCode AddSignal(int sig_number);
 
   ErrorCode RemoveSignal(int sig_number);

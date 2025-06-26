@@ -43,6 +43,8 @@ class Notify {
     f_ = std::forward<decltype(f)>(f);
   }
 
+  ~Notify() = default;
+
   friend class Object;
 
  private:

@@ -69,15 +69,16 @@ TEST(spiderweb_EventLoop, multithread_emit_event_class_member) {
 
   spiderweb::Object::Connect(&test, &TestObject::statedChanged, &reciver, &ReciverObject::SetValue);
 
-  spiderweb::Timer timer;
-  timer.SetInterval(100);
+  auto timer = std::make_shared<spiderweb::Timer>();
 
-  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &app, [&]() { app.Quit(); });
+  timer->SetInterval(100);
+
+  spiderweb::Object::Connect(timer.get(), &spiderweb::Timer::timeout, &app, [&]() { app.Quit(); });
 
   std::thread subthread([&]() {
     test.SetState(true);
 
-    app.QueueTask([&]() { timer.Start(); });
+    app.QueueTask([&]() { timer->Start(); });
   });
 
   app.Exec();
@@ -102,15 +103,15 @@ TEST(spiderweb_EventLoop, multithread_emit_event_lambda) {
     calledInAppThread = test.ThreadId() == std::this_thread::get_id();
   });
 
-  spiderweb::Timer timer;
-  timer.SetInterval(100);
+  auto timer = std::make_shared<spiderweb::Timer>();
+  timer->SetInterval(100);
 
-  spiderweb::Object::Connect(&timer, &spiderweb::Timer::timeout, &app, [&]() { app.Quit(); });
+  spiderweb::Object::Connect(timer.get(), &spiderweb::Timer::timeout, &app, [&]() { app.Quit(); });
 
   std::thread subthread([&]() {
     test.SetState(true);
 
-    app.QueueTask([&]() { timer.Start(); });
+    app.QueueTask([&]() { timer->Start(); });
   });
 
   app.Exec();

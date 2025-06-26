@@ -34,7 +34,6 @@ if(SPIDERWEB_YYJSON_USE_PACKAGE)
   find_package(yyjson REQUIRED)
 endif()
 
-find_package(PkgConfig REQUIRED)
 if(SPIDERWEB_DATE_USE_PACKAGE)
   find_package(date REQUIRED)
 endif()
@@ -54,6 +53,7 @@ if(SPIDERWEB_SPDLOG_USE_PACKAGE)
 endif()
 
 if(SPIDERWEB_ASIO_USE_PACKAGE)
+  find_package(PkgConfig REQUIRED)
   pkg_check_modules(asio REQUIRED)
 endif()
 

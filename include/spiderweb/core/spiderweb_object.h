@@ -48,7 +48,7 @@ static inline std::function<void(Args...)> create_none_class_member_functor(Reci
 }
 
 class EventLoop;
-class Object {
+class Object : public std::enable_shared_from_this<Object> {
  public:
   explicit Object(Object *parent = nullptr);
 
@@ -86,6 +86,8 @@ class Object {
   }
 
   EventLoop *ownerEventLoop();
+
+  EventLoop *ownerEventLoop() const;
 
   void QueueTask(std::function<void()> &&f) const;
 
