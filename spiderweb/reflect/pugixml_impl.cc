@@ -73,12 +73,28 @@ XmlNode &XmlNode::operator=(const XmlNode &other) {
 void XmlNode::GetAttribute(const char *, PlaceHolderValue &) const {
 }
 
+void XmlNode::GetAttribute(const char *name, uint8_t &value) const {
+  value = d->root_.attribute(name).as_uint();
+}
+
+void XmlNode::GetAttribute(const char *name, uint16_t &value) const {
+  value = d->root_.attribute(name).as_uint();
+}
+
 void XmlNode::GetAttribute(const char *name, uint32_t &value) const {
   value = d->root_.attribute(name).as_uint();
 }
 
 void XmlNode::GetAttribute(const char *name, uint64_t &value) const {
   value = d->root_.attribute(name).as_ullong();
+}
+
+void XmlNode::GetAttribute(const char *name, int8_t &value) const {
+  value = d->root_.attribute(name).as_int();
+}
+
+void XmlNode::GetAttribute(const char *name, int16_t &value) const {
+  value = d->root_.attribute(name).as_int();
 }
 
 void XmlNode::GetAttribute(const char *name, int32_t &value) const {
@@ -108,11 +124,27 @@ void XmlNode::GetAttribute(const char *name, std::string &value) const {
 void XmlNode::SetAttribute(const char *name, PlaceHolderValue value) {
 }
 
+void XmlNode::SetAttribute(const char *name, uint8_t value) {
+  d->root_.append_attribute(name).set_value(value);
+}
+
+void XmlNode::SetAttribute(const char *name, uint16_t value) {
+  d->root_.append_attribute(name).set_value(value);
+}
+
 void XmlNode::SetAttribute(const char *name, uint32_t value) {
   d->root_.append_attribute(name).set_value(value);
 }
 
 void XmlNode::SetAttribute(const char *name, uint64_t value) {
+  d->root_.append_attribute(name).set_value(value);
+}
+
+void XmlNode::SetAttribute(const char *name, int8_t value) {
+  d->root_.append_attribute(name).set_value(value);
+}
+
+void XmlNode::SetAttribute(const char *name, int16_t value) {
   d->root_.append_attribute(name).set_value(value);
 }
 
@@ -140,6 +172,14 @@ void XmlNode::SetAttribute(const char *name, const std::string &value) {
   d->root_.append_attribute(name).set_value(value.c_str());
 }
 
+void XmlNode::GetValue(uint8_t &value) const {
+  value = d->root_.text().as_uint();
+}
+
+void XmlNode::GetValue(uint16_t &value) const {
+  value = d->root_.text().as_uint();
+}
+
 void XmlNode::GetValue(uint32_t &value) const {
   value = d->root_.text().as_uint();
 }
@@ -148,6 +188,13 @@ void XmlNode::GetValue(uint64_t &value) const {
   value = d->root_.text().as_ullong();
 }
 
+void XmlNode::GetValue(int8_t &value) const {
+  value = d->root_.text().as_int();
+}
+
+void XmlNode::GetValue(int16_t &value) const {
+  value = d->root_.text().as_int();
+}
 void XmlNode::GetValue(int32_t &value) const {
   value = d->root_.text().as_int();
 }
@@ -172,11 +219,27 @@ void XmlNode::GetValue(std::string &value) const {
   value = d->root_.text().as_string();
 }
 
+void XmlNode::SetValue(uint8_t value) {
+  d->root_.text().set(value);
+}
+
+void XmlNode::SetValue(uint16_t value) {
+  d->root_.text().set(value);
+}
+
 void XmlNode::SetValue(uint32_t value) {
   d->root_.text().set(value);
 }
 
 void XmlNode::SetValue(uint64_t value) {
+  d->root_.text().set(value);
+}
+
+void XmlNode::SetValue(int8_t value) {
+  d->root_.text().set(value);
+}
+
+void XmlNode::SetValue(int16_t value) {
   d->root_.text().set(value);
 }
 

@@ -33,6 +33,14 @@ JsonValue::JsonValue(Document *doc, NodeValue *val) : doc_(doc), val_(val) {
 
 JsonValue::~JsonValue() = default;
 
+bool JsonValue::GetValue(int8_t &result) const {
+  YYJSON_GET_VALUE(int)
+}
+
+bool JsonValue::GetValue(uint8_t &result) const {
+  YYJSON_GET_VALUE(int)
+}
+
 bool JsonValue::GetValue(int16_t &result) const {
   YYJSON_GET_VALUE(int)
 }
@@ -76,6 +84,14 @@ bool JsonValue::GetValue(std::string &result) const {
     result = v;
   }
   return v != nullptr;
+}
+
+bool JsonValue::SetValue(int8_t value) {
+  return SetValue(static_cast<int64_t>(value));
+}
+
+bool JsonValue::SetValue(uint8_t value) {
+  return SetValue(static_cast<int64_t>(value));
 }
 
 bool JsonValue::SetValue(int16_t value) {
@@ -153,6 +169,26 @@ bool JsonValue::SetValue(const std::string &value) {
     return true;
   }
   return false;
+}
+
+bool JsonValue::SetValue(const std::string &key, int8_t value) {
+  VAR_DECAL(val, doc)
+  return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
+}
+
+bool JsonValue::SetValue(const std::string &key, uint8_t value) {
+  VAR_DECAL(val, doc)
+  return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
+}
+
+bool JsonValue::SetValue(const std::string &key, int16_t value) {
+  VAR_DECAL(val, doc)
+  return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
+}
+
+bool JsonValue::SetValue(const std::string &key, uint16_t value) {
+  VAR_DECAL(val, doc)
+  return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
 }
 
 bool JsonValue::SetValue(const std::string &key, int32_t value) {

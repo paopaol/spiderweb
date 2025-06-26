@@ -23,9 +23,17 @@ class XmlNode {
 
   void GetAttribute(const char *name, PlaceHolderValue &value) const;
 
+  void GetAttribute(const char *name, uint8_t &value) const;
+
+  void GetAttribute(const char *name, uint16_t &value) const;
+
   void GetAttribute(const char *name, uint32_t &value) const;
 
   void GetAttribute(const char *name, uint64_t &value) const;
+
+  void GetAttribute(const char *name, int8_t &value) const;
+
+  void GetAttribute(const char *name, int16_t &value) const;
 
   void GetAttribute(const char *name, int32_t &value) const;
 
@@ -41,9 +49,17 @@ class XmlNode {
 
   void SetAttribute(const char *name, PlaceHolderValue value);
 
+  void SetAttribute(const char *name, uint8_t value);
+
+  void SetAttribute(const char *name, uint16_t value);
+
   void SetAttribute(const char *name, uint32_t value);
 
   void SetAttribute(const char *name, uint64_t value);
+
+  void SetAttribute(const char *name, int8_t value);
+
+  void SetAttribute(const char *name, int16_t value);
 
   void SetAttribute(const char *name, int32_t value);
 
@@ -57,9 +73,17 @@ class XmlNode {
 
   void SetAttribute(const char *name, const std::string &value);
 
+  void GetValue(uint8_t &value) const;
+
+  void GetValue(uint16_t &value) const;
+
   void GetValue(uint32_t &value) const;
 
   void GetValue(uint64_t &value) const;
+
+  void GetValue(int8_t &value) const;
+
+  void GetValue(int16_t &value) const;
 
   void GetValue(int32_t &value) const;
 
@@ -73,9 +97,17 @@ class XmlNode {
 
   void GetValue(std::string &value) const;
 
+  void SetValue(uint8_t value);
+
+  void SetValue(uint16_t value);
+
   void SetValue(uint32_t value);
 
   void SetValue(uint64_t value);
+
+  void SetValue(int8_t value);
+
+  void SetValue(int16_t value);
 
   void SetValue(int32_t value);
 

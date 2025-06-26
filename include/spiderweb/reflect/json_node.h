@@ -19,6 +19,10 @@ class JsonValue {
 
   ~JsonValue();
 
+  bool GetValue(int8_t &result) const;
+
+  bool GetValue(uint8_t &result) const;
+
   bool GetValue(int16_t &result) const;
 
   bool GetValue(uint16_t &result) const;
@@ -39,6 +43,10 @@ class JsonValue {
 
   bool GetValue(std::string &result) const;
 
+  bool SetValue(int8_t value);
+
+  bool SetValue(uint8_t value);
+
   bool SetValue(int16_t value);
 
   bool SetValue(uint16_t value);
@@ -58,6 +66,14 @@ class JsonValue {
   bool SetValue(double value);
 
   bool SetValue(const std::string &value);
+
+  bool SetValue(const std::string &key, int8_t value);
+
+  bool SetValue(const std::string &key, uint8_t value);
+
+  bool SetValue(const std::string &key, int16_t value);
+
+  bool SetValue(const std::string &key, uint16_t value);
 
   bool SetValue(const std::string &key, int32_t value);
 
