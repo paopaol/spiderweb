@@ -115,10 +115,6 @@ class SequenceHash {
 
   void Remove(const key_type& key);
 
-  void PopFront();
-
-  void PopBack();
-
   void Clear();
 
   std::size_t Size() const;
