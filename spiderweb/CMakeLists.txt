@@ -25,6 +25,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_waiter.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_thread.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_unbounded_queue.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_sequence_hash.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_range.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_synchronized.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_signal.h
@@ -129,6 +130,7 @@ target_sources(
           core/spiderweb_waiter_test.cc
           core/spiderweb_thread_test.cc
           core/spiderweb_unbounded_queue_test.cc
+          core/spiderweb_sequence_hash_test.cc
           core/spiderweb_range_test.cc
           core/spiderweb_synchronized_test.cc
           core/spiderweb_signal_test.cc
@@ -150,12 +152,12 @@ target_link_libraries(spiderweb_test PRIVATE spiderweb GTest::gtest_main
                                              GTest::gtest GTest::gmock)
 
 # benchmark
- add_executable(spiderweb_benchmark)
- target_sources(
-   spiderweb_benchmark
-   PRIVATE core/spiderweb_notify_benchmark.cc core/spiderweb_timer_benchmark.cc
-           type/spiderweb_variant_benchmark.cc
-           core/spiderweb_object_pool_benchmark.cc)
- target_link_libraries(
-   spiderweb_benchmark PRIVATE spiderweb benchmark::benchmark
-                               benchmark::benchmark_main)
+add_executable(spiderweb_benchmark)
+target_sources(
+  spiderweb_benchmark
+  PRIVATE core/spiderweb_notify_benchmark.cc core/spiderweb_timer_benchmark.cc
+          type/spiderweb_variant_benchmark.cc
+          core/spiderweb_object_pool_benchmark.cc)
+target_link_libraries(
+  spiderweb_benchmark PRIVATE spiderweb benchmark::benchmark
+                              benchmark::benchmark_main)
