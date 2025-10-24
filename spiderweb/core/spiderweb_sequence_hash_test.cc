@@ -1,5 +1,7 @@
 #include "spiderweb/core/spiderweb_sequence_hash.h"
 
+#include <utility>
+
 #include "gtest/gtest.h"
 
 struct User {
@@ -63,6 +65,13 @@ TEST_F(SequenceHashTest, PushFrontwhenEmpty) {
 
 TEST_F(SequenceHashTest, PushFailed) {
   EXPECT_FALSE(users.PushBack("123", User{}));
+}
+
+TEST_F(SequenceHashTest, PushValue) {
+  SequenceHash<std::string, User> v;
+  User                            u;
+
+  EXPECT_TRUE(v.PushBack("front", u));
 }
 
 TEST_F(SequenceHashTest, PushAfter) {

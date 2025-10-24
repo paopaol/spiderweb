@@ -8,16 +8,10 @@ namespace spiderweb {
 
 template <typename T>
 struct SequenceHashNode {
-  explicit SequenceHashNode(T&& v);
-
   T                 v;
   SequenceHashNode* p = nullptr;
   SequenceHashNode* n = nullptr;
 };
-
-template <typename T>
-SequenceHashNode<T>::SequenceHashNode(T&& v) : v(std::forward<T>(v)) {
-}
 
 ///////////////
 
@@ -101,17 +95,13 @@ class SequenceHash {
 
   ~SequenceHash();
 
-  template <typename U>
-  bool PushBack(key_type&& key, U&& v);
+  bool PushBack(key_type key, T v);
 
-  template <typename U>
-  bool PushAfter(const key_type& at, key_type&& key, U&& v);
+  bool PushAfter(key_type at, key_type key, T v);
 
-  template <typename U>
-  bool PushFront(key_type&& key, U&& v);
+  bool PushFront(key_type key, T v);
 
-  template <typename U>
-  bool PushBefore(const key_type& at, key_type&& key, U&& v);
+  bool PushBefore(key_type at, key_type key, T v);
 
   void Remove(const key_type& key);
 
@@ -284,9 +274,8 @@ inline SequenceHash<T, KeyFun>::~SequenceHash() {
 }
 
 template <typename K, typename T>
-template <typename U>
-bool SequenceHash<K, T>::PushBack(key_type&& key, U&& v) {
-  auto* node = InsertHash(std::forward<key_type>(key), std::forward<U>(v));
+bool SequenceHash<K, T>::PushBack(key_type key, T v) {
+  auto* node = InsertHash(std::move(key), std::move(v));
   if (node) {
     PushNode(node);
   }
@@ -294,14 +283,13 @@ bool SequenceHash<K, T>::PushBack(key_type&& key, U&& v) {
 }
 
 template <typename K, typename T>
-template <typename U>
-bool SequenceHash<K, T>::PushAfter(const key_type& at, key_type&& key, U&& v) {
+bool SequenceHash<K, T>::PushAfter(key_type at, key_type key, T v) {
   auto before = Find(at);
   if (before == end()) {
     return false;
   }
 
-  auto* node = InsertHash(std::forward<key_type>(key), std::forward<U>(v));
+  auto* node = InsertHash(std::move(key), std::move(v));
   if (node) {
     PushNode(before.ptr, node);
     return true;
@@ -310,11 +298,10 @@ bool SequenceHash<K, T>::PushAfter(const key_type& at, key_type&& key, U&& v) {
 }
 
 template <typename K, typename T>
-template <typename U>
-bool SequenceHash<K, T>::PushFront(key_type&& key, U&& v) {
+bool SequenceHash<K, T>::PushFront(key_type key, T v) {
   //   head_
   // n head_
-  auto* node = InsertHash(std::forward<key_type>(key), std::forward<U>(v));
+  auto* node = InsertHash(std::move(key), std::move(v));
   if (!node) {
     return false;
   }
@@ -330,8 +317,7 @@ bool SequenceHash<K, T>::PushFront(key_type&& key, U&& v) {
 }
 
 template <typename K, typename T>
-template <typename U>
-bool SequenceHash<K, T>::PushBefore(const key_type& at, key_type&& key, U&& v) {
+bool SequenceHash<K, T>::PushBefore(key_type at, key_type key, T v) {
   //   before
   // n before
   auto before = Find(at);
@@ -339,7 +325,7 @@ bool SequenceHash<K, T>::PushBefore(const key_type& at, key_type&& key, U&& v) {
     return false;
   }
 
-  auto* node = InsertHash(std::forward<key_type>(key), std::forward<U>(v));
+  auto* node = InsertHash(std::move(key), std::move(v));
   if (!node) {
     return false;
   }
@@ -417,7 +403,7 @@ typename SequenceHash<K, T>::node_type* SequenceHash<K, T>::InsertHash(M&& key, 
     return nullptr;
   }
 
-  node = new node_type(std::forward<U>(v));
+  node = new node_type{std::forward<U>(v)};
   result.first->second = node;
   return node;
 }
