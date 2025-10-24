@@ -12,7 +12,7 @@
 namespace spiderweb {
 class EventLoop : public Object {
  public:
-  explicit EventLoop(Object *parent = nullptr);
+  explicit EventLoop(Object* parent = nullptr);
 
   ~EventLoop() override;
 
@@ -22,7 +22,7 @@ class EventLoop : public Object {
 
   void Exit(int code);
 
-  static EventLoop *LoopOfCurrentThread();
+  static EventLoop* LoopOfCurrentThread();
 
   NativeIoService IoService();
 
@@ -31,12 +31,12 @@ class EventLoop : public Object {
   std::unique_ptr<Private> d;
 };
 
-inline EventLoop *GetLoop(Object *base) {
+inline EventLoop* GetLoop(Object* base) {
   if (base) {
     return base->ownerEventLoop();
   }
 
-  auto *loop = EventLoop::LoopOfCurrentThread();
+  auto* loop = EventLoop::LoopOfCurrentThread();
   assert(loop);
   return loop;
 }

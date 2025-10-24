@@ -4,11 +4,11 @@
 
 namespace spiderweb {
 
-thread_local EventLoop *current_loop = nullptr;
+thread_local EventLoop* current_loop = nullptr;
 
 class EventLoop::Private {
  public:
-  explicit Private(EventLoop *qq) : work(io), q(qq) {
+  explicit Private(EventLoop* qq) : work(io), q(qq) {
     assert(!current_loop);
     current_loop = q;
   }
@@ -21,10 +21,10 @@ class EventLoop::Private {
   asio::io_service       io;
   asio::io_service::work work;
   int32_t                exit_code = 0;
-  EventLoop             *q = nullptr;
+  EventLoop*             q = nullptr;
 };
 
-EventLoop::EventLoop(Object *parent) : Object(this, parent), d(new Private(this)) {
+EventLoop::EventLoop(Object* parent) : Object(this, parent), d(new Private(this)) {
   assert(current_loop);
 }
 
@@ -44,13 +44,11 @@ void EventLoop::Exit(int code) {
   d->io.stop();
 }
 
-spiderweb::EventLoop *EventLoop::LoopOfCurrentThread() {
+spiderweb::EventLoop* EventLoop::LoopOfCurrentThread() {
   return current_loop;
 }
 
 NativeIoService EventLoop::IoService() {
-  asio::io_service s;
-
   return &d->io;
 }
 
