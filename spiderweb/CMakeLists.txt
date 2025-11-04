@@ -37,6 +37,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_bitmap_readwriter.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_socket.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_server.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_udp_socket.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_serialport.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/enum_reflect.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/json_reflect.h
@@ -62,6 +63,7 @@ target_sources(
     io/spiderweb_buffer.cc
     net/spiderweb_tcp_socket.cc
     net/spiderweb_tcp_server.cc
+    net/spiderweb_udp_socket.cc
     serial/spiderweb_serialport.cc
     type/spiderweb_variant.cc
     reflect/pugixml_impl.cc
@@ -70,6 +72,7 @@ target_sources(
     io/private/spiderweb_named_pipe_private.h
     net/private/spiderweb_tcp_socket_private.h
     net/private/spiderweb_tcp_server_private.h
+    net/spiderweb_endpoint_visitor.h
     serial/private/spiderweb_serialport_private.h
     serial/private/spiderweb_socketcan_private.h
     ppk_assert.cpp

@@ -12,8 +12,8 @@ namespace spiderweb {
 namespace io {
 template <typename IoImpl>
 class IoPrivate;
-
 }
+
 namespace net {
 
 class TcpServer;
@@ -21,11 +21,11 @@ class TcpSocket : public Object {
  public:
   class Private;
 
-  explicit TcpSocket(Object *parent = nullptr);
+  explicit TcpSocket(Object* parent = nullptr);
 
   ~TcpSocket() override;
 
-  void ConnectToHost(const std::string &ip, uint16_t port);
+  void ConnectToHost(const std::string& ip, uint16_t port);
 
   void DisConnectFromHost();
 
@@ -49,15 +49,15 @@ class TcpSocket : public Object {
    *
    * completed(see BytesWritten). The behavior of multiple writes is undefined.
    */
-  void Write(const uint8_t *data, std::size_t size);
+  void Write(const uint8_t* data, std::size_t size);
 
-  void Write(const std::vector<uint8_t> &data);
+  void Write(const std::vector<uint8_t>& data);
 
   Notify<> ConnectionEstablished;
 
-  Notify<const std::error_code &> Error;
+  Notify<const std::error_code&> Error;
 
-  Notify<const io::BufferReader &> BytesRead;
+  Notify<const io::BufferReader&> BytesRead;
 
   Notify<std::size_t> BytesWritten;
 
@@ -69,7 +69,7 @@ class TcpSocket : public Object {
   Notify<> ReconnectEvent;
 
  private:
-  explicit TcpSocket(TcpServer *parent);
+  explicit TcpSocket(TcpServer* parent);
 
   std::shared_ptr<io::IoPrivate<Private>> d;
 

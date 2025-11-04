@@ -34,7 +34,7 @@ template <typename IoImpl>
 class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
  public:
   template <typename Delegated>
-  explicit IoPrivate(Delegated *qq) : impl(qq) {
+  explicit IoPrivate(Delegated* qq) : impl(qq) {
   }
 
   ~IoPrivate() = default;
@@ -44,7 +44,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   }
 
   template <typename AsyncStream, typename... Args>
-  void StartOpen(AsyncStream &stream, Args &&...args) {
+  void StartOpen(AsyncStream& stream, Args&&... args) {
     if (stream.is_open()) {
       spdlog::warn("{}({}) alreay connected or connecting", impl.Description(), fmt::ptr(impl.q));
       return;
@@ -54,11 +54,11 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
     auto self = this->shared_from_this();
 
     impl.Open(stream, std::forward<Args>(args)...,
-              [this, self, &stream](const asio::error_code &ec) { HandleOpen(stream, ec); });
+              [this, self, &stream](const asio::error_code& ec) { HandleOpen(stream, ec); });
   }
 
   template <typename AsyncStream, typename... Args>
-  void StartOpenEx(AsyncStream &stream, bool check, Args &&...args) {
+  void StartOpenEx(AsyncStream& stream, bool check, Args&&... args) {
     if (check && stream.is_open()) {
       spdlog::warn("{}({}) alreay connected or connecting", impl.Description(), fmt::ptr(impl.q));
       return;
@@ -68,11 +68,11 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
     auto self = this->shared_from_this();
 
     impl.Open(stream, std::forward<Args>(args)...,
-              [this, self, &stream](const asio::error_code &ec) { HandleOpen(stream, ec); });
+              [this, self, &stream](const asio::error_code& ec) { HandleOpen(stream, ec); });
   }
 
   template <typename AsyncStream>
-  void HandleOpen(AsyncStream &stream, const asio::error_code &ec) {
+  void HandleOpen(AsyncStream& stream, const asio::error_code& ec) {
     if (stopped) {
       return;
     }
@@ -90,7 +90,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   }
 
   template <typename AsyncStream>
-  void StartRead(AsyncStream &stream) {
+  void StartRead(AsyncStream& stream) {
     if (stopped) {
       return;
     }
@@ -127,7 +127,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
     const auto buffer = asio::buffer(recv_buffer.beginWrite(), recv_buffer.leftSpace());
 
     auto self = this->shared_from_this();
-    impl.Read(stream, buffer, [this, self, &stream](const asio::error_code &ec, std::size_t n) {
+    impl.Read(stream, buffer, [this, self, &stream](const asio::error_code& ec, std::size_t n) {
       if (stopped) {
         return;
       }
@@ -149,17 +149,17 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
 
   template <typename AsyncStream, typename Byte,
             typename = typename std::enable_if<IsByte<Byte>::value>::type>
-  void StartWrite(AsyncStream &stream, const std::vector<Byte> &data) {
-    StartWrite(stream, static_cast<const uint8_t *>(data.data()), data.size());
+  void StartWrite(AsyncStream& stream, const std::vector<Byte>& data) {
+    StartWrite(stream, static_cast<const uint8_t*>(data.data()), data.size());
   }
 
   template <typename AsyncStream>
-  void StartWrite(AsyncStream &stream, const std::string &data) {
-    StartWrite(stream, reinterpret_cast<const uint8_t *>(data.data()), data.size());
+  void StartWrite(AsyncStream& stream, const std::string& data) {
+    StartWrite(stream, reinterpret_cast<const uint8_t*>(data.data()), data.size());
   }
 
   template <typename AsyncStream>
-  void StartWrite(AsyncStream &stream, const uint8_t *data, std::size_t size) {
+  void StartWrite(AsyncStream& stream, const uint8_t* data, std::size_t size) {
     if (stopped) {
       spdlog::warn("{}({}) stopped", impl.Description(), fmt::ptr(impl.q));
       return;
@@ -167,7 +167,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
 
     const bool should_write = send_buffer.Len() == 0;
 
-    send_buffer.Write(reinterpret_cast<const char *>(data), size);
+    send_buffer.Write(reinterpret_cast<const char*>(data), size);
 
     if (should_write) {
       StartWrite(stream);
@@ -175,7 +175,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   }
 
   template <typename AsyncStream>
-  void StartWrite(AsyncStream &stream) {
+  void StartWrite(AsyncStream& stream) {
     if (stopped) {
       spdlog::warn("{}({}) stopped", impl.Description(), fmt::ptr(impl.q));
       return;
@@ -187,13 +187,13 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
 
     auto self = this->shared_from_this();
     impl.Write(stream, asio::buffer(send_buffer.lastRead(), send_buffer.Len()),
-               [this, self, &stream](const asio::error_code &ec, std::size_t size) {
+               [this, self, &stream](const asio::error_code& ec, std::size_t size) {
                  HandleWrite(stream, ec, size);
                });
   }
 
   template <typename AsyncStream>
-  void HandleWrite(AsyncStream &stream, const asio::error_code &ec, std::size_t size) {
+  void HandleWrite(AsyncStream& stream, const asio::error_code& ec, std::size_t size) {
     if (stopped) {
       return;
     }
@@ -207,7 +207,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
       return;
     }
 
-    char *ptr = nullptr;
+    char* ptr = nullptr;
     send_buffer.ZeroCopyRead(ptr, size);
     StartWrite(stream);
 
@@ -215,14 +215,14 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
   }
 
   template <typename AsyncStream>
-  inline void Stop(AsyncStream &stream) {
+  inline void Stop(AsyncStream& stream) {
     stopped = true;
 
     Close(stream);
   }
 
   template <typename AsyncStream>
-  inline void Close(AsyncStream &stream) {
+  inline void Close(AsyncStream& stream) {
     if (close_called) {
       return;
     }
