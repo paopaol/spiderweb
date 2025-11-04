@@ -1,5 +1,7 @@
 #include "spiderweb/net/spiderweb_udp_socket.h"
 
+#include <absl/types/span.h>
+
 #include "asio.hpp"
 #include "core/internal/asio_cast.h"
 #include "spdlog/spdlog.h"
@@ -8,6 +10,7 @@
 
 namespace spiderweb {
 namespace net {
+using asio::ip::udp;
 
 class UdpSocket::Private : public std::enable_shared_from_this<Private> {
  public:
@@ -20,12 +23,15 @@ class UdpSocket::Private : public std::enable_shared_from_this<Private> {
       return;
     }
 
-    Datagram datagram(endpoint, data, size);
-    auto     self = shared_from_this();
+    Datagram            datagram(endpoint, data, size);
+    absl::Span<uint8_t> span(const_cast<uint8_t*>(datagram.Data().data()), datagram.Data().size());
+    auto                self = shared_from_this();
 
-    socket.async_send(asio::buffer(datagram.Data()),
-                      [this, datagram = std::move(datagram), self](
-                          const asio::error_code& ec, std::size_t size) { HandleWrite(ec, size); });
+    socket.async_send_to(
+        asio::buffer(span), EndPointVisitor::MakeAsioEndpoint<udp>(endpoint),
+        [this, datagram = std::move(datagram), self](const asio::error_code& ec, std::size_t size) {
+          HandleWrite(ec, size);
+        });
   }
 
   void StartRead() {
@@ -33,11 +39,10 @@ class UdpSocket::Private : public std::enable_shared_from_this<Private> {
       return;
     }
 
-    const auto buffer = asio::buffer(recv_buffer);
-    auto       self = shared_from_this();
-
+    auto self = shared_from_this();
     socket.async_receive_from(
-        buffer, remote, [this, self](const std::error_code& ec, std::size_t bytes_transferred) {
+        asio::buffer(recv_buffer), remote,
+        [this, self](const std::error_code& ec, std::size_t bytes_transferred) {
           HandleReceive(ec, bytes_transferred);
         });
   }
@@ -110,11 +115,35 @@ class UdpSocket::Private : public std::enable_shared_from_this<Private> {
 };
 
 UdpSocket::UdpSocket(Object* parent) : Object(parent), d(std::make_shared<Private>(this)) {
+  d->q = this;
 }
 
-UdpSocket::~UdpSocket() = default;
+UdpSocket::~UdpSocket() {
+  Close();
+}
 
-void UdpSocket::Open() {
+void UdpSocket::Open(spiderweb::ErrorCode& ec) {
+  SPIDERWEB_CALL_THREAD_CHECK(UdpSocket::Open);
+  (void)d->socket.open(udp::v4(), ec);
+  if (!ec) {
+    d->stopped = false;
+  }
+}
+
+void UdpSocket::Close() {
+  SPIDERWEB_CALL_THREAD_CHECK(UdpSocket::Close);
+  spiderweb::ErrorCode ec;
+  (void)d->socket.close(ec);
+  d->stopped = true;
+}
+
+void UdpSocket::Bind(const EndPoint& endpoint, spiderweb::ErrorCode& ec) {
+  SPIDERWEB_CALL_THREAD_CHECK(UdpSocket::Bind);
+  (void)d->socket.bind(EndPointVisitor::MakeAsioEndpoint<udp>(endpoint), ec);
+  if (!ec) {
+    d->StartRead();
+    ;
+  }
 }
 
 void UdpSocket::SendTo(const EndPoint& endpoint, const uint8_t* data, std::size_t size) {

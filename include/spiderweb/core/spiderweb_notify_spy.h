@@ -11,14 +11,14 @@ namespace spiderweb {
 
 class NotifySpy : public Object {
  public:
-  explicit NotifySpy(Object *loop);
+  explicit NotifySpy(Object* loop);
 
   template <typename T, typename T2, typename... Args>
-  explicit NotifySpy(T *instance, Notify<Args...> T2::*event) {
-    Object::Connect(instance, event, instance, [this](Args... args) {
+  explicit NotifySpy(T* instance, Notify<Args...> T2::* event) {
+    Object::Connect(instance, event, instance, [this](Args&&... args) {
       ++count_;
-      std::tuple<decay_t<Args>...> t(std::forward<Args>(args)...);
-      results_.emplace_back(std::move(t));
+
+      results_.emplace_back(absl::any(std::tuple<decay_t<Args>...>(std::forward<Args>(args)...)));
     });
   }
 
@@ -36,14 +36,14 @@ class NotifySpy : public Object {
   template <typename... Args>
   const std::tuple<Args...> LastResult() const {
     assert(!results_.empty());
-    const auto &last = results_.back();
+    const auto& last = results_.back();
     return absl::any_cast<std::tuple<Args...>>(last);
   }
 
   template <typename... Args>
   const std::tuple<Args...> ResultAt(uint32_t index) const {
     assert(!results_.empty());
-    const auto &last = results_[index];
+    const auto& last = results_[index];
     return absl::any_cast<std::tuple<Args...>>(last);
   }
 

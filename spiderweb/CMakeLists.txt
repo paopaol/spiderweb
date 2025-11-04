@@ -64,6 +64,7 @@ target_sources(
     net/spiderweb_tcp_socket.cc
     net/spiderweb_tcp_server.cc
     net/spiderweb_udp_socket.cc
+    net/spiderweb_endpoint.cc
     serial/spiderweb_serialport.cc
     type/spiderweb_variant.cc
     reflect/pugixml_impl.cc
@@ -144,6 +145,7 @@ target_sources(
           io/spiderweb_bitmap_readwriter_test.cc
           net/spiderweb_tcp_socket_test.cc
           net/spiderweb_tcp_server_test.cc
+          net/spiderweb_udp_socket_test.cc
           serial/spiderweb_serialport_test.cc
           type/spiderweb_any_view_test.cc
           type/spiderweb_binary_view_test.cc

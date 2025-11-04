@@ -50,6 +50,7 @@ if(SPIDERWEB_BENCHMARK_USE_PACKAGE)
 endif()
 if(SPIDERWEB_SPDLOG_USE_PACKAGE)
   find_package(spdlog REQUIRED)
+  add_compile_definitions(PUBLIC SPDLOG_COMPILED_LIB)
 endif()
 
 if(SPIDERWEB_ASIO_USE_PACKAGE)

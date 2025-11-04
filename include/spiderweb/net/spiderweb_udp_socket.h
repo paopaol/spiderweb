@@ -3,6 +3,7 @@
 #include <memory>
 #include <system_error>
 
+#include "spiderweb/core/spiderweb_error_code.h"
 #include "spiderweb/core/spiderweb_notify.h"
 #include "spiderweb/core/spiderweb_object.h"
 #include "spiderweb/net/spiderweb_endpoint.h"
@@ -12,13 +13,25 @@ namespace net {
 
 class Datagram {
  public:
-  Datagram();
+  Datagram() = default;
+
+  Datagram(const Datagram&) = default;
+
+  Datagram& operator=(const Datagram&) = default;
+
+  Datagram(Datagram&&) noexcept = default;
+
+  Datagram& operator=(Datagram&&) noexcept = default;
 
   inline const EndPoint& GetEndPoint() const {
     return endpoint_;
   }
 
-  inline const std::vector<uint8_t> Data() const {
+  inline const std::vector<uint8_t>& Data() const {
+    return data_;
+  }
+
+  inline std::vector<uint8_t>& Data() {
     return data_;
   }
 
@@ -41,7 +54,11 @@ class UdpSocket : public Object {
 
   ~UdpSocket() override;
 
-  void Open();
+  void Open(spiderweb::ErrorCode& ec);
+
+  void Close();
+
+  void Bind(const EndPoint& endpoint, spiderweb::ErrorCode& ec);
 
   void SendTo(const EndPoint& endpoint, const uint8_t* data, std::size_t size);
 
