@@ -47,7 +47,7 @@ struct PeopleList {
 };
 
 TEST(pugixml_impl, FromXml) {
-  static const char *xml = R"(
+  static const char* xml = R"(
   <people age="53" height="3.33" name="xiaoming" attri_bool_value="true">
       <address>345</address>
       <child id="123"></child>
@@ -69,7 +69,7 @@ TEST(pugixml_impl, FromXml) {
 }
 
 TEST(pugixml_impl, FromXmlInnerHtml) {
-  static const char *xml = R"(<address>345</address>)";
+  static const char* xml = R"(<address>345</address>)";
 
   spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
 
@@ -79,7 +79,7 @@ TEST(pugixml_impl, FromXmlInnerHtml) {
 }
 
 TEST(pugixml_impl, FromXmlInnerHtmlArray) {
-  static const char *xml = R"(
+  static const char* xml = R"(
   <root>
     <address_list>
       <address>0</address>
@@ -100,7 +100,7 @@ TEST(pugixml_impl, FromXmlInnerHtmlArray) {
 }
 
 TEST(pugixml_impl, FromXmlArray) {
-  static const char *xml = R"(
+  static const char* xml = R"(
 <root>
   <people age="53" height="3.33" name="xiaoming">
       <address>345</address>
@@ -123,7 +123,7 @@ TEST(pugixml_impl, FromXmlArray) {
 }
 
 TEST(pugixml_impl, FromXmlByIndex) {
-  static const char *xml = R"(
+  static const char* xml = R"(
 <root>
   <people age="53" height="3.33" name="xiaoming">
       <address>345</address>
@@ -228,7 +228,7 @@ TEST(pugixml_impl, WriteComplexdArray) {
 }
 
 TEST(pugixml_impl, FromXmlSharedPtr) {
-  static const char *xml = R"(
+  static const char* xml = R"(
   <people age="53" height="3.33" name="xiaoming">
       <address>345</address>
       <child id="123"></child>
@@ -285,55 +285,24 @@ TEST(pugixml_impl, WriteComplexdArraySharedPtr) {
   std::cout << writer.ToString() << '\n';
 }
 
-struct Element {
-  int                   value;
-  std::shared_ptr<Element> left;
-  std::shared_ptr<Element> right;
+struct XmlElement {
+  int                                  value;
+  std::shared_ptr<XmlElement>          left;
+  std::shared_ptr<XmlElement>          right;
+  spiderweb::reflect::PlaceHolderValue _;
 };
 
-// REFLECT_XML(Node, REFLECT_XML_ATTR(), (value, "value"), (left, "left"), (right,
-// "right"))
-namespace spiderweb {
-namespace reflect {
-template <typename T>
-struct XmlMeta<T, Element> {
-  using XmlValue = T;
-  using struct_type = Element;
-  static void Read(XmlValue &node, struct_type &result) {
-    {
-      reflect ::detail ::ReadTagImpl(node, "value", result.value);
-    }
-    {
-      reflect ::detail ::ReadTagImpl(node, "left", result.left);
-    }
-    {
-      reflect ::detail ::ReadTagImpl(node, "right", result.right);
-    }
-  }
-  static void Write(XmlValue &node, const struct_type &result) {
-    {
-      reflect ::detail ::WriteTagImpl(node, "value", result.value);
-    }
-    {
-      reflect ::detail ::WriteTagImpl(node, "left", result.left);
-    }
-    {
-      reflect ::detail ::WriteTagImpl(node, "right", result.right);
-    }
-  }
-};
-}  // namespace reflect
-}  // namespace spiderweb
+REFLECT_XML(XmlElement, REFLECT_XML_ATTR((_)), (value, "value"), (left, "left"), (right, "right"))
 
 TEST(pugixml_impl, WriteNodeTree) {
-  auto root = std::make_shared<Element>();
+  auto root = std::make_shared<XmlElement>();
 
   root->value = 5;
 
-  root->left = std::make_shared<Element>();
+  root->left = std::make_shared<XmlElement>();
   root->left->value = 4;
 
-  root->right = std::make_shared<Element>();
+  root->right = std::make_shared<XmlElement>();
   root->right->value = 6;
 
   spiderweb::reflect::XmlDocumentWriter writer;
@@ -342,7 +311,7 @@ TEST(pugixml_impl, WriteNodeTree) {
 }
 
 TEST(pugixml_impl, ReadNodeTree) {
-  static const char *xml = R"(
+  static const char* xml = R"(
 <rootNode>
         <value>5</value>
         <left>
@@ -354,7 +323,7 @@ TEST(pugixml_impl, ReadNodeTree) {
 </rootNode>
             )";
 
-  std::shared_ptr<Element> tree;
+  std::shared_ptr<XmlElement> tree;
 
   spiderweb::reflect::XmlDocumentReader reader(xml, strlen(xml));
   reader.Read("rootNode", tree);
@@ -485,10 +454,10 @@ REFLECT_ENUM(ProperyType, std::string, (kBool, "Bool"), (kNumber, "Number"), (kS
 template <typename K, typename V>
 class Map : public std::map<K, V> {
  public:
-  explicit Map(const std::string &key) : key_tag_(key) {
+  explicit Map(const std::string& key) : key_tag_(key) {
   }
 
-  const std::string &KeyTag() const {
+  const std::string& KeyTag() const {
     return key_tag_;
   }
 
@@ -501,10 +470,10 @@ namespace reflect {
 namespace detail {
 template <typename XmlValue, typename KeyType, typename ValueType,
           template <typename, typename> class Map>
-inline bool ReadTagImpl(XmlValue &node, const char *name, Map<KeyType, ValueType> &value) {
+inline bool ReadTagImpl(XmlValue& node, const char* name, Map<KeyType, ValueType>& value) {
   using MetaType = reflect::XmlMeta<XmlValue, ValueType>;
 
-  node.ForEachChilds(name, [&](const XmlValue &child) {
+  node.ForEachChilds(name, [&](const XmlValue& child) {
     ValueType result{};
     MetaType::Read(child, result);
 
@@ -557,7 +526,7 @@ REFLECT_XML(Public,
             (objects, "Object"))
 
 TEST(pugixml_impl, FromPublic) {
-  static const char *xml = R"(
+  static const char* xml = R"(
 <Public color="#ffffff" containerdev="" height="1013" showPoint="0" transparent="1" width="1570">
     <Object type="2_display_widgets.label" uuid="{9a2c7b65-3367-4a5b-9833-596c8bbae6c1}">
         <Property name="objectName" type="ByteArray" value="label_1120"/>

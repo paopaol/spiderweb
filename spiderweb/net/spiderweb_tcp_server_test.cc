@@ -10,13 +10,13 @@
 
 class tcp_acceptor {
  public:
-  using AcceptHandler = std::function<void(const asio::error_code &)>;
+  using AcceptHandler = std::function<void(const asio::error_code&)>;
 
-  MOCK_METHOD(void, async_accept, (asio::ip::tcp::socket & socket, AcceptHandler &&handler));
+  MOCK_METHOD(void, async_accept, (asio::ip::tcp::socket & socket, AcceptHandler&& handler));
 };
 
 struct MockTcpServer {
-  explicit MockTcpServer(spiderweb::EventLoop &loop)
+  explicit MockTcpServer(spiderweb::EventLoop& loop)
       : loop(loop), d(std::make_shared<spiderweb::net::TcpServer::Private>(6666, &server)) {
   }
 
@@ -24,7 +24,7 @@ struct MockTcpServer {
     d->q = nullptr;
   }
 
-  spiderweb::EventLoop                               &loop;
+  spiderweb::EventLoop&                               loop;
   tcp_acceptor                                        acceptor;
   spiderweb::net::TcpServer                           server{1234};
   std::shared_ptr<spiderweb::net::TcpServer::Private> d;
@@ -39,17 +39,17 @@ TEST(spiderweb_tcp_server, Accept) {
   spiderweb::NotifySpy spy(&mocker.server, &spiderweb::net::TcpServer::InComingConnection);
 
   EXPECT_CALL(mocker.acceptor, async_accept(_, _))
-      .WillOnce([&](asio::ip::tcp::socket & /*socket*/, tcp_acceptor::AcceptHandler &&handler) {
+      .WillOnce([&](asio::ip::tcp::socket& /*socket*/, tcp_acceptor::AcceptHandler&& handler) {
         loop.QueueTask([handler = std::move(handler)]() { handler(asio::error_code()); });
       })
-      .WillOnce([&](asio::ip::tcp::socket & /*socket*/, tcp_acceptor::AcceptHandler &&handler) {});
+      .WillOnce([&](asio::ip::tcp::socket& /*socket*/, tcp_acceptor::AcceptHandler&& handler) {});
 
   mocker.d->StartAccept(mocker.acceptor);
 
   spy.Wait();
   EXPECT_EQ(spy.Count(), 1);
 
-  spiderweb::net::TcpSocket *client = std::get<0>(spy.LastResult<spiderweb::net::TcpSocket *>());
+  spiderweb::net::TcpSocket* client = std::get<0>(spy.LastResult<spiderweb::net::TcpSocket*>());
   assert(client);
   delete client;
 }
@@ -63,10 +63,9 @@ TEST(spiderweb_tcp_server, AcceptFailed) {
   spiderweb::NotifySpy spy(&mocker.server, &spiderweb::net::TcpServer::InComingConnection);
 
   EXPECT_CALL(mocker.acceptor, async_accept(_, _))
-      .WillOnce([&](asio::ip::tcp::socket & /*socket*/, tcp_acceptor::AcceptHandler &&handler) {
+      .WillOnce([&](asio::ip::tcp::socket& /*socket*/, tcp_acceptor::AcceptHandler&& handler) {
         loop.QueueTask([handler = std::move(handler)]() { handler(asio::error::address_in_use); });
-      })
-      .WillOnce([&](asio::ip::tcp::socket & /*socket*/, tcp_acceptor::AcceptHandler &&handler) {});
+      });
 
   mocker.d->StartAccept(mocker.acceptor);
 
@@ -78,7 +77,7 @@ TEST(spiderweb_tcp_server, SafeDelete) {
   using ::testing::_;
 
   spiderweb::EventLoop loop;
-  auto                *server = new spiderweb::net::TcpServer(1234);
+  auto*                server = new spiderweb::net::TcpServer(1234);
 
   server->ListenAndServ();
   delete server;
@@ -88,7 +87,7 @@ TEST(spiderweb_tcp_server, Stop) {
   using ::testing::_;
 
   spiderweb::EventLoop loop;
-  auto                *server = new spiderweb::net::TcpServer(1234);
+  auto*                server = new spiderweb::net::TcpServer(1234);
 
   spiderweb::NotifySpy spy(server, &spiderweb::net::TcpServer::Stopped);
 

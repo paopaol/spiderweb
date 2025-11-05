@@ -25,10 +25,10 @@ REFLECT_JSON(Student,
         (str_value, "str_value"), 
         (intList, "intList")
 )
-// clang-format off
+// clang-format on
 
 TEST(ReflectJson, FromJsonBool) {
-  static const char *str = R"(
+  static const char* str = R"(
 {
   "bool_value": true,
   "uint64_value":1234,
@@ -64,7 +64,7 @@ struct TestPeople {
   std::vector<int>         intList;
   std::vector<std::string> stringList;
 
-  bool operator==(const TestPeople &other) const {
+  bool operator==(const TestPeople& other) const {
     return name == other.name && height == other.height && intList == other.intList &&
            stringList == other.stringList;
   }
@@ -82,7 +82,7 @@ struct TestPeopleList {
 REFLECT_JSON(TestPeopleList, (peoples, "peoples"))
 
 TEST(ReflectJson, FromJsonStruct) {
-  const char *json = R"(
+  const char* json = R"(
 {
   "name": "xiaoming",
   "age": 33,
@@ -106,7 +106,7 @@ TEST(ReflectJson, FromJsonStruct) {
 }
 
 TEST(ReflectJson, FromJsonStructMissingSome) {
-  const char *json = R"(
+  const char* json = R"(
 {
   "name": "xiaoming",
   "height": 1.74,
@@ -129,7 +129,7 @@ TEST(ReflectJson, FromJsonStructMissingSome) {
 }
 
 TEST(ReflectJson, FromJsonArray) {
-  const char *json = R"(
+  const char* json = R"(
 {
   "peoples": [
     {
@@ -177,7 +177,7 @@ TEST(ReflectJson, FromJsonArray) {
 }
 
 TEST(ReflectJson, FromJsonComplexArrayNoKey) {
-  const char *json = R"(
+  const char* json = R"(
 [
   {
     "name": "name1",
@@ -207,7 +207,7 @@ TEST(ReflectJson, FromJsonComplexArrayNoKey) {
 }
 
 TEST(ReflectJson, FromJsonSimpleArrayNoKey) {
-  const char *json = R"(
+  const char* json = R"(
 [123, 456]
 )";
 
@@ -265,7 +265,7 @@ struct MyNode {
 REFLECT_JSON(MyNode, (age, "age"), (next, "next"))
 
 TEST(ReflectJson, FromJsonRecursive) {
-  static const char *str = R"(
+  static const char* str = R"(
 {
   "age": 123,
   "next": {
@@ -336,7 +336,7 @@ TEST(ReflectJson, ToJsonArrayRecursive) {
 }
 
 TEST(ReflectJson, FromJsonArrayRecursive) {
-  static const char *str = R"(
+  static const char* str = R"(
 {
   "age": 1,
   "childs": [
@@ -378,7 +378,7 @@ TEST(ReflectJson, ToJsonEnum) {
 }
 
 TEST(ReflectJson, FromJsonEnum) {
-  static const char *xml = R"(
+  static const char* xml = R"(
 {
   "enumValue": "failed"
 }
@@ -422,36 +422,38 @@ struct ChangePasswdResponse {
   ErrorCode error;
 };
 
+namespace {
 struct User {
   std::string user;
   std::string display;
 };
-REFLECT_JSON(User, (user), (display, "display"))
 
 struct ListUsersRequest {
   int code;
 };
-REFLECT_JSON(ListUsersRequest, (code))
 
 struct ListUsersResponse {
   std::vector<User> users;
 };
+}  // namespace
+REFLECT_JSON(User, (user), (display, "display"))
+REFLECT_JSON(ListUsersRequest, (code))
 REFLECT_JSON(ListUsersResponse, (users, "users"))
 
 class RpcService {
  public:
   using MethodString = std::string;
-  using Handler = std::function<void(const std::string &request, std::string &response)>;
+  using Handler = std::function<void(const std::string& request, std::string& response)>;
 
   RpcService() = default;
 
-  void Dispatch(const std::string &method, const std::string &request, std::string &response) {
+  void Dispatch(const std::string& method, const std::string& request, std::string& response) {
     routes_[method](request, response);
   }
 
   template <typename Request, typename Response, typename T>
-  void Register(const std::string &method, T *impl, void (T::*func)(const Request &, Response &)) {
-    const auto handler = [=](const std::string &request, std::string &response) {
+  void Register(const std::string& method, T* impl, void (T::*func)(const Request&, Response&)) {
+    const auto handler = [=](const std::string& request, std::string& response) {
       Request                                req;
       Response                               resp;
       spiderweb::reflect::JsonDocumentReader reader(request.c_str());
@@ -475,7 +477,7 @@ class RpcService {
 
 class UserService {
  public:
-  explicit UserService(RpcService *service) {
+  explicit UserService(RpcService* service) {
     service->Register<LoginRequest, LoginResponse>("Login", this, &UserService::Login);
     service->Register<ListUsersRequest, ListUsersResponse>("UserList", this,
                                                            &UserService::UserList);
@@ -483,21 +485,21 @@ class UserService {
 
   virtual ~UserService() = default;
 
-  virtual void Login(const LoginRequest &req, LoginResponse &resp) {};
+  virtual void Login(const LoginRequest& req, LoginResponse& resp) {};
 
-  virtual void UserList(const ListUsersRequest &, ListUsersResponse &resp) {
+  virtual void UserList(const ListUsersRequest&, ListUsersResponse& resp) {
   }
 
-  virtual void ChangePasswd(const ChangePasswdRequest &req, ChangePasswdResponse &resp) {
+  virtual void ChangePasswd(const ChangePasswdRequest& req, ChangePasswdResponse& resp) {
   }
 };
 
 class UserServiceImpl : public UserService {
  public:
-  explicit UserServiceImpl(RpcService *service) : UserService(service) {
+  explicit UserServiceImpl(RpcService* service) : UserService(service) {
   }
 
-  void Login(const LoginRequest &req, LoginResponse &resp) override {
+  void Login(const LoginRequest& req, LoginResponse& resp) override {
     if (req.user_name != user_name_) {
       resp.error = ErrorCode::kUserNotFound;
       return;
@@ -505,12 +507,12 @@ class UserServiceImpl : public UserService {
     resp.error = ErrorCode::kSuccess;
   }
 
-  void UserList(const ListUsersRequest &, ListUsersResponse &resp) override {
-    resp.users.push_back(User{"1", "用户1"});
-    resp.users.push_back(User{"2", "用户2"});
+  void UserList(const ListUsersRequest&, ListUsersResponse& resp) override {
+    resp.users.emplace_back(User{"1", "用户1"});
+    resp.users.emplace_back(User{"2", "用户2"});
   }
 
-  void ChangePasswd(const ChangePasswdRequest &req, ChangePasswdResponse &resp) override {
+  void ChangePasswd(const ChangePasswdRequest& req, ChangePasswdResponse& resp) override {
     if (req.user_name != user_name_) {
       resp.error = ErrorCode::kUserNotFound;
       return;
