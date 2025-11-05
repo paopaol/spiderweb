@@ -106,4 +106,5 @@ TEST(spiderweb_tcp_server, Stop) {
 
   SPIDERWEB_VERIFY(1 == 1, return);
   SPIDERWEB_VERIFY(1 == 1, spy.Clear(); return);
+  delete server;
 }

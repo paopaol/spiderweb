@@ -17,12 +17,12 @@
 
 namespace spiderweb {
 
-using NativeIoService = void *;
+using NativeIoService = void*;
 
 template <typename Type, typename... Args>
 static inline std::function<void(Args...)> create_class_member_functor(
-    Type *instance, void (Type::*method)(Args... args)) {
-  return [=](Args &&...args) {
+    Type* instance, void (Type::*method)(Args... args)) {
+  return [=](Args&&... args) {
     if (std::this_thread::get_id() == instance->ThreadId()) {
       (instance->*method)(std::forward<Args>(args)...);
     } else {
@@ -34,9 +34,9 @@ static inline std::function<void(Args...)> create_class_member_functor(
 }
 
 template <typename Reciver, typename... Args, typename F>
-static inline std::function<void(Args...)> create_none_class_member_functor(Reciver *reciver,
-                                                                            F      &&f) {
-  return [=](Args &&...args) {
+static inline std::function<void(Args...)> create_none_class_member_functor(Reciver* reciver,
+                                                                            F&&      f) {
+  return [=](Args&&... args) {
     if (std::this_thread::get_id() == reciver->ThreadId()) {
       f(std::forward<Args>(args)...);
     } else {
@@ -50,16 +50,16 @@ static inline std::function<void(Args...)> create_none_class_member_functor(Reci
 class EventLoop;
 class Object {
  public:
-  explicit Object(Object *parent = nullptr);
+  explicit Object(Object* parent = nullptr);
 
   virtual ~Object();
 
-  Object(const Object &other) = delete;
+  Object(const Object& other) = delete;
 
-  Object &operator=(const Object &other) = delete;
+  Object& operator=(const Object& other) = delete;
 
   template <typename Sender, typename SenderU, typename Reciver, typename... Args>
-  static void Connect(Sender *sender, Notify<Args...> SenderU::*signal, Reciver *reciver,
+  static void Connect(Sender* sender, Notify<Args...> SenderU::* signal, Reciver* reciver,
                       void (Reciver::*method)(Args... args)) {
     static_assert(std::is_base_of<Object, Reciver>::value, "Reciver must derived from Base");
 
@@ -69,7 +69,7 @@ class Object {
   }
 
   template <typename Sender, typename SenderU, typename Reciver, typename... Args, typename F>
-  static void Connect(Sender *sender, Notify<Args...> SenderU::*signal, Reciver *reciver, F &&f) {
+  static void Connect(Sender* sender, Notify<Args...> SenderU::* signal, Reciver* reciver, F&& f) {
     static_assert(std::is_base_of<Object, Reciver>::value, "Reciver must derived from Base");
 
     static_assert(std::is_base_of<Object, Sender>::value, "Sender must derived from Base");
@@ -79,26 +79,28 @@ class Object {
   }
 
   template <typename Sender, typename SenderU, typename... Args>
-  static void Emit(Sender *instance, Notify<Args...> SenderU::*signal, Args &&...args) {
+  static void Emit(Sender* instance, Notify<Args...> SenderU::* signal, Args&&... args) {
     if (instance) {
       (instance->*signal)(std::forward<Args>(args)...);
     }
   }
 
-  EventLoop *ownerEventLoop();
+  EventLoop* ownerEventLoop();
 
-  void QueueTask(std::function<void()> &&f) const;
+  EventLoop* ownerEventLoop() const;
 
-  void RunAfter(uint64_t delay_ms, std::function<void()> &&f) const;
+  void QueueTask(std::function<void()>&& f) const;
+
+  void RunAfter(uint64_t delay_ms, std::function<void()>&& f) const;
 
   std::thread::id ThreadId() const;
 
   void DeleteLater();
 
-  static void DeleteLater(Object *object);
+  static void DeleteLater(Object* object);
 
  private:
-  explicit Object(EventLoop *loop, Object *parent = nullptr);
+  explicit Object(EventLoop* loop, Object* parent = nullptr);
 
   class Private;
   std::unique_ptr<Private> d;
@@ -112,13 +114,13 @@ using ObjectPtr = std::shared_ptr<T>;
 namespace detail {
 
 template <typename T>
-void LazyDeleter(T *p) {
+void LazyDeleter(T* p) {
   p->DeleteLater();
 }
 }  // namespace detail
 
 template <typename T, typename... Args>
-ObjectPtr<T> MakeObject(Args &&...args) {
+ObjectPtr<T> MakeObject(Args&&... args) {
   return std::shared_ptr<T>(new T(std::forward<Args>(args)...), detail::LazyDeleter<T>);
 }
 
