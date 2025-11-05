@@ -6,7 +6,7 @@
 
 struct User {
   std::string id;
-  int         age;
+  int         age = 0;
 };
 
 namespace spiderweb {
