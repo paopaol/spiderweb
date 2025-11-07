@@ -3,6 +3,7 @@
 
 #include <system_error>
 
+#include "spiderweb/core/spiderweb_error_code.h"
 #include "spiderweb/core/spiderweb_notify.h"
 #include "spiderweb/core/spiderweb_object.h"
 #include "spiderweb/io/spiderweb_buffer.h"
@@ -24,6 +25,10 @@ class TcpSocket : public Object {
   explicit TcpSocket(Object* parent = nullptr);
 
   ~TcpSocket() override;
+
+  void SetNoDelay(bool flag, spiderweb::ErrorCode& ec);
+
+  void SetSendBufferSize(uint16_t size, spiderweb::ErrorCode& ec);
 
   void ConnectToHost(const std::string& ip, uint16_t port);
 

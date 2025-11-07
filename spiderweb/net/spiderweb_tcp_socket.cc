@@ -21,6 +21,15 @@ TcpSocket::~TcpSocket() {
   d->impl.q = nullptr;
 }
 
+void TcpSocket::SetNoDelay(bool flag, spiderweb::ErrorCode& ec) {
+  asio::ip::tcp::no_delay no_delay(flag);
+  (void)d->impl.socket.set_option(no_delay, ec);
+}
+
+void TcpSocket::SetSendBufferSize(uint16_t size, spiderweb::ErrorCode& ec) {
+  (void)d->impl.socket.set_option(asio::socket_base::send_buffer_size(size), ec);
+}
+
 void TcpSocket::ConnectToHost(const std::string& ip, uint16_t port) {
   SPIDERWEB_CALL_THREAD_CHECK(TcpSocket::ConnectToHost);
 
