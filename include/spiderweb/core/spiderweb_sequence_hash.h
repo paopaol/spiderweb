@@ -341,6 +341,14 @@ void SequenceHash<K, T>::Remove(const key_type& key) {
   // p current n
   // p         n
   auto* current = it.ptr;
+
+  if (current == head_) {
+    head_ = current->n;
+  }
+  if (current == tail_) {
+    tail_ = current->p;
+  }
+
   if (current->p) {
     current->p->n = current->n;
   }
@@ -401,20 +409,15 @@ typename SequenceHash<K, T>::node_type* SequenceHash<K, T>::InsertHash(M&& key, 
 
 template <typename T, typename KeyFun>
 void SequenceHash<T, KeyFun>::Clear() {
-  nodes_.clear();
-
-  auto* current = tail_;
-
-  while (current) {
-    auto* p = current->p;
+  node_type* current = head_;
+  while (current != nullptr) {
+    node_type* next = current->n;
     delete current;
-
-    if (p) {
-      p->n = nullptr;
-    }
-    current = p;
+    current = next;
   }
-  head_ = tail_ = nullptr;
+  head_ = nullptr;
+  tail_ = nullptr;
+  nodes_.clear();
 }
 
 template <typename T, typename KeyFun>
