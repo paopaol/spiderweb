@@ -139,6 +139,8 @@ class SequenceHash {
 
   Iterator end();
 
+  void Swap(SequenceHash& rh);
+
  private:
   void PushNode(node_type* node);
 
@@ -244,25 +246,14 @@ inline SequenceHash<T, KeyFun>::SequenceHash() = default;
 
 template <typename K, typename T>
 SequenceHash<K, T>::SequenceHash(SequenceHash&& other) noexcept {
-  this->nodes_ = std::move(other.nodes_);
-  this->head_ = other.head_;
-  this->tail_ = other.tail_;
-
-  other.head_ = nullptr;
-  other.tail_ = nullptr;
+  Swap(other);
 }
 
 template <typename K, typename T>
 SequenceHash<K, T>& SequenceHash<K, T>::operator=(SequenceHash&& other) noexcept {
   if (this != &other) {
     Clear();
-
-    this->nodes_ = std::move(other.nodes_);
-    this->head_ = other.head_;
-    this->tail_ = other.tail_;
-
-    other.head_ = nullptr;
-    other.tail_ = nullptr;
+    Swap(other);
   }
 
   return *this;
@@ -513,6 +504,13 @@ typename SequenceHash<T, KeyFun>::Iterator SequenceHash<T, KeyFun>::begin() {
 template <typename T, typename KeyFun>
 typename SequenceHash<T, KeyFun>::Iterator SequenceHash<T, KeyFun>::end() {
   return Iterator(nullptr);
+}
+
+template <typename K, typename T>
+void SequenceHash<K, T>::Swap(SequenceHash& rh) {
+  std::swap(nodes_, rh.nodes_);
+  std::swap(head_, rh.head_);
+  std::swap(tail_, rh.tail_);
 }
 
 }  // namespace spiderweb
