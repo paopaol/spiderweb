@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <system_error>
+#include <vector>
 
 #include "spiderweb/core/spiderweb_error_code.h"
 #include "spiderweb/core/spiderweb_notify.h"
