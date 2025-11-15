@@ -201,4 +201,24 @@ TEST_F(SequenceHashTest, BackRangePrint) {
   }
 }
 
+TEST_F(SequenceHashTest, InitList) {
+  SequenceHash<std::string, User> oldusers{
+      {"123", User{"123", 19}},
+      {"abc", User{"abc", 23}},
+  };
+
+  EXPECT_EQ(oldusers.Size(), 2);
+  EXPECT_TRUE(oldusers.Find("123") != oldusers.end());
+  EXPECT_TRUE(oldusers.Find("abc") != oldusers.end());
+
+  auto _123 = oldusers.Find("123");
+  auto abc = oldusers.Find("abc");
+
+  EXPECT_EQ(_123->age, 19);
+  EXPECT_EQ(_123->id, "123");
+
+  EXPECT_EQ(abc->age, 23);
+  EXPECT_EQ(abc->id, "abc");
+}
+
 }  // namespace spiderweb

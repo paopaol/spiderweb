@@ -85,6 +85,8 @@ class SequenceHash {
 
   SequenceHash();
 
+  SequenceHash(std::initializer_list<std::pair<key_type, T>> list);
+
   SequenceHash(SequenceHash&&) noexcept;
 
   SequenceHash& operator=(SequenceHash&&) noexcept;
@@ -243,6 +245,13 @@ SequenceHashIterator<N, T, IsConst>::operator->() const {
 //////////////////////////////////
 template <typename T, typename KeyFun>
 inline SequenceHash<T, KeyFun>::SequenceHash() = default;
+
+template <typename K, typename T>
+SequenceHash<K, T>::SequenceHash(std::initializer_list<std::pair<key_type, T>> list) {
+  for (auto& v : list) {
+    PushBack(std::move(v.first), std::move(v.second));
+  }
+}
 
 template <typename K, typename T>
 SequenceHash<K, T>::SequenceHash(SequenceHash&& other) noexcept {
