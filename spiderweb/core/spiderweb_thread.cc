@@ -34,6 +34,14 @@ class Thread::Private {
     }
   }
 
+  void Clear() {
+    if (q->IsRunning()) {
+      loop->Quit();
+    }
+    WaitForThreadExit();
+  }
+
+  Thread*        q = nullptr;
   Waiter<bool>   wait_for_satrt;
   std::once_flag once_;
   std::thread    t;
@@ -41,13 +49,28 @@ class Thread::Private {
 };
 
 Thread::Thread() : d(absl::make_unique<Private>()) {
+  d->q = this;
 }
 
 Thread::~Thread() {
-  if (IsRunning()) {
-    d->loop->Quit();
+  if (d) {
+    d->Clear();
   }
-  d->WaitForThreadExit();
+}
+
+Thread::Thread(Thread&& rh) noexcept : d(absl::make_unique<Private>()) {
+  d->q = this;
+  std::swap(d->q, rh.d->q);
+  std::swap(d, rh.d);
+}
+
+Thread& Thread::operator=(Thread&& rh) noexcept {
+  if (this != &rh) {
+    d->Clear();
+    d = std::move(rh.d);
+    d->q = this;
+  }
+  return *this;
 }
 
 void Thread::Start() {
@@ -63,7 +86,7 @@ void Thread::Quit() {
   d->WaitForThreadExit();
 }
 
-void Thread::QueueTask(std::function<void()> &&f) {
+void Thread::QueueTask(std::function<void()>&& f) {
   if (IsRunning()) {
     d->loop->QueueTask(std::move(f));
   }

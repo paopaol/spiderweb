@@ -44,3 +44,26 @@ TEST_F(ThreadTest, Run) {
   r.Quit();
   EXPECT_FALSE(r.IsRunning());
 }
+
+TEST_F(ThreadTest, MoveConstruct) {
+  spiderweb::Thread a;
+
+  a.Start();
+
+  spiderweb::Thread b(std::move(a));
+
+  EXPECT_TRUE(b.IsRunning());
+  EXPECT_FALSE(a.IsRunning());
+}
+
+TEST_F(ThreadTest, MoveCopy) {
+  spiderweb::Thread a;
+  spiderweb::Thread b;
+
+  a.Start();
+  b.Start();
+
+  b = std::move(a);
+
+  EXPECT_TRUE(b.IsRunning());
+}

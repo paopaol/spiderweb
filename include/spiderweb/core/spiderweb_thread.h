@@ -39,9 +39,13 @@ class Thread {
 
   ~Thread();
 
-  Thread(const Thread &) = delete;
+  Thread(Thread&& rh) noexcept;
 
-  Thread &operator=(const Thread &rh) = delete;
+  Thread& operator=(Thread&& rh) noexcept;
+
+  Thread(const Thread&) = delete;
+
+  Thread& operator=(const Thread& rh) = delete;
 
   /**
    * @brief Thread The Loop Thread
@@ -50,13 +54,13 @@ class Thread {
 
   void Quit();
 
-  void QueueTask(std::function<void()> &&f);
+  void QueueTask(std::function<void()>&& f);
 
   bool IsRunning() const;
 
   Id GetThreadId() const;
 
  private:
-  std::shared_ptr<Private> d;
+  std::unique_ptr<Private> d;
 };
 }  // namespace spiderweb
