@@ -78,6 +78,7 @@ class SequenceHash {
  public:
   using key_type = typename std::decay<K>::type;
   using node_type = SequenceHashNode<T>;
+  using value_type = std::pair<const key_type, T>;
 
   using Iterator = SequenceHashIterator<node_type, T>;
 
@@ -85,7 +86,7 @@ class SequenceHash {
 
   SequenceHash();
 
-  SequenceHash(std::initializer_list<std::pair<key_type, T>> list);
+  SequenceHash(std::initializer_list<value_type> list);
 
   SequenceHash(SequenceHash&&) noexcept;
 
@@ -247,9 +248,9 @@ template <typename T, typename KeyFun>
 inline SequenceHash<T, KeyFun>::SequenceHash() = default;
 
 template <typename K, typename T>
-SequenceHash<K, T>::SequenceHash(std::initializer_list<std::pair<key_type, T>> list) {
+SequenceHash<K, T>::SequenceHash(std::initializer_list<value_type> list) {
   for (auto& v : list) {
-    PushBack(std::move(v.first), std::move(v.second));
+    PushBack(v.first, std::move(v.second));
   }
 }
 
