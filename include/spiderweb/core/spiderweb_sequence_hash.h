@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstdint>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -109,6 +110,8 @@ class SequenceHash {
   void Remove(const key_type& key);
 
   void Clear();
+
+  void Reserve(uint32_t size);
 
   std::size_t Size() const;
 
@@ -428,6 +431,11 @@ void SequenceHash<T, KeyFun>::Clear() {
   head_ = nullptr;
   tail_ = nullptr;
   nodes_.clear();
+}
+
+template <typename K, typename T>
+void SequenceHash<K, T>::Reserve(uint32_t size) {
+  nodes_.reserve(size);
 }
 
 template <typename T, typename KeyFun>
