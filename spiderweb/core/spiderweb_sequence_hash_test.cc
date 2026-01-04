@@ -68,6 +68,15 @@ TEST_F(SequenceHashTest, PushFailed) {
   EXPECT_FALSE(users.PushBack("123", User{}));
 }
 
+TEST_F(SequenceHashTest, TryEmplace) {
+  EXPECT_FALSE(users.TryEmplace("123", User{}).second);
+  EXPECT_TRUE(users.TryEmplace("123", User{}).first->age == 19);
+  EXPECT_TRUE(users.TryEmplace("123", User{}).first->id == "123");
+  auto [it, ok] = users.TryEmplace("666", User{"666", 99});
+  EXPECT_TRUE(ok);
+  EXPECT_TRUE(it->age == 99);
+}
+
 TEST_F(SequenceHashTest, PushValue) {
   SequenceHash<std::string, User> v;
   User                            u;

@@ -102,6 +102,8 @@ class SequenceHash {
 
   bool PushBack(key_type key, T v);
 
+  std::pair<Iterator, bool> TryEmplace(key_type key, T v);
+
   bool PushAfter(key_type at, key_type key, T v);
 
   bool PushFront(key_type key, T v);
@@ -285,6 +287,21 @@ bool SequenceHash<K, T, Map>::PushBack(key_type key, T v) {
     PushNode(node);
   }
   return !!node;
+}
+
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+std::pair<typename SequenceHash<K, T, Map>::Iterator, bool> SequenceHash<K, T, Map>::TryEmplace(
+    key_type key, T v) {
+  auto result = nodes_.try_emplace(std::move(key), nullptr);
+  if (!result.second) {
+    return std::make_pair(Iterator(result.first->second), false);
+  }
+
+  auto* node = new node_type{std::forward<T>(v)};
+  result.first->second = node;
+
+  PushNode(node);
+  return std::make_pair(Iterator(node), true);
 }
 
 template <typename K, typename T, template <typename, typename, typename...> class Map>
