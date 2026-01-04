@@ -153,8 +153,9 @@ target_sources(
           reflect/pugixml_impl_test.cc
           reflect/yyjson_impl_test.cc
           ${PLATFORM_TEST_FILES})
-target_link_libraries(spiderweb_test PRIVATE spiderweb GTest::gtest_main
-                                             GTest::gtest GTest::gmock)
+target_link_libraries(
+  spiderweb_test PRIVATE spiderweb GTest::gtest_main GTest::gtest GTest::gmock
+                         absl::flat_hash_map)
 
 # benchmark
 add_executable(spiderweb_benchmark)

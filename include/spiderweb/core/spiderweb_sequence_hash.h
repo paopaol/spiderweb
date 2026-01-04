@@ -49,7 +49,7 @@ struct SequenceHashIterator {
  private:
   element_type* ptr = nullptr;
 
-  template <typename K, typename V>
+  template <typename K, typename V, template <typename, typename, typename...> class Map>
   friend class SequenceHash;
 };
 
@@ -74,7 +74,8 @@ struct SequenceHashIterator {
  *
  * Note: Do not use sorting; sorting behavior is currently undefined.
  */
-template <typename K, typename T>
+template <typename K, typename T,
+          template <typename, typename, typename...> class Map = std::unordered_map>
 class SequenceHash {
  public:
   using key_type = typename std::decay<K>::type;
@@ -155,9 +156,9 @@ class SequenceHash {
   template <typename M, typename U>
   node_type* InsertHash(M&& key, U&& v);
 
-  std::unordered_map<key_type, node_type*> nodes_;
-  node_type*                               tail_ = nullptr;
-  node_type*                               head_ = nullptr;
+  Map<key_type, node_type*> nodes_;
+  node_type*                tail_ = nullptr;
+  node_type*                head_ = nullptr;
 };
 
 template <typename N, typename T, bool IsConst>
@@ -247,23 +248,23 @@ SequenceHashIterator<N, T, IsConst>::operator->() const {
 }
 
 //////////////////////////////////
-template <typename T, typename KeyFun>
-inline SequenceHash<T, KeyFun>::SequenceHash() = default;
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+SequenceHash<K, T, Map>::SequenceHash() = default;
 
-template <typename K, typename T>
-SequenceHash<K, T>::SequenceHash(std::initializer_list<value_type> list) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+SequenceHash<K, T, Map>::SequenceHash(std::initializer_list<value_type> list) {
   for (auto& v : list) {
     PushBack(v.first, std::move(v.second));
   }
 }
 
-template <typename K, typename T>
-SequenceHash<K, T>::SequenceHash(SequenceHash&& other) noexcept {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+SequenceHash<K, T, Map>::SequenceHash(SequenceHash&& other) noexcept {
   Swap(other);
 }
 
-template <typename K, typename T>
-SequenceHash<K, T>& SequenceHash<K, T>::operator=(SequenceHash&& other) noexcept {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+SequenceHash<K, T, Map>& SequenceHash<K, T, Map>::operator=(SequenceHash&& other) noexcept {
   if (this != &other) {
     Clear();
     Swap(other);
@@ -272,13 +273,13 @@ SequenceHash<K, T>& SequenceHash<K, T>::operator=(SequenceHash&& other) noexcept
   return *this;
 }
 
-template <typename T, typename KeyFun>
-inline SequenceHash<T, KeyFun>::~SequenceHash() {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+inline SequenceHash<K, T, Map>::~SequenceHash() {
   Clear();
 }
 
-template <typename K, typename T>
-bool SequenceHash<K, T>::PushBack(key_type key, T v) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+bool SequenceHash<K, T, Map>::PushBack(key_type key, T v) {
   auto* node = InsertHash(std::move(key), std::move(v));
   if (node) {
     PushNode(node);
@@ -286,8 +287,8 @@ bool SequenceHash<K, T>::PushBack(key_type key, T v) {
   return !!node;
 }
 
-template <typename K, typename T>
-bool SequenceHash<K, T>::PushAfter(key_type at, key_type key, T v) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+bool SequenceHash<K, T, Map>::PushAfter(key_type at, key_type key, T v) {
   auto before = Find(at);
   if (before == end()) {
     return false;
@@ -301,8 +302,8 @@ bool SequenceHash<K, T>::PushAfter(key_type at, key_type key, T v) {
   return false;
 }
 
-template <typename K, typename T>
-bool SequenceHash<K, T>::PushFront(key_type key, T v) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+bool SequenceHash<K, T, Map>::PushFront(key_type key, T v) {
   //   head_
   // n head_
   auto* node = InsertHash(std::move(key), std::move(v));
@@ -320,8 +321,8 @@ bool SequenceHash<K, T>::PushFront(key_type key, T v) {
   return true;
 }
 
-template <typename K, typename T>
-bool SequenceHash<K, T>::PushBefore(key_type at, key_type key, T v) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+bool SequenceHash<K, T, Map>::PushBefore(key_type at, key_type key, T v) {
   //   before
   // n before
   auto before = Find(at);
@@ -344,8 +345,8 @@ bool SequenceHash<K, T>::PushBefore(key_type at, key_type key, T v) {
   return true;
 }
 
-template <typename K, typename T>
-void SequenceHash<K, T>::Remove(const key_type& key) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+void SequenceHash<K, T, Map>::Remove(const key_type& key) {
   auto it = Find(key);
   if (it == end()) {
     return;
@@ -373,8 +374,8 @@ void SequenceHash<K, T>::Remove(const key_type& key) {
   delete current;
 }
 
-template <typename K, typename T>
-void SequenceHash<K, T>::PushNode(node_type* node) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+void SequenceHash<K, T, Map>::PushNode(node_type* node) {
   if (head_) {
     node->p = tail_;
     node->n = tail_->n;
@@ -388,8 +389,8 @@ void SequenceHash<K, T>::PushNode(node_type* node) {
   tail_ = node;
 }
 
-template <typename K, typename T>
-void SequenceHash<K, T>::PushNode(node_type* before, node_type* node) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+void SequenceHash<K, T, Map>::PushNode(node_type* before, node_type* node) {
   assert(before && node);
 
   // before   next
@@ -405,12 +406,12 @@ void SequenceHash<K, T>::PushNode(node_type* before, node_type* node) {
   node->p = before;
 }
 
-template <typename K, typename T>
+template <typename K, typename T, template <typename, typename, typename...> class Map>
 template <typename M, typename U>
-typename SequenceHash<K, T>::node_type* SequenceHash<K, T>::InsertHash(M&& key, U&& v) {
+typename SequenceHash<K, T, Map>::node_type* SequenceHash<K, T, Map>::InsertHash(M&& key, U&& v) {
   node_type* node = nullptr;
 
-  auto result = nodes_.insert({std::forward<M>(key), nullptr});
+  auto result = nodes_.try_emplace(std::forward<M>(key), nullptr);
   if (!result.second) {
     return nullptr;
   }
@@ -420,8 +421,8 @@ typename SequenceHash<K, T>::node_type* SequenceHash<K, T>::InsertHash(M&& key, 
   return node;
 }
 
-template <typename T, typename KeyFun>
-void SequenceHash<T, KeyFun>::Clear() {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+void SequenceHash<K, T, Map>::Clear() {
   node_type* current = head_;
   while (current != nullptr) {
     node_type* next = current->n;
@@ -433,102 +434,105 @@ void SequenceHash<T, KeyFun>::Clear() {
   nodes_.clear();
 }
 
-template <typename K, typename T>
-void SequenceHash<K, T>::Reserve(uint32_t size) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+void SequenceHash<K, T, Map>::Reserve(uint32_t size) {
   nodes_.reserve(size);
 }
 
-template <typename T, typename KeyFun>
-std::size_t SequenceHash<T, KeyFun>::Size() const {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+std::size_t SequenceHash<K, T, Map>::Size() const {
   return nodes_.size();
 }
 
-template <typename T, typename KeyFun>
-bool SequenceHash<T, KeyFun>::Empty() const {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+bool SequenceHash<K, T, Map>::Empty() const {
   return nodes_.empty();
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::ConstIterator SequenceHash<K, T>::Find(const key_type& key) const {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::ConstIterator SequenceHash<K, T, Map>::Find(
+    const key_type& key) const {
   auto it = nodes_.find(key);
   return it == nodes_.end() ? ConstIterator(nullptr) : ConstIterator(it->second);
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::Iterator SequenceHash<K, T>::Find(const key_type& key) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::Iterator SequenceHash<K, T, Map>::Find(const key_type& key) {
   auto it = nodes_.find(key);
   return it == nodes_.end() ? Iterator(nullptr) : Iterator(it->second);
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::Iterator SequenceHash<K, T>::Forward(const key_type& current) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::Iterator SequenceHash<K, T, Map>::Forward(
+    const key_type& current) {
   auto it = Find(current);
   return it != end() ? ++it : end();
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::ConstIterator SequenceHash<K, T>::Forward(
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::ConstIterator SequenceHash<K, T, Map>::Forward(
     const key_type& current) const {
   auto it = Find(current);
   return it != end() ? ++it : end();
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::Iterator SequenceHash<K, T>::Backward(const key_type& current) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::Iterator SequenceHash<K, T, Map>::Backward(
+    const key_type& current) {
   auto it = Find(current);
   return it != end() ? --it : end();
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::ConstIterator SequenceHash<K, T>::Backward(
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::ConstIterator SequenceHash<K, T, Map>::Backward(
     const key_type& current) const {
   auto it = Find(current);
   return --it;
   return it != end() ? --it : end();
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::Iterator SequenceHash<K, T>::Front() {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::Iterator SequenceHash<K, T, Map>::Front() {
   return Iterator(head_);
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::ConstIterator SequenceHash<K, T>::Front() const {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::ConstIterator SequenceHash<K, T, Map>::Front() const {
   return ConstIterator(head_);
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::Iterator SequenceHash<K, T>::Back() {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::Iterator SequenceHash<K, T, Map>::Back() {
   return Iterator(tail_);
 }
 
-template <typename K, typename T>
-typename SequenceHash<K, T>::ConstIterator SequenceHash<K, T>::Back() const {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::ConstIterator SequenceHash<K, T, Map>::Back() const {
   return ConstIterator(tail_);
 }
 
-template <typename T, typename KeyFun>
-typename SequenceHash<T, KeyFun>::ConstIterator SequenceHash<T, KeyFun>::begin() const {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::ConstIterator SequenceHash<K, T, Map>::begin() const {
   return ConstIterator(head_);
 }
 
-template <typename T, typename KeyFun>
-typename SequenceHash<T, KeyFun>::ConstIterator SequenceHash<T, KeyFun>::end() const {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::ConstIterator SequenceHash<K, T, Map>::end() const {
   return ConstIterator(nullptr);
 }
 
-template <typename T, typename KeyFun>
-typename SequenceHash<T, KeyFun>::Iterator SequenceHash<T, KeyFun>::begin() {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::Iterator SequenceHash<K, T, Map>::begin() {
   return Iterator(head_);
 }
 
-template <typename T, typename KeyFun>
-typename SequenceHash<T, KeyFun>::Iterator SequenceHash<T, KeyFun>::end() {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+typename SequenceHash<K, T, Map>::Iterator SequenceHash<K, T, Map>::end() {
   return Iterator(nullptr);
 }
 
-template <typename K, typename T>
-void SequenceHash<K, T>::Swap(SequenceHash& rh) {
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+void SequenceHash<K, T, Map>::Swap(SequenceHash& rh) {
   std::swap(nodes_, rh.nodes_);
   std::swap(head_, rh.head_);
   std::swap(tail_, rh.tail_);
