@@ -60,6 +60,8 @@ class TcpSocket : public Object {
 
   Notify<> ConnectionEstablished;
 
+  Notify<const std::error_code&> ConnectError;
+
   Notify<const std::error_code&> Error;
 
   Notify<const io::BufferReader&> BytesRead;

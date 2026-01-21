@@ -10,25 +10,25 @@ namespace spiderweb {
 namespace net {
 class TcpSocket::Private {
  public:
-  explicit Private(TcpSocket *qq) : q(qq), socket(AsioService(qq->ownerEventLoop())) {
+  explicit Private(TcpSocket* qq) : q(qq), socket(AsioService(qq->ownerEventLoop())) {
   }
 
   template <typename AsyncStream, typename Handler>
-  void Open(AsyncStream &stream, const asio::ip::tcp::endpoint &endpoint, Handler &&handler) {
+  void Open(AsyncStream& stream, const asio::ip::tcp::endpoint& endpoint, Handler&& handler) {
     stream.async_connect(endpoint, std::forward<Handler>(handler));
   }
 
   template <typename AsyncStream, typename Handler>
-  void Read(AsyncStream &stream, const asio::mutable_buffers_1 &buffer, Handler &&handler) {
+  void Read(AsyncStream& stream, const asio::mutable_buffers_1& buffer, Handler&& handler) {
     stream.async_read_some(buffer, std::forward<Handler>(handler));
   }
 
   template <typename AsyncStream, typename Handler>
-  void Write(AsyncStream &stream, const asio::mutable_buffers_1 &buffers, Handler &&handler) {
+  void Write(AsyncStream& stream, const asio::mutable_buffers_1& buffers, Handler&& handler) {
     asio::async_write(stream, buffers, asio::transfer_all(), std::forward<Handler>(handler));
   }
 
-  void Error(const asio::error_code &ec) {
+  void Error(const asio::error_code& ec) {
     spider_emit Object::Emit(q, &TcpSocket::Error, ec);
   }
 
@@ -36,8 +36,12 @@ class TcpSocket::Private {
     spider_emit Object::Emit(q, &TcpSocket::ConnectionEstablished);
   }
 
+  void OpenFailed(const asio::error_code& ec) {
+    spider_emit Object::Emit(q, &TcpSocket::ConnectError, ec);
+  }
+
   template <typename AsyncStream>
-  void Close(AsyncStream &stream) {
+  void Close(AsyncStream& stream) {
     stream.close();
   }
 
@@ -45,15 +49,15 @@ class TcpSocket::Private {
     spider_emit q->BytesWritten(size);
   }
 
-  void Readden(const io::BufferReader &reader) {
+  void Readden(const io::BufferReader& reader) {
     spider_emit q->BytesRead(reader);
   }
 
-  inline const char *Description() const {
+  inline const char* Description() const {
     return "TcpSocket";
   }
 
-  TcpSocket            *q = nullptr;
+  TcpSocket*            q = nullptr;
   asio::ip::tcp::socket socket;
 };
 }  // namespace net

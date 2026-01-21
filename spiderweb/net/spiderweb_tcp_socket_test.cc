@@ -16,7 +16,7 @@ using TestIoPrivate = spiderweb::io::IoPrivate<spiderweb::net::TcpSocket::Privat
 
 class MockSocket : public spiderweb::Object {
  public:
-  explicit MockSocket(spiderweb::EventLoop &loop, spiderweb::Object *parent = nullptr)
+  explicit MockSocket(spiderweb::EventLoop& loop, spiderweb::Object* parent = nullptr)
       : spiderweb::Object(parent),
         event_loop(loop),
         stream(spiderweb::AsioService(&loop)),
@@ -33,7 +33,7 @@ class MockSocket : public spiderweb::Object {
     ON_CALL(stream, is_open()).WillByDefault(testing::Return(false));
     ON_CALL(stream, async_connect(_, _))
         .WillByDefault(
-            [this](const asio::ip::tcp::endpoint &, const test_stream::ConnectHandler &handler) {
+            [this](const asio::ip::tcp::endpoint&, const test_stream::ConnectHandler& handler) {
               event_loop.QueueTask([handler]() { handler(asio::error_code()); });
             });
 
@@ -46,12 +46,12 @@ class MockSocket : public spiderweb::Object {
     EXPECT_CALL(stream, async_read_some(_, _));
   }
 
-  void SimulateConnectFailed(const asio::error_code &ec) {
+  void SimulateConnectFailed(const asio::error_code& ec) {
     using ::testing::_;
 
     EXPECT_CALL(stream, is_open()).WillOnce(testing::Return(false));
     EXPECT_CALL(stream, async_connect(_, _))
-        .WillOnce([&](const asio::ip::tcp::endpoint &, const test_stream::ConnectHandler &handler) {
+        .WillOnce([&](const asio::ip::tcp::endpoint&, const test_stream::ConnectHandler& handler) {
           event_loop.QueueTask([&, handler]() { handler(ec); });
         });
   }
@@ -61,7 +61,7 @@ class MockSocket : public spiderweb::Object {
 
     EXPECT_CALL(stream, async_write_some(_, _))
         .WillRepeatedly(
-            [this](const asio::const_buffers_1 &buffers, const test_stream::WriteHandler &handler) {
+            [this](const asio::const_buffers_1& buffers, const test_stream::WriteHandler& handler) {
               event_loop.QueueTask(
                   [handler, buffers]() { handler(asio::error_code(), buffers.size()); });
             });
@@ -72,10 +72,10 @@ class MockSocket : public spiderweb::Object {
 
     EXPECT_CALL(stream, async_write_some(_, _))
         .WillRepeatedly(
-            [](const asio::const_buffers_1 &buffers, const test_stream::WriteHandler &handler) {});
+            [](const asio::const_buffers_1& buffers, const test_stream::WriteHandler& handler) {});
   }
 
-  spiderweb::EventLoop          &event_loop;
+  spiderweb::EventLoop&          event_loop;
   test_stream                    stream;
   spiderweb::net::TcpSocket      socket;
   asio::ip::tcp::endpoint        endpoint;
@@ -101,12 +101,15 @@ TEST(spiderweb_tcp_socket, ConnectToHostFailed_ConnectionRefused) {
   MockSocket           mocker(loop);
 
   spiderweb::NotifySpy spy(&mocker.socket, &spiderweb::net::TcpSocket::Error);
+  spiderweb::NotifySpy connect_error(&mocker.socket, &spiderweb::net::TcpSocket::ConnectError);
 
   mocker.SimulateConnectFailed(asio::error::connection_refused);
 
   mocker.d->StartOpen(mocker.stream, mocker.endpoint);
   spy.Wait();
   EXPECT_EQ(spy.Count(), 1);
+  connect_error.Wait();
+  EXPECT_EQ(connect_error.Count(), 1);
   auto error_code = std::get<0>(spy.LastResult<std::error_code>());
   EXPECT_EQ(error_code, asio::error::connection_refused);
   std::cout << error_code.message() << '\n';
@@ -165,14 +168,14 @@ TEST(spiderweb_tcp_socket, MultiWrite) {
   mocker.ShouldCallReadWhenConnectSuccess();
   EXPECT_CALL(mocker.stream, async_write_some(_, _))
       .WillOnce(
-          [&](const asio::const_buffers_1 &buffers, const test_stream::WriteHandler &handler) {
+          [&](const asio::const_buffers_1& buffers, const test_stream::WriteHandler& handler) {
             // first call only write "1234"
             EXPECT_TRUE(std::memcmp(buffers.data(), "1234", 4) == 0);
             EXPECT_EQ(buffers.size(), 4);
             loop.QueueTask([handler, buffers]() { handler(asio::error_code(), buffers.size()); });
           })
       .WillOnce(
-          [&](const asio::const_buffers_1 &buffers, const test_stream::WriteHandler &handler) {
+          [&](const asio::const_buffers_1& buffers, const test_stream::WriteHandler& handler) {
             // second call will write remaing data  "5678abcd"
             EXPECT_TRUE(std::memcmp(buffers.data(), "5678abcd", 4) == 0);
             EXPECT_EQ(buffers.size(), 8);
@@ -205,19 +208,19 @@ TEST(spiderweb_tcp_socket, ReadSuccess) {
   mocker.SimulateConnectSuccess();
   EXPECT_CALL(mocker.stream, async_read_some(_, _))
       .WillOnce(
-          [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {
+          [&](const asio::mutable_buffers_1& buffers, const test_stream::ReadHandler& handler) {
             asio::buffer_copy(buffers, asio::buffer("hello", 5));
             const auto size = 5;
-            loop.QueueTask([handler,size]() { handler(asio::error_code(), size); });
+            loop.QueueTask([handler, size]() { handler(asio::error_code(), size); });
           })
       .WillOnce(
-          [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {
+          [&](const asio::mutable_buffers_1& buffers, const test_stream::ReadHandler& handler) {
             asio::buffer_copy(buffers, asio::buffer("world", 5));
             const auto size = 5;
-            loop.QueueTask([handler,size]() { handler(asio::error_code(), size); });
+            loop.QueueTask([handler, size]() { handler(asio::error_code(), size); });
           })
       .WillOnce(
-          [&](const asio::mutable_buffers_1 &buffers, const test_stream::ReadHandler &handler) {});
+          [&](const asio::mutable_buffers_1& buffers, const test_stream::ReadHandler& handler) {});
 
   mocker.d->StartOpen(mocker.stream, mocker.endpoint);
   spy.Wait(500, 10);
@@ -242,7 +245,7 @@ TEST(spiderweb_tcp_socket, ReadFailed) {
   mocker.SimulateConnectSuccess();
   EXPECT_CALL(mocker.stream, async_read_some(_, _))
       .WillOnce(
-          [&](const asio::mutable_buffers_1 & /*buffers*/, const test_stream::ReadHandler &hander) {
+          [&](const asio::mutable_buffers_1& /*buffers*/, const test_stream::ReadHandler& hander) {
             loop.QueueTask([hander]() { hander(asio::error::connection_aborted, 0); });
           });
 
@@ -274,7 +277,7 @@ TEST(spiderweb_tcp_socket, WriteClosedSocket) {
 TEST(spiderweb_tcp_socket, SafeDelete1) {
   spiderweb::EventLoop loop;
 
-  auto                *socket = new spiderweb::net::TcpSocket;
+  auto*                socket = new spiderweb::net::TcpSocket;
   spiderweb::NotifySpy spy(socket, &spiderweb::net::TcpSocket::Error);
 
   std::vector<uint8_t> data{0x30, 0x31, 0x32, 0x33, 0x34};
@@ -307,7 +310,7 @@ TEST(spiderweb_tcp_socket, SafeDelete1) {
 
 TEST(spiderweb_tcp_socket, SafeDelete) {
   spiderweb::EventLoop loop;
-  auto                *mocker = new MockSocket(loop);
+  auto*                mocker = new MockSocket(loop);
 
   spiderweb::NotifySpy spy(&mocker->socket, &spiderweb::net::TcpSocket::Error);
 

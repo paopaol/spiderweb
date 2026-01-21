@@ -48,39 +48,41 @@ class SerialPort final : public Object {
  public:
   class Private;
 
-  explicit SerialPort(Object *parent = nullptr);
+  explicit SerialPort(Object* parent = nullptr);
 
   ~SerialPort() override;
 
-  void Open(const std::string &port);
+  void Open(const std::string& port);
 
-  void SetParity(Parity parity, std::error_code &ec);
+  void SetParity(Parity parity, std::error_code& ec);
 
   Parity GetParity() const;
 
-  void SetBaudRate(BaudRate baudrate, std::error_code &ec);
+  void SetBaudRate(BaudRate baudrate, std::error_code& ec);
 
   BaudRate GetBaudRate() const;
 
-  void SetDataBits(DataBits bits, std::error_code &ec);
+  void SetDataBits(DataBits bits, std::error_code& ec);
 
   DataBits GetDataBits() const;
 
-  void SetStopBits(StopBits stopbits, std::error_code &ec);
+  void SetStopBits(StopBits stopbits, std::error_code& ec);
 
   StopBits GetStopBits() const;
 
   void Close();
 
-  void Write(const uint8_t *data, std::size_t size);
+  void Write(const uint8_t* data, std::size_t size);
 
-  void Write(const std::vector<uint8_t> &data);
+  void Write(const std::vector<uint8_t>& data);
 
   Notify<> OpenSuccess;
 
-  Notify<const std::error_code &> Error;
+  Notify<const std::error_code&> OpenFailed;
 
-  Notify<const io::BufferReader &> BytesRead;
+  Notify<const std::error_code&> Error;
+
+  Notify<const io::BufferReader&> BytesRead;
 
   Notify<std::size_t> BytesWritten;
 

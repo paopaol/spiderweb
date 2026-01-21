@@ -82,6 +82,7 @@ class IoPrivate : public std::enable_shared_from_this<IoPrivate<IoImpl>> {
       /**
        * @brief we use Object::Emit here, beause maybe `q` has gone.
        */
+      impl.OpenFailed(ec);
       impl.Error(ec);
       return;
     }

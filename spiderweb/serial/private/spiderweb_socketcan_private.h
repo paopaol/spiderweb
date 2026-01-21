@@ -19,35 +19,35 @@ namespace spiderweb {
 namespace serial {
 class SocketCan::Private {
  public:
-  explicit Private(SocketCan *qq) : q(qq) {
+  explicit Private(SocketCan* qq) : q(qq) {
   }
 
   template <typename AsyncStream, typename Handler>
-  void Open(AsyncStream &, const std::error_code &ec, Handler &&handler) {
+  void Open(AsyncStream&, const std::error_code& ec, Handler&& handler) {
     q->QueueTask([ec, h = std::forward<Handler>(handler)]() { h(ec); });
   }
 
-  inline const char *Description() const {
+  inline const char* Description() const {
     return "SocketCan";
   }
 
   template <typename AsyncStream, typename Handler>
-  void Read(AsyncStream &stream, const asio::mutable_buffers_1 &buffer, Handler &&handler) {
+  void Read(AsyncStream& stream, const asio::mutable_buffers_1& buffer, Handler&& handler) {
     stream.async_receive(buffer, std::forward<Handler>(handler));
   }
 
   template <typename AsyncStream, typename Handler>
-  void Write(AsyncStream &stream, const asio::mutable_buffers_1 &buffers, Handler &&handler) {
+  void Write(AsyncStream& stream, const asio::mutable_buffers_1& buffers, Handler&& handler) {
     stream.async_send(buffers, std::forward<Handler>(handler));
   }
 
-  void Readden(const io::BufferReader &reader) {
+  void Readden(const io::BufferReader& reader) {
     if (reader.Len() < sizeof(CanFrame)) {
       return;
     }
 
     CanFrame f;
-    auto    *p = reinterpret_cast<char *>(&f);
+    auto*    p = reinterpret_cast<char*>(&f);
     reader.Read(p, sizeof(f));
 
     spider_emit q->FrameRead(f);
@@ -57,12 +57,12 @@ class SocketCan::Private {
     spider_emit q->BytesWritten(size);
   }
 
-  void Error(const asio::error_code &ec) {
+  void Error(const asio::error_code& ec) {
     spider_emit Object::Emit(q, &SocketCan::Error, ec);
   }
 
   template <typename AsyncStream>
-  void Close(AsyncStream &stream) {
+  void Close(AsyncStream& stream) {
     std::error_code ec;
     stream.close(ec);
   }
@@ -71,7 +71,11 @@ class SocketCan::Private {
     spider_emit Object::Emit(q, &SocketCan::OpenSuccess);
   }
 
-  SocketCan                             *q = nullptr;
+  void OpenFailed(const asio::error_code& ec) {
+    spider_emit Object::Emit(q, &SocketCan::OpenError, ec);
+  }
+
+  SocketCan*                             q = nullptr;
   SocketCanType                          type;
   std::unique_ptr<canary::raw::socket>   raw_sock;
   std::unique_ptr<canary::isotp::socket> isotp_sock;

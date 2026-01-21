@@ -16,7 +16,7 @@ class NamedPipe : public Object {
   class Private;
 
  public:
-  explicit NamedPipe(const std::string &name, Object *parent = nullptr);
+  explicit NamedPipe(const std::string& name, Object* parent = nullptr);
 
   ~NamedPipe() override;
 
@@ -24,15 +24,17 @@ class NamedPipe : public Object {
 
   void Close();
 
-  void Write(const uint8_t *data, std::size_t size);
+  void Write(const uint8_t* data, std::size_t size);
 
-  void Write(const std::vector<uint8_t> &data);
+  void Write(const std::vector<uint8_t>& data);
 
   Notify<> OpenSuccess;
 
-  Notify<const std::error_code &> Error;
+  Notify<const std::error_code&> OpenError;
 
-  Notify<const io::BufferReader &> BytesRead;
+  Notify<const std::error_code&> Error;
+
+  Notify<const io::BufferReader&> BytesRead;
 
   Notify<std::size_t> BytesWritten;
 

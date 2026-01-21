@@ -19,27 +19,29 @@ struct CanFrame {
   std::array<std::uint8_t, 8> payload{0};
 };
 
-enum class SocketCanType { kRaw, kIsotp };
+enum class SocketCanType : uint8_t { kRaw, kIsotp };
 
 class SocketCan final : public Object {
  public:
   class Private;
 
-  explicit SocketCan(Object *parent = nullptr);
+  explicit SocketCan(Object* parent = nullptr);
 
   ~SocketCan() override;
 
-  void Open(const std::string &can, SocketCanType type);
+  void Open(const std::string& can, SocketCanType type);
 
   void Close();
 
-  void Write(const CanFrame &frame);
+  void Write(const CanFrame& frame);
 
   Notify<> OpenSuccess;
 
-  Notify<const std::error_code &> Error;
+  Notify<const std::error_code&> OpenError;
 
-  Notify<const CanFrame &> FrameRead;
+  Notify<const std::error_code&> Error;
+
+  Notify<const CanFrame&> FrameRead;
 
   Notify<std::size_t> BytesWritten;
 

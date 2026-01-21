@@ -8,11 +8,11 @@
 namespace spiderweb {
 class NamedPipe::Private {
  public:
-  explicit Private(NamedPipe *qq) : q(qq), pipe(AsioService(qq->ownerEventLoop())) {
+  explicit Private(NamedPipe* qq) : q(qq), pipe(AsioService(qq->ownerEventLoop())) {
   }
 
   template <typename AsyncStream, typename Handler>
-  void Open(AsyncStream &, Handler &&handler) {
+  void Open(AsyncStream&, Handler&& handler) {
     std::error_code ec;
     const int       fd = ::open(name.c_str(), O_RDWR | O_NONBLOCK);
 
@@ -25,26 +25,26 @@ class NamedPipe::Private {
     q->QueueTask([ec, h = std::forward<Handler>(handler)]() { h(ec); });
   }
 
-  inline const char *Description() const {
+  inline const char* Description() const {
     return "NamedPipe";
   }
 
   template <typename AsyncStream, typename Handler>
-  void Read(AsyncStream &stream, const asio::mutable_buffers_1 &buffer, Handler &&handler) {
+  void Read(AsyncStream& stream, const asio::mutable_buffers_1& buffer, Handler&& handler) {
     stream.async_read_some(buffer, std::forward<Handler>(handler));
   }
 
   template <typename AsyncStream, typename Handler>
-  void Write(AsyncStream &stream, const asio::mutable_buffers_1 &buffers, Handler &&handler) {
+  void Write(AsyncStream& stream, const asio::mutable_buffers_1& buffers, Handler&& handler) {
     asio::async_write(stream, buffers, asio::transfer_all(), std::forward<Handler>(handler));
   }
 
-  void Error(const asio::error_code &ec) {
+  void Error(const asio::error_code& ec) {
     spider_emit Object::Emit(q, &NamedPipe::Error, ec);
   }
 
   template <typename AsyncStream>
-  void Close(AsyncStream &stream) {
+  void Close(AsyncStream& stream) {
     std::error_code ec;
     stream.close(ec);
   }
@@ -53,7 +53,7 @@ class NamedPipe::Private {
     spider_emit q->BytesWritten(size);
   }
 
-  void Readden(const io::BufferReader &reader) {
+  void Readden(const io::BufferReader& reader) {
     spider_emit q->BytesRead(reader);
   }
 
@@ -61,7 +61,11 @@ class NamedPipe::Private {
     spider_emit Object::Emit(q, &NamedPipe::OpenSuccess);
   }
 
-  NamedPipe                     *q = nullptr;
+  void OpenFailed(const asio::error_code& ec) {
+    spider_emit Object::Emit(q, &NamedPipe::OpenError, ec);
+  }
+
+  NamedPipe*                     q = nullptr;
   asio::posix::stream_descriptor pipe;
   std::string                    name;
 };

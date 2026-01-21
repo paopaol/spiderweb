@@ -36,6 +36,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_buffer.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_bitmap_readwriter.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_socket.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_socket_connector.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_server.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_udp_socket.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_serialport.h
@@ -62,6 +63,7 @@ target_sources(
     core/spiderweb_signal.cc
     io/spiderweb_buffer.cc
     net/spiderweb_tcp_socket.cc
+    net/spiderweb_tcp_socket_connector.cc
     net/spiderweb_tcp_server.cc
     net/spiderweb_udp_socket.cc
     net/spiderweb_endpoint.cc
@@ -143,6 +145,7 @@ target_sources(
           core/spiderweb_object_pool_test.cc
           io/spiderweb_binary_writer_test.cc
           io/spiderweb_bitmap_readwriter_test.cc
+          net/spiderweb_tcp_socket_connector_test.cc
           net/spiderweb_tcp_socket_test.cc
           net/spiderweb_tcp_server_test.cc
           net/spiderweb_udp_socket_test.cc
