@@ -21,6 +21,7 @@ option(SPIDERWEB_BENCHMARK_USE_PACKAGE "use find_package for benchmark" ON)
 option(SPIDERWEB_SPDLOG_USE_PACKAGE "use find_package for spdlog" ON)
 option(SPIDERWEB_ASIO_USE_PACKAGE "use find_package for asio" ON)
 option(SPIDERWEB_ENABLE_ASAN "enable libasan" OFF)
+option(SPIDERWEB_ENABLE_TEST "enable libasan" ON)
 
 if(SPIDERWEB_ABSL_USE_PACKAGE)
   find_package(absl REQUIRED)

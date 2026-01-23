@@ -122,51 +122,53 @@ if(NOT MSVC)
   target_link_libraries(spiderweb PUBLIC $<BUILD_INTERFACE:canary::canary>)
 endif()
 
-add_subdirectory(reflect)
+if(SPIDERWEB_ENABLE_TEST)
+  # unit test
+  add_subdirectory(reflect)
+  add_executable(spiderweb_test)
+  target_sources(
+    spiderweb_test
+    PRIVATE core/spiderweb_error_code_test.cc
+            core/spiderweb_object_test.cc
+            core/spiderweb_timer_test.cc
+            core/spiderweb_eventloop_test.cc
+            core/spiderweb_notify_spy_test.cc
+            core/spiderweb_waiter_test.cc
+            core/spiderweb_thread_test.cc
+            core/spiderweb_unbounded_queue_test.cc
+            core/spiderweb_sequence_hash_test.cc
+            core/spiderweb_range_test.cc
+            core/spiderweb_synchronized_test.cc
+            core/spiderweb_signal_test.cc
+            core/spiderweb_bimap_test.cc
+            core/spiderweb_tree_test.cc
+            core/spiderweb_object_pool_test.cc
+            io/spiderweb_binary_writer_test.cc
+            io/spiderweb_bitmap_readwriter_test.cc
+            net/spiderweb_tcp_socket_connector_test.cc
+            net/spiderweb_tcp_socket_test.cc
+            net/spiderweb_tcp_server_test.cc
+            net/spiderweb_udp_socket_test.cc
+            serial/spiderweb_serialport_test.cc
+            type/spiderweb_any_view_test.cc
+            type/spiderweb_binary_view_test.cc
+            type/spiderweb_variant_test.cc
+            reflect/pugixml_impl_test.cc
+            reflect/yyjson_impl_test.cc
+            ${PLATFORM_TEST_FILES})
+  target_link_libraries(
+    spiderweb_test PRIVATE spiderweb GTest::gtest_main GTest::gtest
+                           GTest::gmock absl::flat_hash_map)
 
-# unit test
-add_executable(spiderweb_test)
-target_sources(
-  spiderweb_test
-  PRIVATE core/spiderweb_error_code_test.cc
-          core/spiderweb_object_test.cc
-          core/spiderweb_timer_test.cc
-          core/spiderweb_eventloop_test.cc
-          core/spiderweb_notify_spy_test.cc
-          core/spiderweb_waiter_test.cc
-          core/spiderweb_thread_test.cc
-          core/spiderweb_unbounded_queue_test.cc
-          core/spiderweb_sequence_hash_test.cc
-          core/spiderweb_range_test.cc
-          core/spiderweb_synchronized_test.cc
-          core/spiderweb_signal_test.cc
-          core/spiderweb_bimap_test.cc
-          core/spiderweb_tree_test.cc
-          core/spiderweb_object_pool_test.cc
-          io/spiderweb_binary_writer_test.cc
-          io/spiderweb_bitmap_readwriter_test.cc
-          net/spiderweb_tcp_socket_connector_test.cc
-          net/spiderweb_tcp_socket_test.cc
-          net/spiderweb_tcp_server_test.cc
-          net/spiderweb_udp_socket_test.cc
-          serial/spiderweb_serialport_test.cc
-          type/spiderweb_any_view_test.cc
-          type/spiderweb_binary_view_test.cc
-          type/spiderweb_variant_test.cc
-          reflect/pugixml_impl_test.cc
-          reflect/yyjson_impl_test.cc
-          ${PLATFORM_TEST_FILES})
-target_link_libraries(
-  spiderweb_test PRIVATE spiderweb GTest::gtest_main GTest::gtest GTest::gmock
-                         absl::flat_hash_map)
-
-# benchmark
-add_executable(spiderweb_benchmark)
-target_sources(
-  spiderweb_benchmark
-  PRIVATE core/spiderweb_notify_benchmark.cc core/spiderweb_timer_benchmark.cc
-          type/spiderweb_variant_benchmark.cc
-          core/spiderweb_object_pool_benchmark.cc)
-target_link_libraries(
-  spiderweb_benchmark PRIVATE spiderweb benchmark::benchmark
-                              benchmark::benchmark_main)
+  # benchmark
+  add_executable(spiderweb_benchmark)
+  target_sources(
+    spiderweb_benchmark
+    PRIVATE core/spiderweb_notify_benchmark.cc
+            core/spiderweb_timer_benchmark.cc
+            type/spiderweb_variant_benchmark.cc
+            core/spiderweb_object_pool_benchmark.cc)
+  target_link_libraries(
+    spiderweb_benchmark PRIVATE spiderweb benchmark::benchmark
+                                benchmark::benchmark_main)
+endif()
