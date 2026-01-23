@@ -11,17 +11,17 @@ class TcpSocket;
 class TcpServer : public Object {
  public:
   class Private;
-  explicit TcpServer(uint16_t port, Object *parent = nullptr);
+  explicit TcpServer(uint16_t port, Object* parent = nullptr);
 
   ~TcpServer() override;
 
-  void ListenAndServ();
+  ErrorCode ListenAndServ();
 
   void Stop();
 
-  Notify<TcpSocket *> InComingConnection;
+  Notify<TcpSocket*> InComingConnection;
 
-  Notify<spiderweb::ErrorCode> Stopped;
+  Notify<ErrorCode> Stopped;
 
  private:
   std::shared_ptr<Private> d;

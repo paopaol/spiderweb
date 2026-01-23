@@ -44,6 +44,9 @@ TEST(spiderweb_tcp_server, Accept) {
       })
       .WillOnce([&](asio::ip::tcp::socket& /*socket*/, tcp_acceptor::AcceptHandler&& handler) {});
 
+  auto ec = mocker.server.ListenAndServ();
+  EXPECT_FALSE(ec) << ec.FormatedMessage();
+  mocker.d->Listen();
   mocker.d->StartAccept(mocker.acceptor);
 
   spy.Wait();
@@ -67,10 +70,24 @@ TEST(spiderweb_tcp_server, AcceptFailed) {
         loop.QueueTask([handler = std::move(handler)]() { handler(asio::error::address_in_use); });
       });
 
+  auto ec = mocker.server.ListenAndServ();
+  EXPECT_FALSE(ec) << ec.FormatedMessage();
+  mocker.d->Listen();
   mocker.d->StartAccept(mocker.acceptor);
 
   spy.Wait(500);
   EXPECT_EQ(spy.Count(), 0);
+}
+
+TEST(spiderweb_tcp_server, ListenAndServFailed) {
+  using ::testing::_;
+
+  spiderweb::EventLoop loop;
+  auto*                server = new spiderweb::net::TcpServer(2);
+
+  auto ec = server->ListenAndServ();
+  EXPECT_TRUE(ec) << ec.FormatedMessage();
+  delete server;
 }
 
 TEST(spiderweb_tcp_server, SafeDelete) {

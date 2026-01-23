@@ -2,11 +2,12 @@
 
 #include "net/private/spiderweb_tcp_server_private.h"
 #include "spiderweb/core/internal/thread_check.h"
+#include "spiderweb/spiderweb_check.h"
 
 namespace spiderweb {
 namespace net {
 
-TcpServer::TcpServer(uint16_t port, Object *parent)
+TcpServer::TcpServer(uint16_t port, Object* parent)
     : Object(parent), d(std::make_shared<Private>(port, this)) {
 }
 
@@ -15,13 +16,14 @@ TcpServer::~TcpServer() {
   d->q = nullptr;
 }
 
-void TcpServer::ListenAndServ() {
+ErrorCode TcpServer::ListenAndServ() {
   SPIDERWEB_CALL_THREAD_CHECK(TcpServer::~ListenAndServ);
-  if (!d->acceptor.is_open()) {
-    d->acceptor = asio::ip::tcp::acceptor(AsioService(ownerEventLoop()),
-                                          asio::ip::tcp::endpoint(asio::ip::tcp::v4(), d->port_));
-  }
+
+  auto ec = d->Listen();
+  SPIDERWEB_VERIFY(!ec, return ec);
+
   d->StartAccept(d->acceptor);
+  return ec;
 }
 
 void TcpServer::Stop() {
