@@ -130,6 +130,11 @@ void UdpSocket::Open(spiderweb::ErrorCode& ec) {
   }
 }
 
+bool UdpSocket::IsOpen() const {
+  SPIDERWEB_CALL_THREAD_CHECK(UdpSocket::Open);
+  return d->socket.is_open();
+}
+
 void UdpSocket::Close() {
   SPIDERWEB_CALL_THREAD_CHECK(UdpSocket::Close);
   spiderweb::ErrorCode ec;

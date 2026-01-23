@@ -1,5 +1,6 @@
 #include "spiderweb/net/spiderweb_udp_socket.h"
 
+#include <fcntl.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -58,6 +59,39 @@ TEST_F(UdpTest, OpenClose) {
   {
     UdpServer server2(30001);
   }
+  UdpSocket server;
+  server.Open(ec);
+}
+
+TEST_F(UdpTest, ReOpen) {
+  bool                 called = false;
+  std::vector<int64_t> files;
+
+  files.reserve(10240);
+  for (;;) {
+    auto fd = ::open("/etc/passwd", O_RDONLY);
+    if (fd >= 0) {
+      files.push_back(fd);
+    } else {
+      spiderweb::ErrorCode e;
+      UdpSocket            socket;
+
+      socket.Open(e);
+      EXPECT_TRUE(e) << e.FormatedMessage();
+      EXPECT_FALSE(socket.IsOpen());
+
+      ::close(files.front());
+
+      socket.Open(e);
+      EXPECT_FALSE(e);
+      EXPECT_TRUE(socket.IsOpen());
+
+      called = true;
+      break;
+    }
+  }
+
+  EXPECT_TRUE(called);
 }
 }  // namespace net
 }  // namespace spiderweb

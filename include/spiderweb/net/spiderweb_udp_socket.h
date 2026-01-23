@@ -57,6 +57,8 @@ class UdpSocket : public Object {
 
   void Open(spiderweb::ErrorCode& ec);
 
+  bool IsOpen() const;
+
   void Close();
 
   void Bind(const EndPoint& endpoint, spiderweb::ErrorCode& ec);
