@@ -10,6 +10,27 @@
 namespace spiderweb {
 namespace net {
 
+TEST(TcpSocketConnector, Lifetime) {
+  EventLoop loop;
+  auto*     connector = new TcpSocketConnector();
+  NotifySpy spy(connector, &TcpSocketConnector::ConnectError);
+
+  connector->SetDeadline(300);
+  connector->ConnectToHost("100.100.100.100", 1111);
+
+  spy.Wait();
+
+  EXPECT_EQ(spy.Count(), 1);
+  auto error_code = std::get<0>(spy.LastResult<std::error_code>());
+  EXPECT_EQ(error_code, asio::error::operation_aborted);
+  std::cout << error_code.message() << '\n';
+
+  connector->DeleteLater();
+
+  loop.RunAfter(0, [&]() { loop.Quit(); });
+  loop.Exec();
+}
+
 TEST(TcpSocketConnector, ConnectTimeout) {
   EventLoop          loop;
   TcpSocketConnector connector;
@@ -24,6 +45,33 @@ TEST(TcpSocketConnector, ConnectTimeout) {
   auto error_code = std::get<0>(spy.LastResult<std::error_code>());
   EXPECT_EQ(error_code, asio::error::operation_aborted);
   std::cout << error_code.message() << '\n';
+
+  loop.RunAfter(0, [&]() { loop.Quit(); });
+  loop.Exec();
+}
+
+TEST(TcpSocketConnector, ConnectCanceled) {
+  EventLoop loop;
+  auto*     connector = new TcpSocketConnector();
+  NotifySpy spy(connector, &TcpSocketConnector::ConnectError);
+
+  connector->SetDeadline(6000);
+  connector->ConnectToHost("100.100.100.100", 1111);
+
+  loop.RunAfter(10, [&]() {
+    connector->CancelConnect();
+    connector->DeleteLater();
+  });
+
+  spy.Wait();
+
+  EXPECT_EQ(spy.Count(), 1);
+  auto error_code = std::get<0>(spy.LastResult<std::error_code>());
+  EXPECT_EQ(error_code, asio::error::operation_aborted);
+  std::cout << error_code.message() << '\n';
+
+  loop.RunAfter(0, [&]() { loop.Quit(); });
+  loop.Exec();
 }
 
 TEST(TcpSocketConnector, ConnectRefused) {
@@ -40,6 +88,9 @@ TEST(TcpSocketConnector, ConnectRefused) {
   auto error_code = std::get<0>(spy.LastResult<std::error_code>());
   EXPECT_EQ(error_code, asio::error::connection_refused);
   std::cout << error_code.message() << '\n';
+
+  loop.RunAfter(0, [&]() { loop.Quit(); });
+  loop.Exec();
 }
 
 }  // namespace net

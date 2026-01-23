@@ -17,6 +17,8 @@ class TcpSocketConnector : public spiderweb::Object {
 
   void ConnectToHost(const std::string& ip, uint16_t port);
 
+  void CancelConnect();
+
   spiderweb::Notify<TcpSocket*> ConnectionEstablished;
 
   spiderweb::Notify<const std::error_code&> ConnectError;
