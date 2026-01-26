@@ -22,7 +22,7 @@ TEST(spiderweb_EventLoop, exec) {
 
 class TestObject : public spiderweb::Object {
  public:
-  explicit TestObject(spiderweb::Object *parent = nullptr) : spiderweb::Object(parent) {
+  explicit TestObject(spiderweb::Object* parent = nullptr) : spiderweb::Object(parent) {
   }
 
   void SetState(bool state) {
@@ -40,7 +40,7 @@ class TestObject : public spiderweb::Object {
 
 class ReciverObject : public spiderweb::Object {
  public:
-  explicit ReciverObject(spiderweb::Object *parent = nullptr) : spiderweb::Object(parent) {
+  explicit ReciverObject(spiderweb::Object* parent = nullptr) : spiderweb::Object(parent) {
   }
 
   void SetValue(bool state) {
@@ -123,7 +123,7 @@ TEST(spiderweb_EventLoop, multithread_emit_event_lambda) {
 
 class MyObject : public spiderweb::Object {
  public:
-  explicit MyObject(spiderweb::Object *parent = nullptr) : spiderweb::Object(parent) {
+  explicit MyObject(spiderweb::Object* parent = nullptr) : spiderweb::Object(parent) {
     timer_ = absl::make_unique<spiderweb::Timer>(this);
   }
 
@@ -134,4 +134,26 @@ TEST(spiderweb_EventLoop, destory) {
   spiderweb::EventLoop loop;
 
   MyObject object;
+}
+
+TEST(spiderweb_EventLoop, Exec) {
+  spiderweb::EventLoop loop;
+
+  auto* object = new MyObject();
+
+  object->DeleteLater();
+  loop.Quit();
+
+  loop.Exec();
+}
+
+TEST(spiderweb_EventLoop, ExecEx) {
+  spiderweb::EventLoop loop;
+
+  auto* object = new MyObject();
+
+  object->DeleteLater();
+  loop.Quit();
+
+  loop.ExecEx();
 }

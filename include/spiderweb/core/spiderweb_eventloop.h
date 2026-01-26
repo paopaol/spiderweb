@@ -18,6 +18,8 @@ class EventLoop : public Object {
 
   int Exec();
 
+  int ExecEx();
+
   void Quit();
 
   void Exit(int code);

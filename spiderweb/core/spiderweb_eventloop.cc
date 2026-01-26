@@ -35,6 +35,13 @@ int EventLoop::Exec() {
   return d->exit_code;
 }
 
+int EventLoop::ExecEx() {
+  d->io.run();
+  d->io.reset();
+  d->io.poll();
+  return d->exit_code;
+}
+
 void EventLoop::Quit() {
   d->io.stop();
 }
