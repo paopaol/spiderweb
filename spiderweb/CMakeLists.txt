@@ -84,8 +84,10 @@ target_sources(
 target_include_directories(
   spiderweb PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_include_directories(
-  spiderweb PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-                   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+  spiderweb
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+         $<BUILD_INTERFACE:${ASIO_INCLUDE_DIRS}>)
 
 # we do not use any boost components
 target_compile_definitions(

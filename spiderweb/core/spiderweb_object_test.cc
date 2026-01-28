@@ -5,7 +5,7 @@
 
 class Sender : public spiderweb::Object {
  public:
-  explicit Sender(spiderweb::Object *parent = nullptr) : spiderweb::Object(parent) {
+  explicit Sender(spiderweb::Object* parent = nullptr) : spiderweb::Object(parent) {
   }
 
   ~Sender() override {
@@ -17,17 +17,14 @@ class Sender : public spiderweb::Object {
 
 TEST(spiderweb_object, DeleteLater) {
   spiderweb::EventLoop loop;
-  auto                *sender = new Sender;
+  auto*                sender = new Sender;
 
   spiderweb::Object::Connect(sender, &Sender::a_event, &loop, [&]() {
-    // should crash here under windows
     sender->DeleteLater();
-    std::cout << "crash here ? " << '\n';
-
-    loop.QueueTask([&]() { loop.Quit(); });
+    loop.Quit();
   });
 
   sender->a_event();
 
-  loop.Exec();
+  loop.ExecEx();
 }

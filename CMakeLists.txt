@@ -56,7 +56,7 @@ endif()
 
 if(SPIDERWEB_ASIO_USE_PACKAGE)
   find_package(PkgConfig REQUIRED)
-  pkg_check_modules(asio REQUIRED)
+  pkg_check_modules(ASIO REQUIRED asio)
 endif()
 
 if(NOT MSVC AND SPIDERWEB_ASIO_USE_PACKAGE)
