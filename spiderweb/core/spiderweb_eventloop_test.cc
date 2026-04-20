@@ -142,7 +142,7 @@ TEST(spiderweb_EventLoop, Exec) {
   auto* object = new MyObject();
 
   object->DeleteLater();
-  loop.Quit();
+  loop.RunAfter(100, [&]() { loop.Quit(); });
 
   loop.Exec();
 }

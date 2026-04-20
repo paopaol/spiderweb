@@ -31,6 +31,8 @@ struct MockTcpServer {
 };
 
 TEST(spiderweb_tcp_server, Accept) {
+  spdlog::set_level(spdlog::level::trace);
+  spdlog::flush_on(spdlog::level::trace);
   using ::testing::_;
 
   spiderweb::EventLoop loop;
@@ -55,6 +57,12 @@ TEST(spiderweb_tcp_server, Accept) {
   spiderweb::net::TcpSocket* client = std::get<0>(spy.LastResult<spiderweb::net::TcpSocket*>());
   assert(client);
   delete client;
+
+  mocker.server.Stop();
+  mocker.d->acceptor.close();
+
+  loop.Quit();
+  loop.ExecEx();
 }
 
 TEST(spiderweb_tcp_server, AcceptFailed) {

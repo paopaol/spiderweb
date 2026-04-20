@@ -1,8 +1,9 @@
 #include "spiderweb/core/spiderweb_signal.h"
 
+#include <csignal>
+
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
-#include <csignal>
 
 TEST(SignalTest, Emit) {
   spiderweb::EventLoop loop;
@@ -13,12 +14,13 @@ TEST(SignalTest, Emit) {
                              [&](int sig) {
                                called = true;
                                EXPECT_EQ(SIGINT, sig);
+                               signals.reset();
                                loop.Exit(0);
                              });
 
-  //loop.RunAfter(1000, []() { kill(getpid(), SIGINT); });
+  // loop.RunAfter(1000, []() { kill(getpid(), SIGINT); });
 
-  loop.Exec();
+  loop.ExecEx();
 
   EXPECT_TRUE(called);
 }
