@@ -26,9 +26,11 @@ class TcpSocket : public Object {
 
   ~TcpSocket() override;
 
-  void SetNoDelay(bool flag, spiderweb::ErrorCode& ec);
+  void SetNoDelay(bool flag);
 
-  void SetSendBufferSize(uint16_t size, spiderweb::ErrorCode& ec);
+  void Bind(const std::string& local_ip, uint16_t port);
+
+  void SetSendBufferSize(uint16_t size);
 
   void ConnectToHost(const std::string& ip, uint16_t port);
 
@@ -63,6 +65,8 @@ class TcpSocket : public Object {
   Notify<const std::error_code&> ConnectError;
 
   Notify<const std::error_code&> Error;
+
+  Notify<const std::error_code&> SetOptionError;
 
   Notify<const io::BufferReader&> BytesRead;
 

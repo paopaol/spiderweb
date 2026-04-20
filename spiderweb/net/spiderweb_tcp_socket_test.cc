@@ -96,6 +96,30 @@ TEST(spiderweb_tcp_socket, ConnectToHostSuccess) {
   EXPECT_EQ(spy.Count(), 1);
 }
 
+TEST(spiderweb_tcp_socket, BindSuccess) {
+  spiderweb::EventLoop      loop;
+  spiderweb::net::TcpSocket socket;
+  spiderweb::NotifySpy      spy(&socket, &spiderweb::net::TcpSocket::SetOptionError);
+
+  socket.Bind("127.0.0.1", 0);
+  socket.ConnectToHost("127.0.0.1", 1998);
+  spy.Wait(100);
+  EXPECT_EQ(spy.Count(), 0);
+}
+
+TEST(spiderweb_tcp_socket, BindFailed) {
+  spiderweb::EventLoop      loop;
+  spiderweb::net::TcpSocket socket;
+  spiderweb::NotifySpy      spy(&socket, &spiderweb::net::TcpSocket::SetOptionError);
+
+  socket.Bind("100.100.100.100", 0);
+  socket.ConnectToHost("127.0.0.1", 1998);
+  spy.Wait();
+  EXPECT_EQ(spy.Count(), 1);
+  auto ec = std::get<0>(spy.LastResult<std::error_code>());
+  EXPECT_TRUE(ec) << ec.message();
+}
+
 TEST(spiderweb_tcp_socket, ConnectToHostFailed_ConnectionRefused) {
   spiderweb::EventLoop loop;
   MockSocket           mocker(loop);

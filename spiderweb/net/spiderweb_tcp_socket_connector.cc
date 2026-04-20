@@ -9,8 +9,10 @@ namespace net {
 
 class TcpSocketConnector::Private {
  public:
-  int32_t    deadline = 3000;
-  TcpSocket* pending = nullptr;
+  int32_t     deadline = 3000;
+  TcpSocket*  pending = nullptr;
+  std::string local_ip;
+  uint16_t    local_port;
 };
 
 TcpSocketConnector::TcpSocketConnector(spiderweb::Object* parent)
@@ -23,6 +25,9 @@ TcpSocketConnector::~TcpSocketConnector() {
 
 void TcpSocketConnector::SetDeadline(int32_t timeout) {
   d->deadline = timeout;
+}
+
+void TcpSocketConnector::Bind(const std::string& local_ip, uint16_t port) {
 }
 
 void TcpSocketConnector::ConnectToHost(const std::string& ip, uint16_t port) {
@@ -51,11 +56,22 @@ void TcpSocketConnector::ConnectToHost(const std::string& ip, uint16_t port) {
     spider_emit ConnectError(ec);
   });
 
+  Connect(sd, &TcpSocket::SetOptionError, sd, [this, sd, timer](const std::error_code& ec) {
+    d->pending = nullptr;
+    timer->Stop();
+    timer->DeleteLater();
+
+    sd->DeleteLater();
+    spider_emit SetOptionError(ec);
+  });
+
   Connect(timer, &spiderweb::Timer::timeout, sd, [sd]() { sd->DisConnectFromHost(); });
 
   timer->SetInterval(d->deadline);
   timer->SetSingalShot(true);
   timer->Start();
+
+  sd->Bind(d->local_ip, d->local_port);
 
   sd->ConnectToHost(ip, port);
 }

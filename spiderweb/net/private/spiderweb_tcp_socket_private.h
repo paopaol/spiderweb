@@ -1,6 +1,8 @@
 #ifndef SPIDERWEB_TCP_SOCKET_PRIVATE_H
 #define SPIDERWEB_TCP_SOCKET_PRIVATE_H
 
+#include <tuple>
+
 #include "asio.hpp"
 #include "core/internal/asio_cast.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
@@ -15,6 +17,7 @@ class TcpSocket::Private {
 
   template <typename AsyncStream, typename Handler>
   void Open(AsyncStream& stream, const asio::ip::tcp::endpoint& endpoint, Handler&& handler) {
+    TrySetOption(endpoint);
     stream.async_connect(endpoint, std::forward<Handler>(handler));
   }
 
@@ -57,8 +60,56 @@ class TcpSocket::Private {
     return "TcpSocket";
   }
 
+  void TrySetOption(const asio::ip::tcp::endpoint& endpoint) {
+    if (!socket.is_open()) {
+      std::error_code ec;
+      std::ignore = socket.open(endpoint.protocol(), ec);
+    }
+
+    SetNoDelay();
+    SetSendBufferSize();
+    Bind();
+  }
+
+  void SetNoDelay() {
+    std::error_code ec;
+    std::ignore = socket.set_option(asio::ip::tcp::no_delay(no_delay), ec);
+    if (ec) {
+      q->SetOptionError(ec);
+    }
+  }
+
+  void SetSendBufferSize() {
+    if (send_buffer_size == 0) {
+      return;
+    }
+
+    std::error_code ec;
+    std::ignore = socket.set_option(asio::socket_base::send_buffer_size(send_buffer_size), ec);
+    if (ec) {
+      q->SetOptionError(ec);
+    }
+  }
+
+  void Bind() {
+    if (local_ip.empty()) {
+      return;
+    }
+
+    std::error_code         ec;
+    asio::ip::tcp::endpoint local(asio::ip::make_address(local_ip), local_port);
+    std::ignore = socket.bind(local, ec);
+    if (ec) {
+      q->SetOptionError(ec);
+    }
+  }
+
   TcpSocket*            q = nullptr;
   asio::ip::tcp::socket socket;
+  bool                  no_delay = false;
+  std::string           local_ip;
+  uint16_t              local_port = 0;
+  uint32_t              send_buffer_size = 0;
 };
 }  // namespace net
 }  // namespace spiderweb
