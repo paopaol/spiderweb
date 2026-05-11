@@ -42,7 +42,7 @@ TEST(BiMap, foreach) {
   m.Set(1, "name1");
   m.Set(2, "name2");
 
-  for (const auto &it : m) {
+  for (const auto& it : m) {
     printf("%d %s\n", it.first, it.second->right_value.c_str());
   }
 }
@@ -54,7 +54,7 @@ struct Item {
 };
 
 struct ItemUniqueKey {
-  int32_t operator()(const Item &item) {
+  int32_t operator()(const Item& item) {
     return item.id;
   }
 };
@@ -62,9 +62,9 @@ struct ItemUniqueKey {
 TEST(BiMap, Find) {
   spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
 
-  m.Set(1, {1, "xiaoming", 23});
-  m.Set(2, {2, "lilei", 23});
-  m.Set(3, {3, "dapeng", 23});
+  m.Set(1, Item{1, "xiaoming", 23});
+  m.Set(2, Item{2, "lilei", 23});
+  m.Set(3, Item{3, "dapeng", 23});
 
   EXPECT_EQ(m.Size(), 3);
 
@@ -79,9 +79,9 @@ TEST(BiMap, Find) {
 TEST(BiMap, InverseFind) {
   spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
 
-  m.Set(1, {1, "xiaoming", 23});
-  m.Set(2, {2, "lilei", 23});
-  m.Set(3, {3, "dapeng", 24});
+  m.Set(1, Item{1, "xiaoming", 23});
+  m.Set(2, Item{2, "lilei", 23});
+  m.Set(3, Item{3, "dapeng", 24});
 
   EXPECT_EQ(m.Size(), 3);
 
@@ -98,13 +98,13 @@ TEST(BiMap, InverseFind) {
 TEST(BiMap, Range) {
   spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
 
-  m.Set(1, {1, "xiaoming", 23});
-  m.Set(2, {2, "lilei", 23});
-  m.Set(3, {3, "dapeng", 23});
+  m.Set(1, Item{1, "xiaoming", 23});
+  m.Set(2, Item{2, "lilei", 23});
+  m.Set(3, Item{3, "dapeng", 23});
 
   EXPECT_EQ(m.Size(), 3);
 
-  for (const auto &it : m) {
+  for (const auto& it : m) {
     printf("%d %d %s %d\n", it.first, it.second->right_value.id,
            it.second->right_value.name.c_str(), it.second->right_value.age);
   }
@@ -113,9 +113,9 @@ TEST(BiMap, Range) {
 TEST(BiMap, Erase) {
   spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
 
-  m.Set(1, {1, "xiaoming", 23});
-  m.Set(2, {2, "lilei", 23});
-  m.Set(3, {3, "dapeng", 23});
+  m.Set(1, Item{1, "xiaoming", 23});
+  m.Set(2, Item{2, "lilei", 23});
+  m.Set(3, Item{3, "dapeng", 23});
 
   EXPECT_EQ(m.Size(), 3);
   m.Erase(2);
@@ -125,9 +125,9 @@ TEST(BiMap, Erase) {
 TEST(BiMap, InverseErase) {
   spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
 
-  m.Set(1, {1, "xiaoming", 23});
-  m.Set(2, {2, "lilei", 23});
-  m.Set(3, {3, "dapeng", 23});
+  m.Set(1, Item{1, "xiaoming", 23});
+  m.Set(2, Item{2, "lilei", 23});
+  m.Set(3, Item{3, "dapeng", 23});
 
   EXPECT_EQ(m.Size(), 3);
 
@@ -139,9 +139,9 @@ TEST(BiMap, InverseErase) {
 TEST(BiMap, Insert) {
   spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
 
-  m.Set(5, {1, "xiaoming", 23});
-  m.Set(5, {2, "lilei", 23});   // change 1 to 2
-  m.Set(6, {2, "dapeng", 23});  // change 5 to 6
+  m.Set(5, Item{1, "xiaoming", 23});
+  m.Set(5, Item{2, "lilei", 23});   // change 1 to 2
+  m.Set(6, Item{2, "dapeng", 23});  // change 5 to 6
 
   EXPECT_EQ(m.Size(), 1);
 }
@@ -149,9 +149,9 @@ TEST(BiMap, Insert) {
 TEST(BiMap, Modify) {
   spiderweb::UnorderedBiMap<int, Item, ItemUniqueKey> m;
 
-  m.Set(5, {1, "xiaoming", 23});
-  m.Set(5, {2, "lilei", 23});   // change 1 to 2
-  m.Set(6, {2, "dapeng", 23});  // change 5 to 6
+  m.Set(5, Item{1, "xiaoming", 23});
+  m.Set(5, Item{2, "lilei", 23});   // change 1 to 2
+  m.Set(6, Item{2, "dapeng", 23});  // change 5 to 6
 
   auto it = m.Find(6);
 

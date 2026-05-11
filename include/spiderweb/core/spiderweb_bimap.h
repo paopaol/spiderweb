@@ -1,12 +1,13 @@
 #pragma once
 
 #include <unordered_map>
+#include <utility>
 
 namespace spiderweb {
 
 template <typename T, typename K>
 struct GenRightValueUniqueKey {
-  K operator()(const T &v) {
+  K operator()(const T& v) {
     return v;
   }
 };
@@ -28,26 +29,26 @@ class UnorderedBiMap {
     right_value_type right_value;
   };
 
-  using left_map_type = std::unordered_map<left_key_type, StoreValue *>;
+  using left_map_type = std::unordered_map<left_key_type, StoreValue*>;
   using left_const_iterator = typename left_map_type::const_iterator;
 
-  using right_map_type = std::unordered_map<right_key_type, const StoreValue *>;
+  using right_map_type = std::unordered_map<right_key_type, const StoreValue*>;
   using right_const_iterator = typename right_map_type::const_iterator;
 
   class InversedMap {
    public:
-    explicit InversedMap(UnorderedBiMap *m) : view_(m) {
+    explicit InversedMap(UnorderedBiMap* m) : view_(m) {
     }
 
-    InversedMap(const InversedMap &) = delete;
+    InversedMap(const InversedMap&) = delete;
 
-    InversedMap &operator=(const InversedMap &) = delete;
+    InversedMap& operator=(const InversedMap&) = delete;
 
-    InversedMap(InversedMap &&other) noexcept : view_(other.view_) {
+    InversedMap(InversedMap&& other) noexcept : view_(other.view_) {
       other.view_ = nullptr;
     }
 
-    InversedMap &operator=(InversedMap &&other) noexcept {
+    InversedMap& operator=(InversedMap&& other) noexcept {
       if (&other == this) {
         return *this;
       }
@@ -63,16 +64,16 @@ class UnorderedBiMap {
 
     void Clear();
 
-    void Erase(const right_key_type &key);
+    void Erase(const right_key_type& key);
 
-    right_const_iterator Find(const right_key_type &right_key) const;
+    right_const_iterator Find(const right_key_type& right_key) const;
 
     right_const_iterator begin() const;
 
     right_const_iterator end() const;
 
    private:
-    UnorderedBiMap *view_ = nullptr;
+    UnorderedBiMap* view_ = nullptr;
 
     friend class UnorderedBiMap;
   };
@@ -81,11 +82,12 @@ class UnorderedBiMap {
 
   ~UnorderedBiMap();
 
-  UnorderedBiMap(const UnorderedBiMap &other) = delete;
+  UnorderedBiMap(const UnorderedBiMap& other) = delete;
 
-  UnorderedBiMap &operator=(const UnorderedBiMap &other) = delete;
+  UnorderedBiMap& operator=(const UnorderedBiMap& other) = delete;
 
-  void Set(left_key_type key, right_value_type &&value);
+  template <typename KeyArg, typename ValueArg>
+  void Set(KeyArg&& key, ValueArg&& value);
 
   std::size_t Size() const;
 
@@ -93,9 +95,9 @@ class UnorderedBiMap {
 
   void Clear();
 
-  void Erase(const left_key_type &key);
+  void Erase(const left_key_type& key);
 
-  left_const_iterator Find(const left_key_type &left_key) const;
+  left_const_iterator Find(const left_key_type& left_key) const;
 
   left_const_iterator begin() const;
 
@@ -103,14 +105,14 @@ class UnorderedBiMap {
 
   InversedMap Inserse();
 
-  void ModifyData(left_const_iterator left_iterator, right_value_type &&value);
+  void ModifyData(left_const_iterator left_iterator, right_value_type&& value);
 
  private:
-  StoreValue *InsertLeft(left_key_type key, right_value_type &&value);
+  StoreValue* InsertLeft(left_key_type key, right_value_type&& value);
 
-  void InsertRight(StoreValue *value);
+  void InsertRight(StoreValue* value);
 
-  StoreValue *UpdateLeftRightValue(left_const_iterator left_iterator, right_value_type &&value);
+  StoreValue* UpdateLeftRightValue(left_const_iterator left_iterator, right_value_type&& value);
 
   left_map_type  left_;
   right_map_type right_;
@@ -137,7 +139,7 @@ void UnorderedBiMap<K, V, RightValueKey>::InversedMap::Clear() {
 }
 
 template <typename K, typename V, typename RightValueKey>
-void UnorderedBiMap<K, V, RightValueKey>::InversedMap::Erase(const right_key_type &key) {
+void UnorderedBiMap<K, V, RightValueKey>::InversedMap::Erase(const right_key_type& key) {
   auto it = view_->right_.find(key);
   if (it != view_->right_.end()) {
     const auto left_key = it->second->left_key;
@@ -147,7 +149,7 @@ void UnorderedBiMap<K, V, RightValueKey>::InversedMap::Erase(const right_key_typ
 
 template <typename K, typename V, typename RightValueKey>
 typename UnorderedBiMap<K, V, RightValueKey>::right_const_iterator
-UnorderedBiMap<K, V, RightValueKey>::InversedMap::Find(const right_key_type &right_key) const {
+UnorderedBiMap<K, V, RightValueKey>::InversedMap::Find(const right_key_type& right_key) const {
   return view_->right_.find(right_key);
 }
 
@@ -164,8 +166,9 @@ UnorderedBiMap<K, V, RightValueKey>::InversedMap::end() const {
 }
 
 template <typename K, typename V, typename RightValueKey>
-void UnorderedBiMap<K, V, RightValueKey>::Set(left_key_type key, right_value_type &&value) {
-  InsertRight(InsertLeft(key, std::forward<right_value_type>(value)));
+template <typename KeyArg, typename ValueArg>
+void UnorderedBiMap<K, V, RightValueKey>::Set(KeyArg&& key, ValueArg&& value) {
+  InsertRight(InsertLeft(std::forward<KeyArg>(key), std::forward<ValueArg>(value)));
 }
 
 template <typename K, typename V, typename RightValueKey>
@@ -179,7 +182,7 @@ bool UnorderedBiMap<K, V, RightValueKey>::Empty() const {
 
 template <typename K, typename V, typename RightValueKey>
 void UnorderedBiMap<K, V, RightValueKey>::Clear() {
-  for (const auto &it : left_) {
+  for (const auto& it : left_) {
     delete it.second;
   }
   left_.clear();
@@ -187,7 +190,7 @@ void UnorderedBiMap<K, V, RightValueKey>::Clear() {
 }
 
 template <typename K, typename V, typename RightValueKey>
-void UnorderedBiMap<K, V, RightValueKey>::Erase(const left_key_type &key) {
+void UnorderedBiMap<K, V, RightValueKey>::Erase(const left_key_type& key) {
   auto it = left_.find(key);
   if (it != left_.end()) {
     right_.erase(RightValueKey()(it->second->right_value));
@@ -199,7 +202,7 @@ void UnorderedBiMap<K, V, RightValueKey>::Erase(const left_key_type &key) {
 
 template <typename K, typename V, typename RightValueKey>
 typename UnorderedBiMap<K, V, RightValueKey>::left_const_iterator
-UnorderedBiMap<K, V, RightValueKey>::Find(const left_key_type &left_key) const {
+UnorderedBiMap<K, V, RightValueKey>::Find(const left_key_type& left_key) const {
   return left_.find(left_key);
 }
 
@@ -223,13 +226,13 @@ UnorderedBiMap<K, V, RightValueKey>::Inserse() {
 
 template <typename K, typename V, typename RightValueKey>
 void UnorderedBiMap<K, V, RightValueKey>::ModifyData(left_const_iterator left_iterator,
-                                                     right_value_type  &&value) {
+                                                     right_value_type&&  value) {
   InsertRight(UpdateLeftRightValue(left_iterator, std::forward<right_value_type>(value)));
 }
 
 template <typename K, typename V, typename RightValueKey>
-typename UnorderedBiMap<K, V, RightValueKey>::StoreValue *
-UnorderedBiMap<K, V, RightValueKey>::InsertLeft(left_key_type left_key, right_value_type &&value) {
+typename UnorderedBiMap<K, V, RightValueKey>::StoreValue*
+UnorderedBiMap<K, V, RightValueKey>::InsertLeft(left_key_type left_key, right_value_type&& value) {
   auto it = left_.insert({left_key, nullptr});
   if (it.second) {
     it.first->second = new StoreValue(left_key, std::forward<right_value_type>(value));
@@ -240,7 +243,7 @@ UnorderedBiMap<K, V, RightValueKey>::InsertLeft(left_key_type left_key, right_va
 }
 
 template <typename K, typename V, typename RightValueKey>
-void UnorderedBiMap<K, V, RightValueKey>::InsertRight(StoreValue *v) {
+void UnorderedBiMap<K, V, RightValueKey>::InsertRight(StoreValue* v) {
   auto it = right_.insert({RightValueKey()(v->right_value), v});
   if (!it.second) {
     /**
@@ -259,9 +262,9 @@ void UnorderedBiMap<K, V, RightValueKey>::InsertRight(StoreValue *v) {
 }
 
 template <typename K, typename V, typename RightValueKey>
-typename UnorderedBiMap<K, V, RightValueKey>::StoreValue *
+typename UnorderedBiMap<K, V, RightValueKey>::StoreValue*
 UnorderedBiMap<K, V, RightValueKey>::UpdateLeftRightValue(left_const_iterator left_iterator,
-                                                          right_value_type  &&value) {
+                                                          right_value_type&&  value) {
   right_.erase(RightValueKey()(left_iterator->second->right_value));
   *left_iterator->second =
       StoreValue(left_iterator->second->left_key, std::forward<right_value_type>(value));
