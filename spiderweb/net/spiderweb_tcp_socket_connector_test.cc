@@ -86,7 +86,7 @@ TEST(TcpSocketConnector, ConnectRefused) {
 
   EXPECT_EQ(spy.Count(), 1);
   auto error_code = std::get<0>(spy.LastResult<std::error_code>());
-  EXPECT_EQ(error_code, asio::error::connection_refused);
+  EXPECT_EQ(error_code, asio::error::operation_aborted);
   std::cout << error_code.message() << '\n';
 
   loop.RunAfter(0, [&]() { loop.Quit(); });

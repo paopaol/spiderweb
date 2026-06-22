@@ -16,10 +16,10 @@ TcpServer::~TcpServer() {
   d->q = nullptr;
 }
 
-ErrorCode TcpServer::ListenAndServ() {
+ErrorCode TcpServer::ListenAndServ(const std::string& ip_v4) {
   SPIDERWEB_CALL_THREAD_CHECK(TcpServer::~ListenAndServ);
 
-  auto ec = d->Listen();
+  auto ec = d->Listen(ip_v4);
   SPIDERWEB_VERIFY(!ec, return ec);
 
   d->StartAccept(d->acceptor);

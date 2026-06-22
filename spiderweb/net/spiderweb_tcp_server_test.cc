@@ -48,7 +48,7 @@ TEST(spiderweb_tcp_server, Accept) {
 
   auto ec = mocker.server.ListenAndServ();
   EXPECT_FALSE(ec) << ec.FormatedMessage();
-  mocker.d->Listen();
+  mocker.d->Listen("127.0.0.1");
   mocker.d->StartAccept(mocker.acceptor);
 
   spy.Wait();
@@ -80,7 +80,7 @@ TEST(spiderweb_tcp_server, AcceptFailed) {
 
   auto ec = mocker.server.ListenAndServ();
   EXPECT_FALSE(ec) << ec.FormatedMessage();
-  mocker.d->Listen();
+  mocker.d->Listen("0.0.0.0");
   mocker.d->StartAccept(mocker.acceptor);
 
   spy.Wait(500);

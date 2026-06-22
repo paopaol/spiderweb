@@ -15,7 +15,7 @@ class TcpServer : public Object {
 
   ~TcpServer() override;
 
-  ErrorCode ListenAndServ();
+  ErrorCode ListenAndServ(const std::string& ip_v4 = "0.0.0.0");
 
   void Stop();
 

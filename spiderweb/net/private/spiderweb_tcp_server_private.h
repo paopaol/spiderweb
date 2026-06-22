@@ -1,6 +1,8 @@
 #ifndef SPIDERWEB_TCP_SERVER_PRIVATE_H
 #define SPIDERWEB_TCP_SERVER_PRIVATE_H
 
+#include <string>
+
 #include "asio.hpp"
 #include "spdlog/spdlog.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
@@ -25,9 +27,20 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
 
   ~Private() = default;
 
-  ErrorCode Listen() {
-    ErrorCode               ec;
-    asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), port_);
+  ErrorCode Listen(std::string ip_v4) {
+    asio::ip::address addr;
+    if (ip_v4.empty() || ip_v4 == "0.0.0.0") {
+      ip_v4 = "0.0.0.0";
+    }
+
+    ErrorCode ec;
+    addr = asio::ip::make_address(ip_v4, ec);
+    SPIDERWEB_VERIFY(!ec, {
+      spdlog::warn("TcpServer({}) {}", fmt::ptr(q), ec.message());
+      return ec;
+    });
+
+    asio::ip::tcp::endpoint endpoint(addr, port_);
 
     auto e = acceptor.open(endpoint.protocol(), ec);
     SPIDERWEB_VERIFY(!e, {
