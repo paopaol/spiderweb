@@ -1,4 +1,7 @@
+#include <absl/memory/memory.h>
+
 #include <cassert>
+#include <utility>
 
 #include "spiderweb/reflect/json_node.h"
 #include "yyjson.h"
@@ -7,20 +10,20 @@ extern "C" {
 #include "yyjson.h"
 }
 
-#define YYJSON_GET_VALUE(signature)                     \
-  auto *val = reinterpret_cast<yyjson_mut_val *>(val_); \
-  if (!yyjson_mut_is_null(val)) {                       \
-    assert(yyjson_mut_is_##signature(val));             \
-    result = yyjson_mut_get_##signature(val);           \
-    return true;                                        \
-  }                                                     \
+#define YYJSON_GET_VALUE(signature)                    \
+  auto* val = reinterpret_cast<yyjson_mut_val*>(val_); \
+  if (!yyjson_mut_is_null(val)) {                      \
+    assert(yyjson_mut_is_##signature(val));            \
+    result = yyjson_mut_get_##signature(val);          \
+    return true;                                       \
+  }                                                    \
   return false;
 
-#define VAR_DECAL(val, doc)                             \
-  auto *val = reinterpret_cast<yyjson_mut_val *>(val_); \
-  auto *doc = reinterpret_cast<yyjson_mut_doc *>(doc_); \
-  assert((val) && (doc));                               \
-  (void)(doc);                                          \
+#define VAR_DECAL(val, doc)                            \
+  auto* val = reinterpret_cast<yyjson_mut_val*>(val_); \
+  auto* doc = reinterpret_cast<yyjson_mut_doc*>(doc_); \
+  assert((val) && (doc));                              \
+  (void)(doc);                                         \
   (void)(val);
 
 namespace spiderweb {
@@ -28,58 +31,58 @@ namespace reflect {
 
 JsonValue::JsonValue() = default;
 
-JsonValue::JsonValue(Document *doc, NodeValue *val) : doc_(doc), val_(val) {
+JsonValue::JsonValue(Document* doc, NodeValue* val) : doc_(doc), val_(val) {
 }
 
 JsonValue::~JsonValue() = default;
 
-bool JsonValue::GetValue(int8_t &result) const {
+bool JsonValue::GetValue(int8_t& result) const {
   YYJSON_GET_VALUE(int)
 }
 
-bool JsonValue::GetValue(uint8_t &result) const {
+bool JsonValue::GetValue(uint8_t& result) const {
   YYJSON_GET_VALUE(int)
 }
 
-bool JsonValue::GetValue(int16_t &result) const {
+bool JsonValue::GetValue(int16_t& result) const {
   YYJSON_GET_VALUE(int)
 }
 
-bool JsonValue::GetValue(uint16_t &result) const {
+bool JsonValue::GetValue(uint16_t& result) const {
   YYJSON_GET_VALUE(int)
 }
 
-bool JsonValue::GetValue(int32_t &result) const {
+bool JsonValue::GetValue(int32_t& result) const {
   YYJSON_GET_VALUE(int)
 }
 
-bool JsonValue::GetValue(uint32_t &result) const {
+bool JsonValue::GetValue(uint32_t& result) const {
   YYJSON_GET_VALUE(uint)
 }
 
-bool JsonValue::GetValue(int64_t &result) const {
+bool JsonValue::GetValue(int64_t& result) const {
   YYJSON_GET_VALUE(int)
 }
 
-bool JsonValue::GetValue(uint64_t &result) const {
+bool JsonValue::GetValue(uint64_t& result) const {
   YYJSON_GET_VALUE(uint)
 }
 
-bool JsonValue::GetValue(bool &result) const {
+bool JsonValue::GetValue(bool& result) const {
   YYJSON_GET_VALUE(bool)
 }
 
-bool JsonValue::GetValue(float &result) const {
+bool JsonValue::GetValue(float& result) const {
   YYJSON_GET_VALUE(real)
 }
 
-bool JsonValue::GetValue(double &result) const {
+bool JsonValue::GetValue(double& result) const {
   YYJSON_GET_VALUE(real)
 }
 
-bool JsonValue::GetValue(std::string &result) const {
+bool JsonValue::GetValue(std::string& result) const {
   VAR_DECAL(val, doc)
-  const auto *v = yyjson_mut_get_str(val);
+  const auto* v = yyjson_mut_get_str(val);
   if (v) {
     result = v;
   }
@@ -157,11 +160,11 @@ bool JsonValue::SetValue(double value) {
   return false;
 }
 
-bool JsonValue::SetValue(const std::string &value) {
+bool JsonValue::SetValue(const std::string& value) {
   VAR_DECAL(val, doc)
 
   const auto len = value.size();
-  char      *new_str = unsafe_yyjson_mut_strncpy(doc, value.c_str(), len);
+  char*      new_str = unsafe_yyjson_mut_strncpy(doc, value.c_str(), len);
 
   if (yyjson_likely(val && new_str)) {
     val->tag = (static_cast<uint64_t>(len) << YYJSON_TAG_BIT) | YYJSON_TYPE_STR;
@@ -171,89 +174,89 @@ bool JsonValue::SetValue(const std::string &value) {
   return false;
 }
 
-bool JsonValue::SetValue(const std::string &key, int8_t value) {
+bool JsonValue::SetValue(const std::string& key, int8_t value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, uint8_t value) {
+bool JsonValue::SetValue(const std::string& key, uint8_t value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, int16_t value) {
+bool JsonValue::SetValue(const std::string& key, int16_t value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, uint16_t value) {
+bool JsonValue::SetValue(const std::string& key, uint16_t value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, int32_t value) {
+bool JsonValue::SetValue(const std::string& key, int32_t value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, uint32_t value) {
+bool JsonValue::SetValue(const std::string& key, uint32_t value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_uint(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, int64_t value) {
+bool JsonValue::SetValue(const std::string& key, int64_t value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_int(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, uint64_t value) {
+bool JsonValue::SetValue(const std::string& key, uint64_t value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_uint(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, bool value) {
+bool JsonValue::SetValue(const std::string& key, bool value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_bool(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, float value) {
+bool JsonValue::SetValue(const std::string& key, float value) {
   return SetValue(key, static_cast<double>(value));
 }
 
-bool JsonValue::SetValue(const std::string &key, double value) {
+bool JsonValue::SetValue(const std::string& key, double value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_real(doc, val, key.c_str(), value);
 }
 
-bool JsonValue::SetValue(const std::string &key, const std::string &value) {
+bool JsonValue::SetValue(const std::string& key, const std::string& value) {
   VAR_DECAL(val, doc)
   return yyjson_mut_obj_add_str(doc, val, key.c_str(), value.c_str());
 }
 
-bool JsonValue::SetValue(const std::string &key, const JsonValue &value) {
+bool JsonValue::SetValue(const std::string& key, const JsonValue& value) {
   VAR_DECAL(val, doc)
-  auto *obj_val = reinterpret_cast<yyjson_mut_val *>(value.val_);
+  auto* obj_val = reinterpret_cast<yyjson_mut_val*>(value.val_);
 
-  char *k = unsafe_yyjson_mut_strncpy(doc, key.c_str(), key.size());
+  char* k = unsafe_yyjson_mut_strncpy(doc, key.c_str(), key.size());
   return yyjson_mut_obj_add_val(doc, val, k, obj_val);
 }
 
-void JsonValue::Append(const JsonValue &value) {
+void JsonValue::Append(const JsonValue& value) {
   VAR_DECAL(val, doc)
 
   if (!yyjson_mut_is_arr(val)) {
     val->tag = YYJSON_TYPE_ARR | YYJSON_SUBTYPE_NONE;
   }
-  yyjson_mut_arr_append(val, reinterpret_cast<yyjson_mut_val *>(value.val_));
+  yyjson_mut_arr_append(val, reinterpret_cast<yyjson_mut_val*>(value.val_));
 }
 
-JsonValue JsonValue::Value(const char *key) const {
+JsonValue JsonValue::Value(const char* key) const {
   VAR_DECAL(val, doc)
 
   JsonValue value;
 
   value.doc_ = doc_;
-  value.val_ = reinterpret_cast<NodeValue *>(yyjson_mut_obj_get(val, key));
+  value.val_ = reinterpret_cast<NodeValue*>(yyjson_mut_obj_get(val, key));
 
   return value;
 }
@@ -264,7 +267,7 @@ JsonValue JsonValue::NewValue() const {
   JsonValue value;
 
   value.doc_ = doc_;
-  value.val_ = reinterpret_cast<NodeValue *>(yyjson_mut_obj(doc));
+  value.val_ = reinterpret_cast<NodeValue*>(yyjson_mut_obj(doc));
 
   return value;
 }
@@ -275,7 +278,7 @@ JsonValue JsonValue::NewArray() const {
   JsonValue array;
 
   array.doc_ = doc_;
-  array.val_ = reinterpret_cast<NodeValue *>(yyjson_mut_arr(doc));
+  array.val_ = reinterpret_cast<NodeValue*>(yyjson_mut_arr(doc));
 
   return array;
 }
@@ -287,33 +290,61 @@ bool JsonValue::IsArray() const {
 }
 
 bool JsonValue::IsNull() const {
-  auto *val = reinterpret_cast<yyjson_mut_val *>(val_);
+  auto* val = reinterpret_cast<yyjson_mut_val*>(val_);
 
-  return !val || yyjson_mut_is_null(const_cast<yyjson_mut_val *>(val));
+  return !val || yyjson_mut_is_null(const_cast<yyjson_mut_val*>(val));
 }
 
-JsonArray::JsonArray() = default;
+struct JsonArray::Private {
+  Private() = default;
 
-JsonArray::JsonArray(const JsonValue &json) : value_(json) {
+  explicit Private(const JsonValue& json) : value_(json) {
+  }
+
+  JsonValue           value_;
+  yyjson_mut_arr_iter iter;
+};
+
+JsonArray::JsonArray() : d(absl::make_unique<Private>()) {
+}
+
+JsonArray::JsonArray(const JsonValue& json) : d(absl::make_unique<Private>(json)) {
+  yyjson_mut_arr_iter_init(reinterpret_cast<yyjson_mut_val*>(d->value_.val_), &d->iter);
+}
+
+JsonArray::JsonArray(JsonArray&& other) noexcept {
+  d = std::move(other.d);
+}
+
+JsonArray& JsonArray::operator=(JsonArray&& other) noexcept {
+  if (this == &other) {
+    std::swap(d, other.d);
+  }
+  return *this;
 }
 
 JsonArray::~JsonArray() = default;
 
 std::size_t JsonArray::Size() const {
   assert(IsValid());
-  return yyjson_mut_arr_size(reinterpret_cast<yyjson_mut_val *>(value_.val_));
+  return yyjson_mut_arr_size(reinterpret_cast<yyjson_mut_val*>(d->value_.val_));
 }
 
-JsonValue JsonArray::operator[](std::size_t index) const {
+bool JsonArray::HasNext() const {
+  assert(IsValid());
+  return yyjson_mut_arr_iter_has_next(&d->iter);
+}
+
+JsonValue JsonArray::Next() const {
   assert(IsValid());
 
-  auto *element = yyjson_mut_arr_get(reinterpret_cast<yyjson_mut_val *>(value_.val_), index);
-  return JsonValue(reinterpret_cast<JsonValue::Document *>(value_.doc_),
-                   reinterpret_cast<JsonValue::NodeValue *>(element));
+  auto* element = yyjson_mut_arr_iter_next(&d->iter);
+  return JsonValue(reinterpret_cast<JsonValue::Document*>(d->value_.doc_),
+                   reinterpret_cast<JsonValue::NodeValue*>(element));
 }
 
 bool JsonArray::IsValid() const {
-  auto *val = reinterpret_cast<yyjson_mut_val *>(value_.val_);
+  auto* val = reinterpret_cast<yyjson_mut_val*>(d->value_.val_);
   (void)(val);
 
   assert(val);
@@ -322,30 +353,31 @@ bool JsonArray::IsValid() const {
   return true;
 }
 
-void JsonArray::Borrow(const JsonValue &json) {
-  value_ = json;
+void JsonArray::Borrow(const JsonValue& json) {
+  d->value_ = json;
+  yyjson_mut_arr_iter_init(reinterpret_cast<yyjson_mut_val*>(d->value_.val_), &d->iter);
 }
 
 struct YyJsonValueBuilder {
-  JsonValue operator()(const char *json) const {
-    auto           *idoc = yyjson_read(json, strlen(json), 0);
-    yyjson_mut_doc *doc = yyjson_doc_mut_copy(idoc, nullptr);
-    auto           *root = yyjson_mut_doc_get_root(doc);
+  JsonValue operator()(const char* json) const {
+    auto*           idoc = yyjson_read(json, strlen(json), 0);
+    yyjson_mut_doc* doc = yyjson_doc_mut_copy(idoc, nullptr);
+    auto*           root = yyjson_mut_doc_get_root(doc);
     yyjson_doc_free(idoc);
 
-    return JsonValue(reinterpret_cast<JsonValue::Document *>(doc),
-                     reinterpret_cast<JsonValue::NodeValue *>(root));
+    return JsonValue(reinterpret_cast<JsonValue::Document*>(doc),
+                     reinterpret_cast<JsonValue::NodeValue*>(root));
   }
 
   JsonValue operator()() const {
-    yyjson_mut_doc *doc = yyjson_mut_doc_new(nullptr);
-    yyjson_mut_val *root = yyjson_mut_obj(doc);
-    return JsonValue(reinterpret_cast<JsonValue::Document *>(doc),
-                     reinterpret_cast<JsonValue::NodeValue *>(root));
+    yyjson_mut_doc* doc = yyjson_mut_doc_new(nullptr);
+    yyjson_mut_val* root = yyjson_mut_obj(doc);
+    return JsonValue(reinterpret_cast<JsonValue::Document*>(doc),
+                     reinterpret_cast<JsonValue::NodeValue*>(root));
   }
 };
 
-JsonDocumentReader::JsonDocumentReader(const char *json)
+JsonDocumentReader::JsonDocumentReader(const char* json)
     : reflect::JsonReader<JsonValue>(&root_), root_(YyJsonValueBuilder()(json)) {
 }
 
@@ -353,15 +385,15 @@ JsonDocumentReader::JsonDocumentReader() : reflect::JsonReader<JsonValue>(&root_
 }
 
 JsonDocumentReader::~JsonDocumentReader() {
-  auto *doc = reinterpret_cast<yyjson_mut_doc *>(root_.doc_);
+  auto* doc = reinterpret_cast<yyjson_mut_doc*>(root_.doc_);
 
   yyjson_mut_doc_free(doc);
 }
 
 std::string JsonDocumentReader::ToString() const {
-  auto *val = reinterpret_cast<yyjson_mut_val *>(root_.val_);
+  auto* val = reinterpret_cast<yyjson_mut_val*>(root_.val_);
 
-  char *js = yyjson_mut_val_write(val, 0, nullptr);
+  char* js = yyjson_mut_val_write(val, 0, nullptr);
 
   std::string json(js);
 
@@ -375,7 +407,7 @@ JsonDocumentWriter::JsonDocumentWriter()
 }
 
 JsonDocumentWriter::~JsonDocumentWriter() {
-  auto *doc = reinterpret_cast<yyjson_mut_doc *>(root_.doc_);
+  auto* doc = reinterpret_cast<yyjson_mut_doc*>(root_.doc_);
 
   if (doc) {
     yyjson_mut_doc_free(doc);
@@ -383,8 +415,8 @@ JsonDocumentWriter::~JsonDocumentWriter() {
 }
 
 std::string JsonDocumentWriter::ToString() const {
-  auto       *val = reinterpret_cast<yyjson_mut_val *>(root_.val_);
-  char       *js = yyjson_mut_val_write(val, 0, nullptr);
+  auto*       val = reinterpret_cast<yyjson_mut_val*>(root_.val_);
+  char*       js = yyjson_mut_val_write(val, 0, nullptr);
   std::string json(js);
   free(js);
   return json;

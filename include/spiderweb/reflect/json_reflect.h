@@ -44,19 +44,19 @@ struct Meta {
   using JsonType = T;
   using Visitor = JsonValueVisitor<JsonType>;
 
-  inline bool FromJson(const JsonType &json, ValueType *result) const {
+  inline bool FromJson(const JsonType& json, ValueType* result) const {
     return Visitor::Get(json, *result);
   }
 
-  inline bool FromJson(const JsonType &json, const char *key, ValueType *result) const {
+  inline bool FromJson(const JsonType& json, const char* key, ValueType* result) const {
     return FromJson(Visitor::ValueOfKey(json, key), result);
   }
 
-  inline void ToJson(const ValueType *result, JsonType &json) const {
+  inline void ToJson(const ValueType* result, JsonType& json) const {
     Visitor::Write(json, *result);
   }
 
-  inline void ToJson(const ValueType *result, const char *key, JsonType &json) const {
+  inline void ToJson(const ValueType* result, const char* key, JsonType& json) const {
     Visitor::Write(json, key, *result);
   }
 };
@@ -69,7 +69,7 @@ struct Meta<std::shared_ptr<U>, T> {
   using JsonType = T;
   using Visitor = JsonValueVisitor<JsonType>;
 
-  inline bool FromJson(const JsonType &json, ValueTypePtr *result) const {
+  inline bool FromJson(const JsonType& json, ValueTypePtr* result) const {
     if (!(*result)) {
       result->reset(new ValueType);
     }
@@ -81,7 +81,7 @@ struct Meta<std::shared_ptr<U>, T> {
     return meta.FromJson(json, result->get());
   }
 
-  inline void ToJson(const ValueTypePtr *result, JsonType &json) const {
+  inline void ToJson(const ValueTypePtr* result, JsonType& json) const {
     if (!(*result)) {
       return;
     }
@@ -90,7 +90,7 @@ struct Meta<std::shared_ptr<U>, T> {
     meta.ToJson(result->get(), json);
   }
 
-  inline void ToJson(const ValueTypePtr *result, const char *key, JsonType &json) const {
+  inline void ToJson(const ValueTypePtr* result, const char* key, JsonType& json) const {
     if (!(*result)) {
       return;
     }
@@ -107,21 +107,21 @@ struct Meta<std::string, T> {
   using JsonType = T;
   using Visitor = JsonValueVisitor<JsonType>;
 
-  inline bool FromJson(const JsonType &json, std::string *result) const {
+  inline bool FromJson(const JsonType& json, std::string* result) const {
     if (Visitor::IsNull(json)) {
       return false;
     }
     return Visitor::Get(json, *result);
   }
 
-  inline void ToJson(const std::string *result, JsonType &json) const {
+  inline void ToJson(const std::string* result, JsonType& json) const {
     if (!result) {
       return;
     }
     Visitor::Write(json, *result);
   }
 
-  inline void ToJson(const std::string *result, const char *key, JsonType &json) const {
+  inline void ToJson(const std::string* result, const char* key, JsonType& json) const {
     if (!result) {
       return;
     }
@@ -136,18 +136,18 @@ struct ArrayMeta {
 
   static constexpr bool IsMeta = Meta<ValueType, JsonType>::IsMeta;
 
-  inline bool FromJson(const JsonType &json, Cont<ValueType> *result) const {
+  inline bool FromJson(const JsonType& json, Cont<ValueType>* result) const {
     return this->FromJsonArray(Visitor::ToArray(json), result);
   }
 
-  inline bool FromJson(const JsonType &json, const char *key, Cont<ValueType> *result) const {
-    const auto &value = Visitor::ValueOfKey(json, key);
-    const auto &array = Visitor::ToArray(value);
+  inline bool FromJson(const JsonType& json, const char* key, Cont<ValueType>* result) const {
+    const auto& value = Visitor::ValueOfKey(json, key);
+    const auto& array = Visitor::ToArray(value);
     return this->FromJsonArray(array, result);
   }
 
-  inline void ToJson(const Cont<ValueType> *result, JsonType &json) const {
-    for (const auto &value : *result) {
+  inline void ToJson(const Cont<ValueType>* result, JsonType& json) const {
+    for (const auto& value : *result) {
       Meta<ValueType, JsonType> meta;
       JsonType                  tmp = Visitor::NewEmptyValueFrom(json);
 
@@ -156,7 +156,7 @@ struct ArrayMeta {
     }
   }
 
-  inline void ToJson(const Cont<ValueType> *result, const char *key, JsonType &json) const {
+  inline void ToJson(const Cont<ValueType>* result, const char* key, JsonType& json) const {
     auto array = Visitor::NewEmptyArrayFrom(json);
     ToJson(result, array);
 
@@ -164,11 +164,12 @@ struct ArrayMeta {
   }
 
   template <typename ArrayType>
-  inline bool FromJsonArray(const ArrayType &array, Cont<ValueType> *result) const {
+  inline bool FromJsonArray(const ArrayType& array, Cont<ValueType>* result) const {
     const auto size = array.Size();
     result->reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
-      const JsonType      &json = array[i];
+
+    while (array.HasNext()) {
+      const JsonType&      json = array.Next();
       JsonReader<JsonType> reader(&json);
       ValueType            tmp;
       if (!reader.FromJson(&tmp)) {
@@ -195,28 +196,28 @@ class JsonReader {
   using JsonType = T;
   using Visitor = JsonValueVisitor<JsonType>;
 
-  explicit JsonReader(const JsonType *access) : access_(access) {
+  explicit JsonReader(const JsonType* access) : access_(access) {
   }
   ~JsonReader() = default;
 
   template <typename U>
-  inline bool FromJson(U *result) const {
+  inline bool FromJson(U* result) const {
     using ThisMeta = Meta<U, JsonType>;
     ThisMeta meta;
     return meta.FromJson(*this->access_, result);
   }
 
-  inline bool FromJson(PlaceHolderValue * /*result*/) const {
+  inline bool FromJson(PlaceHolderValue* /*result*/) const {
     return true;
   }
 
-  inline bool FromJson(const char * /*key*/, PlaceHolderValue * /*result*/) const {
+  inline bool FromJson(const char* /*key*/, PlaceHolderValue* /*result*/) const {
     return true;
   }
 
   template <typename U>
-  inline bool FromJson(const char *key, U *result) const {
-    const auto &v = Visitor::ValueOfKey(*access_, key);
+  inline bool FromJson(const char* key, U* result) const {
+    const auto& v = Visitor::ValueOfKey(*access_, key);
 
     JsonReader<JsonType> reader(&v);
     if (Visitor::IsNull(v)) {
@@ -228,11 +229,11 @@ class JsonReader {
   template <typename U>
   U ToString() const;
 
-  JsonReader(const JsonReader &other) = delete;
-  JsonReader &operator=(const JsonReader &other) = delete;
+  JsonReader(const JsonReader& other) = delete;
+  JsonReader& operator=(const JsonReader& other) = delete;
 
  private:
-  const JsonType *access_;
+  const JsonType* access_;
 };
 
 template <typename T>
@@ -241,23 +242,23 @@ class JsonWriter {
   using JsonType = T;
   using Visitor = JsonValueVisitor<JsonType>;
 
-  explicit JsonWriter(JsonType *access) : access_(access) {
+  explicit JsonWriter(JsonType* access) : access_(access) {
   }
   ~JsonWriter() = default;
 
   template <typename U>
-  inline void ToJson(const U *result) const {
+  inline void ToJson(const U* result) const {
     using ThisMeta = Meta<U, JsonType>;
 
     ThisMeta meta;
     meta.ToJson(result, *this->access_);
   }
 
-  inline void ToJson(const PlaceHolderValue *result) const {
+  inline void ToJson(const PlaceHolderValue* result) const {
   }
 
   template <typename U>
-  inline void ToJson(const char *key, const U *result) const {
+  inline void ToJson(const char* key, const U* result) const {
     using ThisMeta = Meta<U, JsonType>;
 
     ThisMeta meta;
@@ -267,17 +268,17 @@ class JsonWriter {
     Visitor::Write(*access_, key, value);
   }
 
-  inline void ToJson(const char *key, const PlaceHolderValue *result) const {
+  inline void ToJson(const char* key, const PlaceHolderValue* result) const {
   }
 
   template <typename U>
   U ToString() const;
 
-  JsonWriter(const JsonWriter &other) = delete;
-  JsonWriter &operator=(const JsonWriter &other) = delete;
+  JsonWriter(const JsonWriter& other) = delete;
+  JsonWriter& operator=(const JsonWriter& other) = delete;
 
  private:
-  JsonType *access_;
+  JsonType* access_;
 };
 
 #define REFLECT_JSON_READ_CODE_BLOCK_0()
@@ -336,12 +337,12 @@ class JsonWriter {
     static constexpr bool IsMeta = true;                                 \
     using struct_type = Type;                                            \
     using jsonnode_type = JsonNodeType;                                  \
-    bool FromJson(const JsonNodeType &json, struct_type *result) const { \
+    bool FromJson(const JsonNodeType& json, struct_type* result) const { \
       reflect::JsonReader<jsonnode_type> serilizer(&json);               \
       MACRO_MAP(reflect_json_expands_fromjson, __VA_ARGS__)              \
       return true;                                                       \
     }                                                                    \
-    void ToJson(const struct_type *result, JsonNodeType &json) const {   \
+    void ToJson(const struct_type* result, JsonNodeType& json) const {   \
       reflect::JsonWriter<jsonnode_type> serilizer(&json);               \
       MACRO_MAP(reflect_json_expands_tojson, __VA_ARGS__)                \
     }                                                                    \
@@ -357,12 +358,12 @@ class JsonWriter {
     static constexpr bool IsMeta = true;                                 \
     using struct_type = Type;                                            \
     using jsonnode_type = JsonNodeType;                                  \
-    bool FromJson(const JsonNodeType &json, struct_type *result) const { \
+    bool FromJson(const JsonNodeType& json, struct_type* result) const { \
       reflect::JsonReader<jsonnode_type> serilizer(&json);               \
       MACRO_MAP(reflect_json_expands_fromjson_simple, __VA_ARGS__)       \
       return true;                                                       \
     }                                                                    \
-    void ToJson(const struct_type *result, JsonNodeType &json) const {   \
+    void ToJson(const struct_type* result, JsonNodeType& json) const {   \
       reflect::JsonWriter<jsonnode_type> serilizer(&json);               \
       MACRO_MAP(reflect_json_expands_tojson_simple, __VA_ARGS__)         \
     }                                                                    \
