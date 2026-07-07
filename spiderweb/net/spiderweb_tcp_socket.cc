@@ -22,7 +22,11 @@ TcpSocket::~TcpSocket() {
 }
 
 void TcpSocket::SetNoDelay(bool flag) {
-  d->impl.no_delay = flag;
+  std::error_code ec;
+  std::ignore = d->impl.socket.set_option(asio::ip::tcp::no_delay(flag), ec);
+  if (ec) {
+    SetOptionError(ec);
+  }
 }
 
 void TcpSocket::Bind(const std::string& local_ip, uint16_t port) {

@@ -66,17 +66,8 @@ class TcpSocket::Private {
       std::ignore = socket.open(endpoint.protocol(), ec);
     }
 
-    SetNoDelay();
     SetSendBufferSize();
     Bind();
-  }
-
-  void SetNoDelay() {
-    std::error_code ec;
-    std::ignore = socket.set_option(asio::ip::tcp::no_delay(no_delay), ec);
-    if (ec) {
-      q->SetOptionError(ec);
-    }
   }
 
   void SetSendBufferSize() {
@@ -106,7 +97,6 @@ class TcpSocket::Private {
 
   TcpSocket*            q = nullptr;
   asio::ip::tcp::socket socket;
-  bool                  no_delay = false;
   std::string           local_ip;
   uint16_t              local_port = 0;
   uint32_t              send_buffer_size = 0;
