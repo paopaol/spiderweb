@@ -5,7 +5,6 @@
 
 #include "asio.hpp"
 #include "spdlog/spdlog.h"
-#include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_traits.h"
 #include "spiderweb/io/spiderweb_buffer.h"
 

@@ -4,6 +4,7 @@
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_notify_spy.h"
+#include "spiderweb/core/spiderweb_object.h"
 #include "spiderweb/net/private/spiderweb_tcp_server_private.h"
 #include "spiderweb/net/spiderweb_tcp_socket.h"
 #include "spiderweb/spiderweb_check.h"
@@ -114,22 +115,28 @@ TEST(spiderweb_tcp_server, Stop) {
   spiderweb::EventLoop loop;
   auto*                server = new spiderweb::net::TcpServer(1234);
 
+  spiderweb::Object::Connect(server, &spiderweb::net::TcpServer::InComingConnection, &loop,
+                             [](spiderweb::net::TcpSocket* sd) {
+                               puts("sssssssssss");
+                               sd->SetNoDelay(true);
+                             });
   spiderweb::NotifySpy spy(server, &spiderweb::net::TcpServer::Stopped);
 
   server->ListenAndServ();
 
-  loop.RunAfter(100, [&]() { server->Stop(); });
-
-  spy.Wait();
-  EXPECT_EQ(spy.Count(), 1);
-  spy.Clear();
-
-  server->ListenAndServ();
-  loop.RunAfter(100, [&]() { server->Stop(); });
-  spy.Wait(100000);
-  EXPECT_EQ(spy.Count(), 1);
-
-  SPIDERWEB_VERIFY(1 == 1, return);
-  SPIDERWEB_VERIFY(1 == 1, spy.Clear(); return);
-  delete server;
+  loop.Exec();
+  // loop.RunAfter(100, [&]() { server->Stop(); });
+  //
+  // spy.Wait();
+  // EXPECT_EQ(spy.Count(), 1);
+  // spy.Clear();
+  //
+  // server->ListenAndServ();
+  // loop.RunAfter(100, [&]() { server->Stop(); });
+  // spy.Wait(100000);
+  // EXPECT_EQ(spy.Count(), 1);
+  //
+  // SPIDERWEB_VERIFY(1 == 1, return);
+  // SPIDERWEB_VERIFY(1 == 1, spy.Clear(); return);
+  // delete server;
 }

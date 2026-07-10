@@ -39,6 +39,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_socket_connector.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_tcp_server.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_udp_socket.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/net/spiderweb_uds_socket.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_serialport.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/enum_reflect.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/reflect/json_reflect.h
@@ -65,6 +66,8 @@ target_sources(
     net/spiderweb_tcp_socket.cc
     net/spiderweb_tcp_socket_connector.cc
     net/spiderweb_tcp_server.cc
+    net/spiderweb_uds_socket.cc
+    net/spiderweb_uds_server.cc
     net/spiderweb_udp_socket.cc
     net/spiderweb_endpoint.cc
     serial/spiderweb_serialport.cc
@@ -75,6 +78,8 @@ target_sources(
     io/private/spiderweb_named_pipe_private.h
     net/private/spiderweb_tcp_socket_private.h
     net/private/spiderweb_tcp_server_private.h
+    net/private/spiderweb_uds_socket_private.h
+    net/private/spiderweb_uds_server_private.h
     net/spiderweb_endpoint_visitor.h
     serial/private/spiderweb_serialport_private.h
     serial/private/spiderweb_socketcan_private.h
@@ -150,6 +155,7 @@ if(SPIDERWEB_ENABLE_TEST)
             net/spiderweb_tcp_socket_connector_test.cc
             net/spiderweb_tcp_socket_test.cc
             net/spiderweb_tcp_server_test.cc
+            net/spiderweb_uds_server_test.cc
             net/spiderweb_udp_socket_test.cc
             serial/spiderweb_serialport_test.cc
             type/spiderweb_any_view_test.cc
