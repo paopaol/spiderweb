@@ -76,9 +76,12 @@ static std::string pstatus(int status) {
   return "";
 }
 
-TEST_F(ProcessTest, Kill) {
+/**
+ * @brief 模拟段错误
+ */
+TEST_F(ProcessTest, Segv) {
   NotifySpy spy(&proc, &Process::Stopped);
-  proc.SetProgram({"sh", "-c", "kill -s 11 $$"});
+  proc.SetProgram({"sh", "-c", "python3 -c 'import ctypes; ctypes.string_at(0)'"});
 
   auto ec = proc.Start();
   EXPECT_FALSE(ec);
@@ -86,6 +89,7 @@ TEST_F(ProcessTest, Kill) {
   spy.Wait();
 
   auto [status] = spy.LastResult<int>();
+  EXPECT_EQ(status, 139);
   puts(pstatus(status).c_str());
 }
 
@@ -116,11 +120,9 @@ TEST_F(ProcessTest, ExitCode) {
 
   spy.Wait();
 
-  {
-    auto [status] = spy.LastResult<int>();
-    EXPECT_EQ(status, 3);
-    puts(pstatus(status).c_str());
-  }
+  auto [status] = spy.LastResult<int>();
+  EXPECT_EQ(status, 3);
+  puts(pstatus(status).c_str());
 }
 
 TEST_F(ProcessTest, StopStart) {
