@@ -1,16 +1,5 @@
 add_library(spiderweb SHARED)
 
-if(NOT MSVC)
-  set(PLATFORM_SOURCE_FILES
-      ${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_socketcan.h
-      serial/spiderweb_socketcan.cc
-      ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_named_pipe.h
-      io/spiderweb_named_pipe.cc)
-
-  set(PLATFORM_TEST_FILES io/spiderweb_named_pipe_test.cc
-                          serial/spiderweb_socketcan_test.cc)
-endif()
-
 target_sources(
   spiderweb
   PRIVATE
@@ -32,6 +21,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_bimap.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_tree.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_object_pool.h
+    ${PROJECT_SOURCE_DIR}/include/spiderweb/core/spiderweb_process.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_binary_writer.hpp
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_buffer.h
     ${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_bitmap_readwriter.h
@@ -62,7 +52,7 @@ target_sources(
     core/spiderweb_waiter.cc
     core/spiderweb_thread.cc
     core/spiderweb_signal.cc
-    io/spiderweb_buffer.cc
+    core/spiderweb_process.cc
     net/spiderweb_tcp_socket.cc
     net/spiderweb_tcp_socket_connector.cc
     net/spiderweb_tcp_server.cc
@@ -74,8 +64,11 @@ target_sources(
     type/spiderweb_variant.cc
     reflect/pugixml_impl.cc
     reflect/yyjson_impl.cc
+    io/spiderweb_buffer.cc
+    io/spiderweb_process_fd.cc
+    io/spiderweb_process_fd.h
+    io/private/spiderweb_process_fd_private.h
     io/private/spiderweb_stream_private.h
-    io/private/spiderweb_named_pipe_private.h
     net/private/spiderweb_tcp_socket_private.h
     net/private/spiderweb_tcp_server_private.h
     net/private/spiderweb_uds_socket_private.h
@@ -84,7 +77,12 @@ target_sources(
     serial/private/spiderweb_serialport_private.h
     serial/private/spiderweb_socketcan_private.h
     ppk_assert.cpp
-    ${PLATFORM_SOURCE_FILES})
+    $<$<PLATFORM_ID:Linux>:${PROJECT_SOURCE_DIR}/include/spiderweb/serial/spiderweb_socketcan.h>
+    $<$<PLATFORM_ID:Linux>:serial/spiderweb_socketcan.cc>
+    $<$<PLATFORM_ID:Linux>:${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_named_pipe.h>
+    $<$<PLATFORM_ID:Linux>:io/spiderweb_named_pipe.cc>
+    $<$<PLATFORM_ID:Linux>:io/private/spiderweb_named_pipe_private.h>
+    )
 
 target_include_directories(
   spiderweb PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
@@ -150,6 +148,7 @@ if(SPIDERWEB_ENABLE_TEST)
             core/spiderweb_bimap_test.cc
             core/spiderweb_tree_test.cc
             core/spiderweb_object_pool_test.cc
+	    core/spiderweb_process_test.cc
             io/spiderweb_binary_writer_test.cc
             io/spiderweb_bitmap_readwriter_test.cc
             net/spiderweb_tcp_socket_connector_test.cc
@@ -163,7 +162,9 @@ if(SPIDERWEB_ENABLE_TEST)
             type/spiderweb_variant_test.cc
             reflect/pugixml_impl_test.cc
             reflect/yyjson_impl_test.cc
-            ${PLATFORM_TEST_FILES})
+            $<$<PLATFORM_ID:Linux>:io/spiderweb_named_pipe_test.cc>
+            $<$<PLATFORM_ID:Linux>:serial/spiderweb_socketcan_test.cc>
+            )
   target_link_libraries(
     spiderweb_test PRIVATE spiderweb GTest::gtest_main GTest::gtest
                            GTest::gmock absl::flat_hash_map)

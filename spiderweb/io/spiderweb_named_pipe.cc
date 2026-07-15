@@ -4,7 +4,7 @@
 
 namespace spiderweb {
 
-NamedPipe::NamedPipe(const std::string &name, Object *parent)
+NamedPipe::NamedPipe(const std::string& name, Object* parent)
     : Object(parent), d(std::make_shared<io::IoPrivate<Private>>(this)) {
   d->impl.name = name;
 }
@@ -15,22 +15,22 @@ NamedPipe::~NamedPipe() {
 }
 
 void NamedPipe::Open() {
-  SPIDERWEB_CALL_THREAD_CHECK(NamedPipe::~Open);
+  SPIDERWEB_CALL_THREAD_CHECK(NamedPipe::Open);
   d->StartOpen(d->impl.pipe);
 }
 
 void NamedPipe::Close() {
-  SPIDERWEB_CALL_THREAD_CHECK(NamedPipe::~Close);
+  SPIDERWEB_CALL_THREAD_CHECK(NamedPipe::Close);
   d->Close(d->impl.pipe);
 }
 
-void NamedPipe::Write(const uint8_t *data, std::size_t size) {
-  SPIDERWEB_CALL_THREAD_CHECK(NamedPipe::~Write);
+void NamedPipe::Write(const uint8_t* data, std::size_t size) {
+  SPIDERWEB_CALL_THREAD_CHECK(NamedPipe::Write);
   d->StartWrite(d->impl.pipe, data, size);
 }
 
-void NamedPipe::Write(const std::vector<uint8_t> &data) {
-  SPIDERWEB_CALL_THREAD_CHECK(NamedPipe::~Write);
+void NamedPipe::Write(const std::vector<uint8_t>& data) {
+  SPIDERWEB_CALL_THREAD_CHECK(NamedPipe::Write);
   d->StartWrite(d->impl.pipe, data);
 }
 

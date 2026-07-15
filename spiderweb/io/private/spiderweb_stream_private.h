@@ -1,6 +1,7 @@
 #ifndef SPIDERWEB_STREAM_PRIVATE_H
 #define SPIDERWEB_STREAM_PRIVATE_H
 
+#include <cstdio>
 #include <type_traits>
 
 #include "asio.hpp"
