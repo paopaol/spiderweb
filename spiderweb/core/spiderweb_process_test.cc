@@ -106,4 +106,61 @@ TEST_F(ProcessTest, Stop) {
   proc.AsyncStop();
 }
 
+TEST_F(ProcessTest, ExitCode) {
+  NotifySpy spy(&proc, &Process::Stopped);
+
+  proc.SetProgram({"sh", "-c", "exit 3"});
+
+  auto ec = proc.Start();
+  EXPECT_FALSE(ec);
+
+  spy.Wait();
+
+  {
+    auto [status] = spy.LastResult<int>();
+    EXPECT_EQ(status, 3);
+    puts(pstatus(status).c_str());
+  }
+}
+
+TEST_F(ProcessTest, StopStart) {
+  NotifySpy stop(&proc, &Process::Stopped);
+  NotifySpy spy(&proc, &Process::BytesRead);
+
+  proc.SetProgram({"top", "-b"});
+
+  auto ec = proc.Start();
+  EXPECT_FALSE(ec);
+
+  loop.RunAfter(2000, [&]() { proc.AsyncStop(); });
+
+  {
+    spy.Wait();
+    auto [ch, reader] = spy.LastResult<Process::Channnel, io::BufferReader>();
+
+    EXPECT_EQ(ch, Process::Channnel::kStdOut);
+    auto span = reader.SpanAt(0, reader.Len());
+    puts(std::string(reinterpret_cast<char*>(span.data()), span.size()).c_str());
+    stop.Wait();
+  }
+
+  ec = proc.Start();
+  EXPECT_FALSE(ec);
+  loop.RunAfter(2000, [&]() { proc.AsyncStop(); });
+
+  {
+    stop.Clear();
+    spy.Clear();
+
+    spy.Wait();
+
+    auto [ch, reader] = spy.LastResult<Process::Channnel, io::BufferReader>();
+
+    EXPECT_EQ(ch, Process::Channnel::kStdOut);
+    auto span = reader.SpanAt(0, reader.Len());
+    puts(std::string(reinterpret_cast<char*>(span.data()), span.size()).c_str());
+    stop.Wait();
+  }
+}
+
 }  // namespace spiderweb
