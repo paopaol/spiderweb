@@ -22,13 +22,13 @@ using NativeIoService = void*;
 template <typename Type, typename... Args>
 static inline std::function<void(Args...)> create_class_member_functor(
     Type* instance, void (Type::*method)(Args... args)) {
-  return [=](Args&&... args) {
+  return [=](Args&&... args) mutable {
     if (std::this_thread::get_id() == instance->ThreadId()) {
       (instance->*method)(std::forward<Args>(args)...);
     } else {
       auto tuple = MoveTuple(std::forward<Args>(args)...);
 
-      instance->QueueTask([instance, method, tuple]() { tuple.Apply(method, *instance); });
+      instance->QueueTask([instance, method, tuple]() mutable { tuple.Apply(method, *instance); });
     }
   };
 }
@@ -36,13 +36,13 @@ static inline std::function<void(Args...)> create_class_member_functor(
 template <typename Reciver, typename... Args, typename F>
 static inline std::function<void(Args...)> create_none_class_member_functor(Reciver* reciver,
                                                                             F&&      f) {
-  return [=](Args&&... args) {
+  return [=](Args&&... args) mutable {
     if (std::this_thread::get_id() == reciver->ThreadId()) {
       f(std::forward<Args>(args)...);
     } else {
       auto tuple = MoveTuple(std::forward<Args>(args)...);
 
-      reciver->QueueTask([tuple, f]() { tuple.Apply(f); });
+      reciver->QueueTask([tuple, f]() mutable { tuple.Apply(f); });
     }
   };
 }
