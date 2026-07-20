@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -13,41 +14,117 @@
 
 namespace spiderweb {
 
+template <typename T>
+class Future;
+
+template <typename T>
+struct IsFuture : std::false_type {};
+
+template <typename T>
+struct IsFuture<Future<T>> : std::true_type {};
+
 namespace detail {
+
+template <typename T>
+struct UnwrapFuture {
+  using Type = T;
+};
+
+template <typename T>
+struct UnwrapFuture<Future<T>> {
+  using Type = T;
+};
+
+template <typename T>
+using UnwrapFutureT = typename UnwrapFuture<T>::Type;
 
 template <typename F, typename T>
 struct InvokeResult {
-  using Type = std::invoke_result_t<F, T>;
+  using Type = std::invoke_result_t<std::decay_t<F>, T>;
 };
 
 template <typename F>
 struct InvokeResult<F, void> {
-  using Type = std::invoke_result_t<F>;
+  using Type = std::invoke_result_t<std::decay_t<F>>;
 };
 
 template <typename F, typename T>
 using InvokeResultT = typename InvokeResult<F, T>::Type;
 
+template <typename... Args>
+struct FirstArg {
+  using Type = void;
+};
+
+template <typename First, typename... Rest>
+struct FirstArg<First, Rest...> {
+  using Type = std::decay_t<First>;
+};
+
 template <typename T>
 struct FuncArgTraits;
 
-template <typename R, typename Arg>
-struct FuncArgTraits<R(Arg)> {
-  using Type = std::decay_t<Arg>;
-  using ReturnType = R;
+template <typename Ret, typename... Args>
+struct FuncArgTraits<Ret (*)(Args...)> {
+  using Type = typename FirstArg<Args...>::Type;
+  using RetType = Ret;
 };
 
-template <typename R, typename C, typename Arg>
-struct FuncArgTraits<R (C::*)(Arg) const> {
-  using Type = std::decay_t<Arg>;
-  using ReturnType = R;
+template <typename Ret, typename... Args>
+struct FuncArgTraits<Ret (&)(Args...)> {
+  using Type = typename FirstArg<Args...>::Type;
+  using RetType = Ret;
+};
+
+template <typename R, typename... Args>
+struct FuncArgTraits<R(Args...)> {
+  using Type = typename FirstArg<Args...>::Type;
+  using RetType = R;
+};
+
+template <typename R, typename C, typename... Args>
+struct FuncArgTraits<R (C::*)(Args...) const> {
+  using Type = typename FirstArg<Args...>::Type;
+  using RetType = R;
+};
+
+template <typename R, typename C, typename... Args>
+struct FuncArgTraits<R (C::*)(Args...)> {
+  using Type = typename FirstArg<Args...>::Type;
+  using RetType = R;
+};
+
+template <typename R, typename C, typename... Args>
+struct FuncArgTraits<R (C::*)(Args...) const volatile> {
+  using Type = typename FirstArg<Args...>::Type;
+  using RetType = R;
 };
 
 template <typename F>
-using FuncArgTypeT = typename FuncArgTraits<decltype(&std::decay_t<F>::operator())>::Type;
+struct FuncArgTraits {
+ private:
+  using OperatorType = decltype(&F::operator());
+
+ public:
+  using Type = typename FuncArgTraits<OperatorType>::Type;
+  using RetType = typename FuncArgTraits<OperatorType>::RetType;
+};
 
 template <typename F>
-using FuncReturnTypeT = typename FuncArgTraits<decltype(&std::decay_t<F>::operator())>::ReturnType;
+using FuncArgTypeT = typename FuncArgTraits<std::decay_t<F>>::Type;
+
+template <typename F>
+using FuncRetTypeT = typename FuncArgTraits<std::decay_t<F>>::RetType;
+
+template <typename Input, typename F>
+struct ThenResult {
+  using Type = detail::InvokeResultT<F, Input>;
+  using Unwraped = detail::UnwrapFutureT<Type>;
+
+  static Future<Unwraped> CreateFuture() {
+    return Future<Unwraped>();
+  }
+};
 
 struct Empty {};
 
@@ -57,13 +134,7 @@ struct FutureValue {
 
   template <typename F>
   auto Call(F&& f) -> InvokeResultT<F, T> {
-    return f(v);
-  }
-
-  template <typename E, typename F>
-  auto CallError(F&& f) -> InvokeResultT<F, E> {
-    auto err = absl::any_cast<E>(error.value());
-    return f(err);
+    return std::forward<F>(f)(v);
   }
 
   T                         v;
@@ -76,13 +147,7 @@ struct FutureValue<void, void> {
 
   template <typename F>
   auto Call(F&& f) -> InvokeResultT<F, void> {
-    return f();
-  }
-
-  template <typename E, typename F>
-  auto CallError(F&& f) -> InvokeResultT<F, void> {
-    auto err = absl::any_cast<E>(error.value());
-    return f(err);
+    return std::forward<F>(f)();
   }
 
   Empty                     v;
@@ -93,12 +158,7 @@ template <typename Input, typename Output>
 struct Resolver {
   template <typename F, typename Next>
   static void Resolve(F&& f, FutureValue<Input> resolved, Next& next) {
-    next.Resolve(resolved.Call(f));
-  }
-
-  template <typename E, typename F, typename Next>
-  static void ResolveError(F&& f, FutureValue<Input> resolved, Next& next) {
-    next.ResolveError(resolved.template CallError<E>(f));
+    next.Resolve(resolved.Call(std::forward<F>(f)));
   }
 };
 
@@ -106,13 +166,8 @@ template <typename Input>
 struct Resolver<Input, void> {
   template <typename F, typename Next>
   static void Resolve(F&& f, FutureValue<Input> resolved, Next& next) {
-    resolved.Call(f);
+    resolved.Call(std::forward<F>(f));
     next.Resolve();
-  }
-
-  template <typename E, typename F, typename Next>
-  static void ResolveError(F&& f, FutureValue<Input> resolved, Next& next) {
-    next.ResolveError(resolved.template CallError<E>(f));
   }
 };
 
@@ -142,10 +197,10 @@ class Future {
   void Wait();
 
   template <typename F>
-  auto Then(F&& f) -> Future<detail::InvokeResultT<F, T>>;
+  auto Then(F&& f) -> Future<typename detail::ThenResult<T, F>::Unwraped>;
 
   template <typename F>
-  auto OnError(F&& f) -> Future<detail::FuncReturnTypeT<F>>;
+  auto OnError(F&& f) -> Future<typename detail::FuncRetTypeT<F>>;
 
  private:
   enum class State : uint8_t {
@@ -203,7 +258,7 @@ void Future<T>::Resolve(U&& v) {
   }
 
   if (then) {
-    then(d->resolved);
+    then(std::move(d->resolved));
   }
 }
 
@@ -233,25 +288,58 @@ void Future<T>::ResolveError(U&& v) {
   }
 
   if (then) {
-    then(d->resolved);
+    then(std::move(d->resolved));
   }
 }
 
+template <typename Input, typename F>
+struct Invoke {
+  struct BasicTypeTag {};
+
+  struct FutureTypeTag {};
+
+  static const auto is_future = IsFuture<typename detail::ThenResult<Input, F>::Type>::value;
+
+  using Output = typename detail::ThenResult<Input, F>::Unwraped;
+
+  static auto CreateThen(Future<Output>& next, F&& f) {
+    using Tag = std::conditional_t<is_future, FutureTypeTag, BasicTypeTag>;
+    return CreateThenImpl(next, std::forward<F>(f), Tag{});
+  }
+
+  static auto CreateThenImpl(Future<Output>& next, F&& f, BasicTypeTag) {
+    return [next, f = std::forward<F>(f)](detail::FutureValue<Input> v) mutable {
+      if (!v.error) {
+        detail::Resolver<Input, Output>::Resolve(std::forward<F>(f), std::move(v), next);
+      } else {
+        next.ResolveError(*v.error);
+      }
+    };
+  }
+
+  static auto CreateThenImpl(Future<Output>& next, F&& f, FutureTypeTag) {
+    return [next, f = std::forward<F>(f)](detail::FutureValue<Input> v) mutable {
+      if (v.error) {
+        next.ResolveError(*v.error);
+        return;
+      }
+
+      auto lazy = v.Call(std::forward<decltype(f)>(f));
+
+      lazy.Then([next](Output val) mutable { next.Resolve(std::move(val)); })
+          .OnError([next](absl::any err) mutable {
+            next.ResolveError(std::move(err));
+            return false;
+          });
+    };
+  }
+};
+
 template <typename T>
 template <typename F>
-auto Future<T>::Then(F&& f) -> Future<detail::InvokeResultT<F, T>> {
-  using Input = T;
-  using Output = detail::InvokeResultT<F, Input>;
-
-  Future<Output> next;
-
-  auto then = [next, f = std::forward<F>(f), this](detail::FutureValue<Input> v) mutable {
-    if (!v.error) {
-      detail::Resolver<Input, Output>::Resolve(f, v, next);
-    } else {
-      next.ResolveError(*v.error);
-    }
-  };
+auto Future<T>::Then(F&& f) -> Future<typename detail::ThenResult<T, F>::Unwraped> {
+  auto next = detail::ThenResult<T, F>::CreateFuture();
+  auto then = Invoke<T, F>::CreateThen(next, std::forward<F>(f));
 
   bool should_then = false;
   {
@@ -273,16 +361,16 @@ auto Future<T>::Then(F&& f) -> Future<detail::InvokeResultT<F, T>> {
 
 template <typename T>
 template <typename F>
-auto Future<T>::OnError(F&& f) -> Future<detail::FuncReturnTypeT<F>> {
+auto Future<T>::OnError(F&& f) -> Future<typename detail::FuncRetTypeT<F>> {
   using Input = T;
   using ErrorT = detail::FuncArgTypeT<F>;
-  using Output = detail::FuncReturnTypeT<F>;
+  using Output = detail::FuncRetTypeT<F>;
 
   Future<Output> next;
 
   auto then = [next, f = std::forward<F>(f)](detail::FutureValue<Input> v) mutable {
     if (v.error) {
-      detail::Resolver<Input, Output>::template ResolveError<ErrorT>(f, v, next);
+      next.ResolveError(std::forward<F>(f)(absl::any_cast<ErrorT>(v.error.value())));
     }
   };
 
@@ -298,7 +386,7 @@ auto Future<T>::OnError(F&& f) -> Future<detail::FuncReturnTypeT<F>> {
   }
 
   if (should_then) {
-    then(d->resolved);
+    then(std::move(d->resolved));
   }
 
   return next;

@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <vector>
 
+#include "spiderweb/core/spiderweb_error_code.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_object.h"
 #include "spiderweb/core/spiderweb_process.h"
@@ -27,7 +28,10 @@ Future<T> make_process_future(std::vector<std::string> cmdline, Object* parent =
       proc, &Process::BytesRead, proc,
       [](Process::Channnel, const io::BufferReader& reader) mutable { reader.Skip(reader.Len()); });
 
-  proc->Start();
+  auto ec = proc->Start();
+  if (ec) {
+    fut.ResolveError(ec);
+  }
 
   return fut;
 }
@@ -149,6 +153,27 @@ TEST_F(FutureTest, OnError) {
 
   EXPECT_FALSE(ok_called);
   EXPECT_TRUE(error_called);
+}
+
+static Future<int> create(int) {
+  return make_process_future<int>({"ls", "111"});
+}
+
+TEST_F(FutureTest, MakeFutureThen) {
+  future = make_process_future<int>({"ls", "/not"});
+
+  future.Then(create)
+      .Then([&](int status) {
+        printf("%d\n", status);
+        loop.Quit();
+      })
+      .OnError([&](const ErrorCode& ec) {
+        puts(ec.FormatedMessage().c_str());
+        loop.Quit();
+        return true;
+      });
+
+  loop.ExecEx();
 }
 
 }  // namespace spiderweb
