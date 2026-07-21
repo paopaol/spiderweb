@@ -15,28 +15,28 @@
 namespace spiderweb {
 
 template <typename T>
-class Future;
+class Promise;
 
 template <typename T>
-struct IsFuture : std::false_type {};
+struct IsPromise : std::false_type {};
 
 template <typename T>
-struct IsFuture<Future<T>> : std::true_type {};
+struct IsPromise<Promise<T>> : std::true_type {};
 
 namespace detail {
 
 template <typename T>
-struct UnwrapFuture {
+struct UnwrapPromise {
   using Type = T;
 };
 
 template <typename T>
-struct UnwrapFuture<Future<T>> {
+struct UnwrapPromise<Promise<T>> {
   using Type = T;
 };
 
 template <typename T>
-using UnwrapFutureT = typename UnwrapFuture<T>::Type;
+using UnwrapPromiseT = typename UnwrapPromise<T>::Type;
 
 template <typename F, typename T>
 struct InvokeResult {
@@ -119,17 +119,17 @@ using FuncRetTypeT = typename FuncArgTraits<std::decay_t<F>>::RetType;
 template <typename Input, typename F>
 struct ThenResult {
   using Type = detail::InvokeResultT<F, Input>;
-  using Unwraped = detail::UnwrapFutureT<Type>;
+  using Unwraped = detail::UnwrapPromiseT<Type>;
 
-  static Future<Unwraped> CreateFuture() {
-    return Future<Unwraped>();
+  static Promise<Unwraped> CreatePromise() {
+    return Promise<Unwraped>();
   }
 };
 
 struct Empty {};
 
 template <typename T, typename = void>
-struct FutureValue {
+struct PromiseValue {
   using Type = T;
 
   template <typename F>
@@ -142,7 +142,7 @@ struct FutureValue {
 };
 
 template <>
-struct FutureValue<void, void> {
+struct PromiseValue<void, void> {
   using Type = Empty;
 
   template <typename F>
@@ -157,7 +157,7 @@ struct FutureValue<void, void> {
 template <typename Input, typename Output>
 struct Resolver {
   template <typename F, typename Next>
-  static void Resolve(F&& f, FutureValue<Input> resolved, Next& next) {
+  static void Resolve(F&& f, PromiseValue<Input> resolved, Next& next) {
     next.Resolve(resolved.Call(std::forward<F>(f)));
   }
 };
@@ -165,7 +165,7 @@ struct Resolver {
 template <typename Input>
 struct Resolver<Input, void> {
   template <typename F, typename Next>
-  static void Resolve(F&& f, FutureValue<Input> resolved, Next& next) {
+  static void Resolve(F&& f, PromiseValue<Input> resolved, Next& next) {
     resolved.Call(std::forward<F>(f));
     next.Resolve();
   }
@@ -174,17 +174,17 @@ struct Resolver<Input, void> {
 }  // namespace detail
 
 template <typename T>
-class Future {
+class Promise {
  public:
-  Future();
+  Promise();
 
-  Future(const Future&) = default;
+  Promise(const Promise&) = default;
 
-  Future& operator=(const Future&) = default;
+  Promise& operator=(const Promise&) = default;
 
-  Future(Future&& rh) noexcept;
+  Promise(Promise&& rh) noexcept;
 
-  Future& operator=(Future&& rh) noexcept;
+  Promise& operator=(Promise&& rh) noexcept;
 
   template <typename U>
   void Resolve(U&& v);
@@ -197,10 +197,10 @@ class Future {
   void Wait();
 
   template <typename F>
-  auto Then(F&& f) -> Future<typename detail::ThenResult<T, F>::Unwraped>;
+  auto Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwraped>;
 
   template <typename F>
-  auto OnError(F&& f) -> Future<typename detail::FuncRetTypeT<F>>;
+  auto OnError(F&& f) -> Promise<typename detail::FuncRetTypeT<F>>;
 
  private:
   enum class State : uint8_t {
@@ -208,27 +208,27 @@ class Future {
     kPending,
   };
 
-  struct FutureContext {
-    std::mutex                                  mutex;
-    detail::FutureValue<T>                      resolved;
-    std::function<void(detail::FutureValue<T>)> then;
-    State                                       state = State::kPending;
+  struct PromiseContext {
+    std::mutex                                   mutex;
+    detail::PromiseValue<T>                      resolved;
+    std::function<void(detail::PromiseValue<T>)> then;
+    State                                        state = State::kPending;
   };
 
-  std::shared_ptr<FutureContext> d;
+  std::shared_ptr<PromiseContext> d;
 };
 
 template <typename T>
-Future<T>::Future() : d(std::make_shared<FutureContext>()) {
+Promise<T>::Promise() : d(std::make_shared<PromiseContext>()) {
 }
 
 template <typename T>
-Future<T>::Future(Future&& rh) noexcept {
+Promise<T>::Promise(Promise&& rh) noexcept {
   this->d = std::move(rh.d);
 }
 
 template <typename T>
-Future<T>& Future<T>::operator=(Future&& rh) noexcept {
+Promise<T>& Promise<T>::operator=(Promise&& rh) noexcept {
   if (this == &rh) {
     return *this;
   }
@@ -239,8 +239,8 @@ Future<T>& Future<T>::operator=(Future&& rh) noexcept {
 
 template <typename T>
 template <typename U>
-void Future<T>::Resolve(U&& v) {
-  std::function<void(detail::FutureValue<T>)> then;
+void Promise<T>::Resolve(U&& v) {
+  std::function<void(detail::PromiseValue<T>)> then;
 
   {
     std::lock_guard<std::mutex> _(d->mutex);
@@ -263,14 +263,14 @@ void Future<T>::Resolve(U&& v) {
 }
 
 template <typename T>
-void Future<T>::Resolve() {
+void Promise<T>::Resolve() {
   Resolve(detail::Empty());
 }
 
 template <typename T>
 template <typename U>
-void Future<T>::ResolveError(U&& v) {
-  std::function<void(detail::FutureValue<T>)> then;
+void Promise<T>::ResolveError(U&& v) {
+  std::function<void(detail::PromiseValue<T>)> then;
 
   {
     std::lock_guard<std::mutex> _(d->mutex);
@@ -294,21 +294,21 @@ void Future<T>::ResolveError(U&& v) {
 
 template <typename Input, typename F>
 struct Invoke {
-  struct BasicTypeTag {};
+  struct BasicTag {};
 
-  struct FutureTypeTag {};
+  struct PromiseTag {};
 
-  static const auto is_future = IsFuture<typename detail::ThenResult<Input, F>::Type>::value;
+  static const auto is_promise = IsPromise<typename detail::ThenResult<Input, F>::Type>::value;
 
   using Output = typename detail::ThenResult<Input, F>::Unwraped;
 
-  static auto CreateThen(Future<Output>& next, F&& f) {
-    using Tag = std::conditional_t<is_future, FutureTypeTag, BasicTypeTag>;
+  static auto CreateThen(Promise<Output>& next, F&& f) {
+    using Tag = std::conditional_t<is_promise, PromiseTag, BasicTag>;
     return CreateThenImpl(next, std::forward<F>(f), Tag{});
   }
 
-  static auto CreateThenImpl(Future<Output>& next, F&& f, BasicTypeTag) {
-    return [next, f = std::forward<F>(f)](detail::FutureValue<Input> v) mutable {
+  static auto CreateThenImpl(Promise<Output>& next, F&& f, BasicTag) {
+    return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
       if (!v.error) {
         detail::Resolver<Input, Output>::Resolve(std::forward<F>(f), std::move(v), next);
       } else {
@@ -317,8 +317,8 @@ struct Invoke {
     };
   }
 
-  static auto CreateThenImpl(Future<Output>& next, F&& f, FutureTypeTag) {
-    return [next, f = std::forward<F>(f)](detail::FutureValue<Input> v) mutable {
+  static auto CreateThenImpl(Promise<Output>& next, F&& f, PromiseTag) {
+    return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
       if (v.error) {
         next.ResolveError(*v.error);
         return;
@@ -337,8 +337,8 @@ struct Invoke {
 
 template <typename T>
 template <typename F>
-auto Future<T>::Then(F&& f) -> Future<typename detail::ThenResult<T, F>::Unwraped> {
-  auto next = detail::ThenResult<T, F>::CreateFuture();
+auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwraped> {
+  auto next = detail::ThenResult<T, F>::CreatePromise();
   auto then = Invoke<T, F>::CreateThen(next, std::forward<F>(f));
 
   bool should_then = false;
@@ -361,14 +361,14 @@ auto Future<T>::Then(F&& f) -> Future<typename detail::ThenResult<T, F>::Unwrape
 
 template <typename T>
 template <typename F>
-auto Future<T>::OnError(F&& f) -> Future<typename detail::FuncRetTypeT<F>> {
+auto Promise<T>::OnError(F&& f) -> Promise<typename detail::FuncRetTypeT<F>> {
   using Input = T;
   using ErrorT = detail::FuncArgTypeT<F>;
   using Output = detail::FuncRetTypeT<F>;
 
-  Future<Output> next;
+  Promise<Output> next;
 
-  auto then = [next, f = std::forward<F>(f)](detail::FutureValue<Input> v) mutable {
+  auto then = [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
     if (v.error) {
       next.ResolveError(std::forward<F>(f)(absl::any_cast<ErrorT>(v.error.value())));
     }

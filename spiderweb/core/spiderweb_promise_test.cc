@@ -1,4 +1,4 @@
-#include "spiderweb/core/spiderweb_future.h"
+#include "spiderweb/core/spiderweb_promise.h"
 
 #include <gtest/gtest.h>
 
@@ -13,15 +13,15 @@
 namespace spiderweb {
 
 template <typename T>
-Future<T> make_process_future(std::vector<std::string> cmdline, Object* parent = nullptr) {
-  Future<T> fut;
+Promise<T> make_process_promise(std::vector<std::string> cmdline, Object* parent = nullptr) {
+  Promise<T> promise;
 
   auto* proc = new Process(parent);
   proc->SetProgram(std::move(cmdline));
 
-  Object::Connect(proc, &Process::Stopped, proc, [fut, proc](int exit) mutable {
+  Object::Connect(proc, &Process::Stopped, proc, [promise, proc](int exit) mutable {
     proc->DeleteLater();
-    fut.Resolve(exit);
+    promise.Resolve(exit);
   });
 
   Object::Connect(
@@ -30,23 +30,23 @@ Future<T> make_process_future(std::vector<std::string> cmdline, Object* parent =
 
   auto ec = proc->Start();
   if (ec) {
-    fut.ResolveError(ec);
+    promise.ResolveError(ec);
   }
 
-  return fut;
+  return promise;
 }
 
-class FutureTest : public testing::Test {
+class PromiseTest : public testing::Test {
  public:
   void TearDown() override {};
 
-  EventLoop   loop;
-  Future<int> future;
+  EventLoop    loop;
+  Promise<int> promise;
 };
 
-TEST_F(FutureTest, VoidInput_VoidOutput) {
-  spiderweb::Future<void> f;
-  bool                    called = false;
+TEST_F(PromiseTest, VoidInput_VoidOutput) {
+  spiderweb::Promise<void> f;
+  bool                     called = false;
 
   f.Then([&]() { called = true; });
   f.Resolve();
@@ -54,19 +54,19 @@ TEST_F(FutureTest, VoidInput_VoidOutput) {
   EXPECT_TRUE(called);
 }
 
-TEST_F(FutureTest, VoidInput_NoneVoidOutput) {
-  spiderweb::Future<void> f;
-  int                     result = 0;
+TEST_F(PromiseTest, VoidInput_NoneVoidOutput) {
+  spiderweb::Promise<void> f;
+  int                      result = 0;
 
   f.Then([]() { return 1; }).Then([&](int v) { result = v; });
   f.Resolve();
   EXPECT_EQ(result, 1);
 }
 
-TEST_F(FutureTest, Input_VoidOutput) {
-  spiderweb::Future<int> f;
-  int                    received_input = -1;
-  bool                   next_void_called = false;
+TEST_F(PromiseTest, Input_VoidOutput) {
+  spiderweb::Promise<int> f;
+  int                     received_input = -1;
+  bool                    next_void_called = false;
 
   f.Then([&](int val) { received_input = val; }).Then([&]() { next_void_called = true; });
   f.Resolve(42);
@@ -74,9 +74,9 @@ TEST_F(FutureTest, Input_VoidOutput) {
   EXPECT_TRUE(next_void_called);
 }
 
-TEST_F(FutureTest, Input_NonVoidOutput) {
-  spiderweb::Future<int> f;
-  std::string            captured = "";
+TEST_F(PromiseTest, Input_NonVoidOutput) {
+  spiderweb::Promise<int> f;
+  std::string             captured = "";
 
   f.Then([](int val) {
      (void)val;
@@ -87,9 +87,9 @@ TEST_F(FutureTest, Input_NonVoidOutput) {
   EXPECT_EQ(captured, "hello");
 }
 
-TEST_F(FutureTest, ResolveBeforeThen) {
-  spiderweb::Future<int> f;
-  int                    result = 0;
+TEST_F(PromiseTest, ResolveBeforeThen) {
+  spiderweb::Promise<int> f;
+  int                     result = 0;
 
   f.Resolve(99);
 
@@ -98,10 +98,10 @@ TEST_F(FutureTest, ResolveBeforeThen) {
   EXPECT_EQ(result, 99);
 }
 
-TEST_F(FutureTest, DoubleResolveDefense) {
-  spiderweb::Future<int> f;
-  int                    call_count = 0;
-  int                    final_value = 0;
+TEST_F(PromiseTest, DoubleResolveDefense) {
+  spiderweb::Promise<int> f;
+  int                     call_count = 0;
+  int                     final_value = 0;
 
   f.Then([&](int val) {
     call_count++;
@@ -117,11 +117,11 @@ TEST_F(FutureTest, DoubleResolveDefense) {
   EXPECT_EQ(final_value, 10);  // 必须保持第一次的值
 }
 
-TEST_F(FutureTest, MakeFuture) {
-  future = make_process_future<int>({"ls"});
+TEST_F(PromiseTest, MakePromise) {
+  promise = make_process_promise<int>({"ls"});
 
   int code = -1;
-  future
+  promise
       .Then([&](int exit) {
         loop.Quit();
         return exit;
@@ -134,10 +134,10 @@ TEST_F(FutureTest, MakeFuture) {
   EXPECT_EQ(code, 10);
 }
 
-TEST_F(FutureTest, OnError) {
-  spiderweb::Future<void> f;
-  bool                    ok_called = false;
-  bool                    error_called = false;
+TEST_F(PromiseTest, OnError) {
+  spiderweb::Promise<void> f;
+  bool                     ok_called = false;
+  bool                     error_called = false;
 
   f.Then([&]() {
      ok_called = true;
@@ -155,14 +155,14 @@ TEST_F(FutureTest, OnError) {
   EXPECT_TRUE(error_called);
 }
 
-static Future<int> create(int) {
-  return make_process_future<int>({"ls", "111"});
+static Promise<int> create(int) {
+  return make_process_promise<int>({"ls", "111"});
 }
 
-TEST_F(FutureTest, MakeFutureThen) {
-  future = make_process_future<int>({"ls", "/not"});
+TEST_F(PromiseTest, MakePromiseThen) {
+  promise = make_process_promise<int>({"ls", "/not"});
 
-  future.Then(create)
+  promise.Then(create)
       .Then([&](int status) {
         printf("%d\n", status);
         loop.Quit();
