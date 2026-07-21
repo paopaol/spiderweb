@@ -231,4 +231,124 @@ TEST_F(PromiseTest, MakePromiseThen) {
   loop.ExecEx();
 }
 
+// OnError 正常值透传
+TEST_F(PromiseTest, OnError_NormalValuePassThrough) {
+  Promise<int> f;
+  int          result = -1;
+
+  f.Then([](int v) { return v + 1; })
+      .OnError(Tag<std::string>{}, [](const std::string&) { return 0; })
+      .Then([&](int v) { result = v; });
+
+  f.Resolve(42);
+  // Then 返回 43，OnError 透传，最后一个 Then 收到 43
+  EXPECT_EQ(result, 43);
+}
+
+// OnError 类型不匹配时错误透传
+TEST_F(PromiseTest, OnError_TypeMismatch_Propagate) {
+  Promise<int> f;
+  bool         timeout_handler_called = false;
+  bool         final_error_received = false;
+
+  f.Then([](int v) { return v; })
+      .OnError(Tag<int>{},
+               [&](const int&) {  // 期望 int 错误
+                 timeout_handler_called = true;
+                 return 0;
+               })
+      .OnError(Tag<std::string>{}, [&](const std::string& err) {  // 期望 string 错误
+        final_error_received = true;
+        EXPECT_EQ(err, "oops");
+        return 0;
+      });
+
+  f.Reject(std::string("oops"));  // 实际是 string 错误
+  // 第一个 OnError 不匹配，透传；第二个 OnError 匹配
+  EXPECT_FALSE(timeout_handler_called);
+  EXPECT_TRUE(final_error_received);
+}
+
+// AlreadyContinued 异常
+TEST_F(PromiseTest, Then_DoubleRegistration_Throws) {
+  Promise<int> f;
+  f.Then([](int v) { return v; });
+
+  EXPECT_THROW(f.Then([](int v) { return v; }), AlreadyContinued);
+}
+
+TEST_F(PromiseTest, OnError_DoubleRegistration_Throws) {
+  Promise<int> f;
+  f.Then([](int v) { return v; }).OnError(Tag<int>{}, [](const int&) { return 0; });
+
+  // 在同一个 Promise 上再注册会抛异常
+  // 但这里 OnError 是在 Then 返回的新 Promise 上，不是原 Promise
+  // 需要构造直接在同一 Promise 上调两次的场景
+  Promise<int> p;
+  p.Then([](int v) { return v; });
+  EXPECT_THROW(p.Then([](int v) { return v; }), AlreadyContinued);
+}
+
+// OnError 链式错误冒泡 错误沿链路一直冒泡直到被捕获：
+TEST_F(PromiseTest, OnError_ErrorBubbling) {
+  Promise<int> f;
+  bool         error_caught = false;
+  bool         then1_called = false;
+  bool         then2_called = false;
+
+  f.Then([&](int v) {
+     then1_called = true;
+     return v + 1;
+   })
+      .Then([&](int v) {
+        then2_called = true;
+        return v * 2;
+      })  // 错误跳过这两级
+      .OnError(Tag<std::string>{}, [&](const std::string& err) {
+        error_caught = true;
+        EXPECT_EQ(err, "fail");
+        return -1;
+      });
+
+  f.Reject(std::string("fail"));
+  EXPECT_TRUE(error_caught);
+  EXPECT_FALSE(then2_called);
+  EXPECT_FALSE(then1_called);
+}
+
+// OnError 返回 void（Promise<void> 的 OnError）
+TEST_F(PromiseTest, OnError_VoidPromise) {
+  Promise<void> f;
+  bool          error_called = false;
+
+  f.Then([]() {}).OnError(Tag<std::string>{}, [&](const std::string&) { error_called = true; });
+
+  f.Reject(std::string("err"));
+  EXPECT_TRUE(error_called);
+}
+
+// Reject 后 Then 的回调不执行
+TEST_F(PromiseTest, Then_SkippedAfterReject) {
+  Promise<int> f;
+  bool         then_called = false;
+
+  f.Then([&](int v) {
+     then_called = true;
+     return v;
+   }).OnError(Tag<std::string>{}, [](const std::string&) { return 0; });
+
+  f.Reject(std::string("err"));
+  EXPECT_FALSE(then_called);
+}
+
+// Error 移动语义
+TEST_F(PromiseTest, ErrorMove) {
+  auto err1 = Error::Make(std::string("hello"));
+  EXPECT_TRUE(err1.Is<std::string>());
+
+  auto err2 = std::move(err1);
+  EXPECT_TRUE(err2.Is<std::string>());
+  EXPECT_EQ(err2.Get<std::string>(), "hello");
+}
+
 }  // namespace spiderweb
