@@ -2,7 +2,10 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
+#include <cstdint>
 #include <cstdio>
+#include <string>
 #include <vector>
 
 #include "spiderweb/core/spiderweb_error_code.h"
@@ -30,7 +33,7 @@ Promise<T> make_process_promise(std::vector<std::string> cmdline, Object* parent
 
   auto ec = proc->Start();
   if (ec) {
-    promise.ResolveError(ec);
+    promise.Reject(ec);
   }
 
   return promise;
@@ -43,6 +46,59 @@ class PromiseTest : public testing::Test {
   EventLoop    loop;
   Promise<int> promise;
 };
+
+TEST_F(PromiseTest, ErrorTest) {
+  {
+    Error e;
+
+    EXPECT_FALSE(e);
+  }
+  {
+    auto err = Error::Make(static_cast<uint8_t>(1));
+    EXPECT_TRUE(err);
+  }
+}
+
+TEST_F(PromiseTest, ErrorIs) {
+  {
+    auto err = Error::Make(static_cast<uint8_t>(1));
+
+    EXPECT_TRUE(err.Is<uint8_t>());
+    EXPECT_FALSE(err.Is<uint16_t>());
+  }
+  {
+    auto err = Error::Make(std::string("123"));
+
+    EXPECT_TRUE(err.Is<std::string>());
+  }
+}
+
+TEST_F(PromiseTest, ErrorGet) {
+  {
+    auto err = Error::Make(static_cast<uint8_t>(1));
+    EXPECT_EQ(err.Get<uint8_t>(), 1);
+  }
+  {
+    auto err = Error::Make(std::string("123"));
+    EXPECT_EQ(err.Get<std::string>(), "123");
+  }
+}
+
+TEST_F(PromiseTest, ErrorRef) {
+  using Array = std::array<uint8_t, 1>;
+
+  Array array = {1};
+
+  {
+    auto err = Error::Make(array);
+    EXPECT_TRUE(err.Is<Array>());
+  }
+  {
+    auto& ref = array;
+    auto  err = Error::Make(ref);
+    EXPECT_TRUE(err.Is<Array>());
+  }
+}
 
 TEST_F(PromiseTest, VoidInput_VoidOutput) {
   spiderweb::Promise<void> f;
@@ -142,14 +198,14 @@ TEST_F(PromiseTest, OnError) {
   f.Then([&]() {
      ok_called = true;
      return true;
-   }).OnError([&](const std::string& err) {
+   }).OnError(Tag<std::string>{}, [&](const std::string& err) {
     EXPECT_EQ(err, "123");
 
     error_called = true;
     return 3;
   });
 
-  f.ResolveError(std::string("123"));
+  f.Reject(std::string("123"));
 
   EXPECT_FALSE(ok_called);
   EXPECT_TRUE(error_called);
@@ -167,10 +223,10 @@ TEST_F(PromiseTest, MakePromiseThen) {
         printf("%d\n", status);
         loop.Quit();
       })
-      .OnError([&](const ErrorCode& ec) {
+      .OnError(Tag<ErrorCode>{}, [&](const ErrorCode& ec) {
         puts(ec.FormatedMessage().c_str());
         loop.Quit();
-        return true;
+        return 1;
       });
 
   loop.ExecEx();

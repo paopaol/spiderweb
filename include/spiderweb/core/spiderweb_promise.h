@@ -1,7 +1,6 @@
 #pragma once
 
 #include <absl/types/any.h>
-#include <absl/types/optional.h>
 
 #include <algorithm>
 #include <cassert>
@@ -22,6 +21,47 @@ struct IsPromise : std::false_type {};
 
 template <typename T>
 struct IsPromise<Promise<T>> : std::true_type {};
+
+template <typename T>
+struct Tag {
+  static char tag;
+};
+template <typename T>
+inline char Tag<T>::tag;
+
+struct Error {
+  void*     tag = nullptr;
+  absl::any value;
+
+  explicit operator bool() const {
+    return tag != nullptr;
+  }
+
+  template <typename T>
+  static Error Make(T value) {
+    Error err;
+
+    err.tag = &Tag<T>::tag;
+    err.value = std::move(value);
+
+    return err;
+  }
+
+  template <typename T>
+  bool Is() const {
+    return tag == &Tag<T>::tag;
+  }
+
+  template <typename T>
+  T& Get() {
+    return absl::any_cast<T&>(value);
+  }
+
+  template <typename T>
+  const T& Get() const {
+    return absl::any_cast<const T&>(value);
+  }
+};
 
 namespace detail {
 
@@ -51,71 +91,6 @@ struct InvokeResult<F, void> {
 template <typename F, typename T>
 using InvokeResultT = typename InvokeResult<F, T>::Type;
 
-template <typename... Args>
-struct FirstArg {
-  using Type = void;
-};
-
-template <typename First, typename... Rest>
-struct FirstArg<First, Rest...> {
-  using Type = std::decay_t<First>;
-};
-
-template <typename T>
-struct FuncArgTraits;
-
-template <typename Ret, typename... Args>
-struct FuncArgTraits<Ret (*)(Args...)> {
-  using Type = typename FirstArg<Args...>::Type;
-  using RetType = Ret;
-};
-
-template <typename Ret, typename... Args>
-struct FuncArgTraits<Ret (&)(Args...)> {
-  using Type = typename FirstArg<Args...>::Type;
-  using RetType = Ret;
-};
-
-template <typename R, typename... Args>
-struct FuncArgTraits<R(Args...)> {
-  using Type = typename FirstArg<Args...>::Type;
-  using RetType = R;
-};
-
-template <typename R, typename C, typename... Args>
-struct FuncArgTraits<R (C::*)(Args...) const> {
-  using Type = typename FirstArg<Args...>::Type;
-  using RetType = R;
-};
-
-template <typename R, typename C, typename... Args>
-struct FuncArgTraits<R (C::*)(Args...)> {
-  using Type = typename FirstArg<Args...>::Type;
-  using RetType = R;
-};
-
-template <typename R, typename C, typename... Args>
-struct FuncArgTraits<R (C::*)(Args...) const volatile> {
-  using Type = typename FirstArg<Args...>::Type;
-  using RetType = R;
-};
-
-template <typename F>
-struct FuncArgTraits {
- private:
-  using OperatorType = decltype(&F::operator());
-
- public:
-  using Type = typename FuncArgTraits<OperatorType>::Type;
-  using RetType = typename FuncArgTraits<OperatorType>::RetType;
-};
-
-template <typename F>
-using FuncArgTypeT = typename FuncArgTraits<std::decay_t<F>>::Type;
-
-template <typename F>
-using FuncRetTypeT = typename FuncArgTraits<std::decay_t<F>>::RetType;
-
 template <typename Input, typename F>
 struct ThenResult {
   using Type = detail::InvokeResultT<F, Input>;
@@ -137,8 +112,8 @@ struct PromiseValue {
     return std::forward<F>(f)(v);
   }
 
-  T                         v;
-  absl::optional<absl::any> error;
+  T     v;
+  Error error;
 };
 
 template <>
@@ -150,8 +125,8 @@ struct PromiseValue<void, void> {
     return std::forward<F>(f)();
   }
 
-  Empty                     v;
-  absl::optional<absl::any> error;
+  Empty v;
+  Error error;
 };
 
 template <typename Input, typename Output>
@@ -191,16 +166,18 @@ class Promise {
 
   void Resolve();
 
-  template <typename U>
-  void ResolveError(U&& v);
+  void ResolveError(Error err);
+
+  template <typename E>
+  void Reject(E e);
 
   void Wait();
 
   template <typename F>
   auto Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwraped>;
 
-  template <typename F>
-  auto OnError(F&& f) -> Promise<typename detail::FuncRetTypeT<F>>;
+  template <typename E, typename F>
+  auto OnError(Tag<E>, F&& f) -> Promise<T>;
 
  private:
   enum class State : uint8_t {
@@ -268,8 +245,7 @@ void Promise<T>::Resolve() {
 }
 
 template <typename T>
-template <typename U>
-void Promise<T>::ResolveError(U&& v) {
+void Promise<T>::ResolveError(Error err) {
   std::function<void(detail::PromiseValue<T>)> then;
 
   {
@@ -279,7 +255,7 @@ void Promise<T>::ResolveError(U&& v) {
       return;
     }
 
-    d->resolved.error = absl::any(std::forward<U>(v));
+    d->resolved.error = std::move(err);
     d->state = State::kFinished;
 
     if (d->then) {
@@ -290,6 +266,12 @@ void Promise<T>::ResolveError(U&& v) {
   if (then) {
     then(std::move(d->resolved));
   }
+}
+
+template <typename T>
+template <typename E>
+void Promise<T>::Reject(E e) {
+  this->ResolveError(Error::Make(std::move(e)));
 }
 
 template <typename Input, typename F>
@@ -312,7 +294,7 @@ struct Invoke {
       if (!v.error) {
         detail::Resolver<Input, Output>::Resolve(std::forward<F>(f), std::move(v), next);
       } else {
-        next.ResolveError(*v.error);
+        next.ResolveError(std::move(v.error));
       }
     };
   }
@@ -320,17 +302,14 @@ struct Invoke {
   static auto CreateThenImpl(Promise<Output>& next, F&& f, PromiseTag) {
     return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
       if (v.error) {
-        next.ResolveError(*v.error);
+        next.ResolveError(std::move(v.error));
         return;
       }
 
       auto lazy = v.Call(std::forward<decltype(f)>(f));
 
       lazy.Then([next](Output val) mutable { next.Resolve(std::move(val)); })
-          .OnError([next](absl::any err) mutable {
-            next.ResolveError(std::move(err));
-            return false;
-          });
+          .OnError(Tag<Error>{}, [next](Error err) mutable { next.ResolveError(std::move(err)); });
     };
   }
 };
@@ -359,19 +338,37 @@ auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwra
   return next;
 }
 
+namespace detail {
+template <typename F, typename E, typename Next>
+void do_resolve_error(F& f, E& e, Next& next, std::false_type) {
+  next.Resolve(f(e));
+}
+
+template <typename F, typename E, typename Next>
+void do_resolve_error(F& f, E& e, Next& next, std::true_type) {
+  f(e);
+  next.Resolve();
+}
+}  // namespace detail
+
 template <typename T>
-template <typename F>
-auto Promise<T>::OnError(F&& f) -> Promise<typename detail::FuncRetTypeT<F>> {
+template <typename E, typename F>
+auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
   using Input = T;
-  using ErrorT = detail::FuncArgTypeT<F>;
-  using Output = detail::FuncRetTypeT<F>;
+  using Output = T;
 
   Promise<Output> next;
 
   auto then = [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
-    if (v.error) {
-      next.ResolveError(std::forward<F>(f)(absl::any_cast<ErrorT>(v.error.value())));
+    if (!v.error) {
+      next.Resolve(std::move(v.v));
+      return;
     }
+    if (v.error.template Is<E>()) {
+      detail::do_resolve_error(f, v.error.template Get<E>(), next, std::is_void<Output>{});
+      return;
+    }
+    next.ResolveError(std::move(v.error));
   };
 
   bool should_then = false;
