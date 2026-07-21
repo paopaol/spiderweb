@@ -202,7 +202,7 @@ TEST_F(PromiseTest, OnError) {
     EXPECT_EQ(err, "123");
 
     error_called = true;
-    return 3;
+    return true;
   });
 
   f.Reject(std::string("123"));
@@ -226,7 +226,6 @@ TEST_F(PromiseTest, MakePromiseThen) {
       .OnError(Tag<ErrorCode>{}, [&](const ErrorCode& ec) {
         puts(ec.FormatedMessage().c_str());
         loop.Quit();
-        return 1;
       });
 
   loop.ExecEx();

@@ -378,6 +378,10 @@ auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
   using Input = T;
   using Output = T;
 
+  using RetType = detail::UnwrapPromiseT<std::invoke_result_t<std::decay_t<F>, E&>>;
+
+  static_assert(std::is_same<RetType, T>::value, "OnError callback must return T");
+
   Promise<Output> next;
 
   auto then = [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
