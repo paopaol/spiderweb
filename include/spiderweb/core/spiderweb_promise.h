@@ -8,10 +8,18 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <utility>
 
 namespace spiderweb {
+
+class AlreadyContinued : public std::runtime_error {
+ public:
+  explicit AlreadyContinued(const std::string& msg) : std::runtime_error(msg) {
+  }
+};
 
 template <typename T>
 class Promise;
@@ -30,8 +38,15 @@ template <typename T>
 inline char Tag<T>::tag;
 
 struct Error {
-  void*     tag = nullptr;
-  absl::any value;
+  Error() = default;
+
+  Error(const Error&) = delete;
+
+  Error& operator=(const Error&) = delete;
+
+  Error(Error&&) noexcept = default;
+
+  Error& operator=(Error&&) noexcept = default;
 
   explicit operator bool() const {
     return tag != nullptr;
@@ -61,6 +76,9 @@ struct Error {
   const T& Get() const {
     return absl::any_cast<const T&>(value);
   }
+
+  void*     tag = nullptr;
+  absl::any value;
 };
 
 namespace detail {
@@ -309,7 +327,7 @@ struct Invoke {
       auto lazy = v.Call(std::forward<decltype(f)>(f));
 
       lazy.Then([next](Output val) mutable { next.Resolve(std::move(val)); })
-          .OnError(Tag<Error>{}, [next](Error err) mutable { next.ResolveError(std::move(err)); });
+          .OnError(Tag<Error>{}, [next](Error& err) mutable { next.ResolveError(std::move(err)); });
     };
   }
 };
@@ -323,6 +341,9 @@ auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwra
   bool should_then = false;
   {
     std::lock_guard<std::mutex> _(d->mutex);
+    if (d->then) {
+      throw AlreadyContinued("Then");
+    }
 
     if (d->state == State::kFinished) {
       should_then = true;
@@ -332,7 +353,7 @@ auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwra
   }
 
   if (should_then) {
-    then(d->resolved);
+    then(std::move(d->resolved));
   }
 
   return next;
@@ -374,6 +395,10 @@ auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
   bool should_then = false;
   {
     std::lock_guard<std::mutex> _(d->mutex);
+
+    if (d->then) {
+      throw AlreadyContinued("OnError");
+    }
 
     if (d->state == State::kFinished) {
       should_then = true;
