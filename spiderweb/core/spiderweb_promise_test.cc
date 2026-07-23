@@ -100,6 +100,16 @@ TEST_F(PromiseTest, ErrorRef) {
   }
 }
 
+// Error 移动语义
+TEST_F(PromiseTest, ErrorMove) {
+  auto err1 = Error::Make(std::string("hello"));
+  EXPECT_TRUE(err1.Is<std::string>());
+
+  auto err2 = std::move(err1);
+  EXPECT_TRUE(err2.Is<std::string>());
+  EXPECT_EQ(err2.Get<std::string>(), "hello");
+}
+
 TEST_F(PromiseTest, VoidInput_VoidOutput) {
   spiderweb::Promise<void> f;
   bool                     called = false;
@@ -341,14 +351,159 @@ TEST_F(PromiseTest, Then_SkippedAfterReject) {
   EXPECT_FALSE(then_called);
 }
 
-// Error 移动语义
-TEST_F(PromiseTest, ErrorMove) {
-  auto err1 = Error::Make(std::string("hello"));
-  EXPECT_TRUE(err1.Is<std::string>());
+// 基本用法：3 个 Promise 全部 resolve
+TEST_F(PromiseTest, All_AllResolved) {
+  Promise<int> p1;
+  Promise<int> p2;
+  Promise<int> p3;
 
-  auto err2 = std::move(err1);
-  EXPECT_TRUE(err2.Is<std::string>());
-  EXPECT_EQ(err2.Get<std::string>(), "hello");
+  bool finished = false;
+
+  PromiseAll<int>({p1, p2, p3}).Then([&](std::vector<int> results) {
+    finished = true;
+    ASSERT_EQ(results.size(), 3u);
+    EXPECT_EQ(results[0], 1);
+    EXPECT_EQ(results[1], 2);
+    EXPECT_EQ(results[2], 3);
+  });
+
+  // 按任意顺序 resolve
+  p2.Resolve(2);
+  p1.Resolve(1);
+  p3.Resolve(3);
+
+  EXPECT_TRUE(finished);
 }
+
+// // 结果顺序必须和传入顺序一致（即使 resolve 顺序不同）
+// TEST_F(PromiseTest, All_ResultOrder) {
+//   Promise<int> p1;
+//   Promise<int> p2;
+//   Promise<int> p3;
+//
+//   bool finished = false;
+//
+//   PromiseAll<int>({p1, p2, p3}).Then([&](std::vector<int> results) {
+//     finished = true;
+//     // 结果顺序 = 传入顺序，不是 resolve 顺序
+//     EXPECT_EQ(results[0], 10);
+//     EXPECT_EQ(results[1], 20);
+//     EXPECT_EQ(results[2], 30);
+//   });
+//
+//   p3.Resolve(30);  // 最后一个先完成
+//   p1.Resolve(10);  // 第一个后完成
+//   p2.Resolve(20);  // 中间最后完成
+//
+//   EXPECT_TRUE(finished);
+// }
+//
+// // 任一 Promise reject，PromiseAll<int> 整体失败
+// TEST_F(PromiseTest, All_OneReject) {
+//   Promise<int> p1;
+//   Promise<int> p2;
+//   Promise<int> p3;
+//
+//   bool then_called = false;
+//   bool error_called = false;
+//
+//   PromiseAll<int>({p1, p2, p3})
+//       .Then([&](const std::vector<int>&) { then_called = true; })
+//       .OnError(Tag<std::string>{}, [&](const std::string& err) {
+//         error_called = true;
+//         EXPECT_EQ(err, "fail");
+//       });
+//
+//   p1.Resolve(1);
+//   p2.Reject(std::string("fail"));  // p2 失败
+//   p3.Resolve(3);
+//
+//   EXPECT_FALSE(then_called);
+//   EXPECT_TRUE(error_called);
+// }
+//
+// // 第一个就 reject
+// TEST_F(PromiseTest, All_FirstReject) {
+//   Promise<int> p1;
+//   Promise<int> p2;
+//
+//   bool error_called = false;
+//
+//   PromiseAll<int>({p1, p2}).OnError(Tag<std::string>{}, [&](const std::string& err) {
+//     error_called = true;
+//     EXPECT_EQ(err, "first_fail");
+//   });
+//
+//   p1.Reject(std::string("first_fail"));
+//   p2.Resolve(2);
+//
+//   EXPECT_TRUE(error_called);
+// }
+//
+// // 单个 Promise
+// TEST_F(PromiseTest, All_SinglePromise) {
+//   Promise<int> p1;
+//
+//   bool finished = false;
+//
+//   PromiseAll<int>({p1}).Then([&](std::vector<int> results) {
+//     finished = true;
+//     ASSERT_EQ(results.size(), 1u);
+//     EXPECT_EQ(results[0], 42);
+//   });
+//
+//   p1.Resolve(42);
+//
+//   EXPECT_TRUE(finished);
+// }
+//
+// // 空向量
+// TEST_F(PromiseTest, All_EmptyVector) {
+//   bool finished = false;
+//
+//   PromiseAll<int>({}).Then([&](const std::vector<int>& results) {
+//     finished = true;
+//     EXPECT_TRUE(results.empty());
+//   });
+//
+//   EXPECT_TRUE(finished);
+// }
+//
+// // 已完成的 Promise 也能 PromiseAll<int>
+// TEST_F(PromiseTest, All_AlreadyResolved) {
+//   Promise<int> p1;
+//   Promise<int> p2;
+//
+//   p1.Resolve(1);
+//   p2.Resolve(2);
+//
+//   bool finished = false;
+//
+//   PromiseAll<int>({p1, p2}).Then([&](std::vector<int> results) {
+//     finished = true;
+//     ASSERT_EQ(results.size(), 2u);
+//     EXPECT_EQ(results[0], 1);
+//     EXPECT_EQ(results[1], 2);
+//   });
+//
+//   EXPECT_TRUE(finished);
+// }
+
+// Promise<void> 的 PromiseAll<int>
+// TEST_F(PromiseTest, All_VoidPromises) {
+//   Promise<void> p1;
+//   Promise<void> p2;
+//   Promise<void> p3;
+//
+//   bool finished = false;
+//
+//   PromiseAll<void>({p1, p2, p3}).Then([&]() { finished = true; });
+//
+//   p1.Resolve();
+//   p3.Resolve();
+//   p2.Resolve();
+//
+//   EXPECT_TRUE(finished);
+// }
 
 }  // namespace spiderweb

@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <functional>
 #include <memory>
@@ -12,6 +14,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace spiderweb {
 
@@ -189,8 +192,6 @@ class Promise {
   template <typename E>
   void Reject(E e);
 
-  void Wait();
-
   template <typename F>
   auto Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwraped>;
 
@@ -199,22 +200,25 @@ class Promise {
 
  private:
   enum class State : uint8_t {
+    kPending = 0,
     kFinished,
-    kPending,
   };
 
-  struct PromiseContext {
+  struct Shared {
     std::mutex                                   mutex;
     detail::PromiseValue<T>                      resolved;
     std::function<void(detail::PromiseValue<T>)> then;
     State                                        state = State::kPending;
   };
 
-  std::shared_ptr<PromiseContext> d;
+  std::shared_ptr<Shared> d;
 };
 
 template <typename T>
-Promise<T>::Promise() : d(std::make_shared<PromiseContext>()) {
+Promise<std::vector<T>> PromiseAll(std::vector<Promise<T>> promises);
+
+template <typename T>
+Promise<T>::Promise() : d(std::make_shared<Shared>()) {
 }
 
 template <typename T>
@@ -236,7 +240,7 @@ template <typename T>
 template <typename U>
 void Promise<T>::Resolve(U&& v) {
   std::function<void(detail::PromiseValue<T>)> then;
-
+  detail::PromiseValue<T>                      resolved;
   {
     std::lock_guard<std::mutex> _(d->mutex);
 
@@ -249,11 +253,12 @@ void Promise<T>::Resolve(U&& v) {
 
     if (d->then) {
       then = std::move(d->then);
+      resolved = std::move(d->resolved);
     }
   }
 
   if (then) {
-    then(std::move(d->resolved));
+    then(std::move(resolved));
   }
 }
 
@@ -265,7 +270,7 @@ void Promise<T>::Resolve() {
 template <typename T>
 void Promise<T>::ResolveError(Error err) {
   std::function<void(detail::PromiseValue<T>)> then;
-
+  detail::PromiseValue<T>                      resolved;
   {
     std::lock_guard<std::mutex> _(d->mutex);
 
@@ -278,11 +283,12 @@ void Promise<T>::ResolveError(Error err) {
 
     if (d->then) {
       then = std::move(d->then);
+      resolved = std::move(d->resolved);
     }
   }
 
   if (then) {
-    then(std::move(d->resolved));
+    then(std::move(resolved));
   }
 }
 
@@ -338,7 +344,8 @@ auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwra
   auto next = detail::ThenResult<T, F>::CreatePromise();
   auto then = Invoke<T, F>::CreateThen(next, std::forward<F>(f));
 
-  bool should_then = false;
+  detail::PromiseValue<T> resolved;
+  bool                    should_then = false;
   {
     std::lock_guard<std::mutex> _(d->mutex);
     if (d->then) {
@@ -347,13 +354,14 @@ auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwra
 
     if (d->state == State::kFinished) {
       should_then = true;
+      resolved = std::move(d->resolved);
     } else {
       d->then = std::move(then);
     }
   }
 
   if (should_then) {
-    then(std::move(d->resolved));
+    then(std::move(resolved));
   }
 
   return next;
@@ -396,7 +404,8 @@ auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
     next.ResolveError(std::move(v.error));
   };
 
-  bool should_then = false;
+  detail::PromiseValue<T> resolved;
+  bool                    should_then = false;
   {
     std::lock_guard<std::mutex> _(d->mutex);
 
@@ -406,13 +415,53 @@ auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
 
     if (d->state == State::kFinished) {
       should_then = true;
+      resolved = std::move(d->resolved);
     } else {
       d->then = std::move(then);
     }
   }
 
   if (should_then) {
-    then(std::move(d->resolved));
+    then(std::move(resolved));
+  }
+
+  return next;
+}
+
+template <typename T>
+Promise<std::vector<T>> PromiseAll(std::vector<Promise<T>> promises) {
+  Promise<std::vector<T>> next;
+
+  if (promises.empty()) {
+    next.Resolve(std::vector<T>{});
+    return next;
+  }
+
+  struct Result {
+    std::mutex     mutex;
+    std::vector<T> vals;
+    std::size_t    tasks = 0;
+  };
+
+  auto result = std::make_shared<Result>();
+
+  result->vals.resize(promises.size());
+  result->tasks = promises.size();
+
+  for (std::size_t i = 0; i < promises.size(); ++i) {
+    auto& pro = promises[i];
+
+    pro.Then([next, result, i](T val) mutable {
+         std::lock_guard<std::mutex> _(result->mutex);
+
+         result->vals[i] = std::move(val);
+         result->tasks--;
+         if (result->tasks == 0) {
+           next.Resolve(std::move(result->vals));
+         }
+       })
+        .OnError(Tag<Error>{},
+                 [next, result, i](Error& err) mutable { next.ResolveError(std::move(err)); });
   }
 
   return next;
