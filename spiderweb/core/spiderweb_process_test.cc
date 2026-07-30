@@ -27,6 +27,15 @@ class ProcessTest : public testing::Test {
   Process   proc;
 };
 
+TEST_F(ProcessTest, StartFaled) {
+  NotifySpy spy(&proc, &Process::BytesRead);
+
+  proc.SetProgram({"notfound", "123"});
+
+  auto ec = proc.Start();
+  EXPECT_TRUE(ec);
+}
+
 TEST_F(ProcessTest, StdOut) {
   NotifySpy spy(&proc, &Process::BytesRead);
 

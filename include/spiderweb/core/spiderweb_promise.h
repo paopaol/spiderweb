@@ -179,21 +179,74 @@ struct Resolver {
   }
 };
 
+struct BasicTag {};
+
+struct PromiseTag {};
+
+template <typename E, typename F>
+struct ErrorInvoke {
+  using RawRet = std::invoke_result_t<std::decay_t<F>, E&>;
+  using Output = UnwrapPromiseT<RawRet>;
+
+  static constexpr auto is_promise = IsPromise<typename detail::ThenResult<E&, F>::Type>::value;
+
+  template <typename Input>
+  static auto CreateErrorThen(Promise<Output>& next, F&& f) {
+    using Tag = std::conditional_t<is_promise, PromiseTag, BasicTag>;
+    return CreateErrorThenImpl<Input>(next, std::forward<F>(f), Tag{});
+  }
+
+  template <typename Input>
+  static auto CreateErrorThenImpl(Promise<Output>& next, F&& f, BasicTag) {
+    return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
+      if (!v.error) {
+        next.Resolve(std::move(v.v));
+        return;
+      }
+
+      if (!v.error.template Is<E>()) {
+        next.ResolveError(std::move(v.error));
+        return;
+      }
+
+      auto ret = detail::invoke<Output>(std::move(f), v.error.template Get<E>());
+      next.Resolve(std::move(ret));
+    };
+  }
+
+  template <typename Input>
+  static auto CreateErrorThenImpl(Promise<Output>& next, F&& f, PromiseTag) {
+    return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
+      if (!v.error) {
+        next.Resolve(std::move(v.v));
+        return;
+      }
+
+      if (!v.error.template Is<E>()) {
+        next.ResolveError(std::move(v.error));
+        return;
+      }
+
+      auto lazy = std::move(f)(v.error.template Get<E>());
+
+      lazy.Then([next](Output val) mutable { next.Resolve(std::move(val)); })
+          .OnError(Tag<Error>{}, [next](Error& err) mutable { next.ResolveError(std::move(err)); });
+    };
+  }
+};
+
 template <typename Input, typename F>
-struct Invoke {
-  struct BasicTag {};
-
-  struct PromiseTag {};
-
-  static const auto is_promise = IsPromise<typename detail::ThenResult<Input, F>::Type>::value;
-
+struct ThenInvoke {
   using Output = typename detail::ThenResult<Input, F>::Unwraped;
+
+  static constexpr auto is_promise = IsPromise<typename detail::ThenResult<Input, F>::Type>::value;
 
   static auto CreateThen(Promise<Output>& next, F&& f) {
     using Tag = std::conditional_t<is_promise, PromiseTag, BasicTag>;
     return CreateThenImpl(next, std::forward<F>(f), Tag{});
   }
 
+ private:
   static auto CreateThenImpl(Promise<Output>& next, F&& f, BasicTag) {
     return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
       if (!v.error) {
@@ -354,7 +407,7 @@ template <typename T>
 template <typename F>
 auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwraped> {
   auto next = detail::ThenResult<T, F>::CreatePromise();
-  auto then = detail::Invoke<T, F>::CreateThen(next, std::forward<F>(f));
+  auto then = detail::ThenInvoke<T, F>::CreateThen(next, std::forward<F>(f));
 
   detail::PromiseValue<T> resolved;
   bool                    should_then = false;
@@ -383,27 +436,13 @@ template <typename T>
 template <typename E, typename F>
 auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
   using Input = T;
-  using Output = T;
-
   using RetType = detail::UnwrapPromiseT<std::invoke_result_t<std::decay_t<F>, E&>>;
+
+  Promise<T> next;
+  auto then = detail::ErrorInvoke<E, F>::template CreateErrorThen<Input>(next, std::forward<F>(f));
 
   static_assert(std::is_same<RetType, T>::value,
                 "OnError callback must return T (the Promise value type)");
-
-  Promise<Output> next;
-
-  auto then = [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
-    if (!v.error) {
-      next.Resolve(std::move(v.v));
-      return;
-    }
-    if (v.error.template Is<E>()) {
-      auto ret = detail::invoke<Output>(std::move(f), v.error.template Get<E>());
-      next.Resolve(std::move(ret));
-      return;
-    }
-    next.ResolveError(std::move(v.error));
-  };
 
   detail::PromiseValue<T> resolved;
   bool                    should_then = false;

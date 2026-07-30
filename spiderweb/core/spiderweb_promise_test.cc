@@ -12,6 +12,7 @@
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_object.h"
 #include "spiderweb/core/spiderweb_process.h"
+#include "spiderweb/core/spiderweb_timer.h"
 
 namespace spiderweb {
 
@@ -223,6 +224,39 @@ TEST_F(PromiseTest, OnError) {
 
 static Promise<int> create(int) {
   return make_process_promise<int>({"ls", "111"});
+}
+
+static Promise<int> create_timeout_promise(int v) {
+  Promise<int> promise;
+  auto*        timer = new Timer();
+
+  Object::Connect(timer, &Timer::timeout, timer, [v, promise, timer]() mutable {
+    timer->DeleteLater();
+    promise.Resolve(v);
+  });
+
+  timer->SetInterval(1000);
+  timer->SetSingalShot(true);
+  timer->Start();
+
+  return promise;
+}
+
+TEST_F(PromiseTest, MakePromiseError) {
+  promise = make_process_promise<int>({"notfound", "/not"});
+
+  promise
+      .OnError(Tag<ErrorCode>{},
+               [&](const ErrorCode& ec) {
+                 puts(ec.FormatedMessage().c_str());
+                 return create_timeout_promise(-1);
+               })
+      .Then([&](int v) {
+        printf("%d\n", v);
+        loop.Quit();
+      });
+
+  loop.ExecEx();
 }
 
 TEST_F(PromiseTest, MakePromiseThen) {
