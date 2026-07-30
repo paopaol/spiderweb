@@ -2,16 +2,12 @@
 
 #include <absl/types/any.h>
 
-#include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstdio>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
-#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -154,15 +150,6 @@ inline constexpr bool IsParam = !std::is_void<T>::value;
 template <typename T>
 inline constexpr bool IsResult = !std::is_void<T>::value;
 
-template <typename T>
-Wrap<T> wrap_result(T&& v) {
-  return std::forward<T>(v);
-}
-
-inline Wrap<void> wrap_result() {
-  return Void{};
-}
-
 template <typename R, typename F, typename... Args, typename = std::enable_if_t<IsResult<R>>>
 Wrap<R> invoke(F&& f, Args&&... args) {
   return std::forward<F>(f)(std::forward<Args>(args)...);
@@ -175,7 +162,7 @@ Void invoke(F&& f, Args&&... args) {
 }
 
 template <typename T, typename F>
-auto invoke_func(F&& f, Wrap<T>&& v) -> Wrap<InvokeResultT<F, UnWrap<T>>> {
+auto invoke_func(F&& f, Wrap<T>&& v) -> Wrap<InvokeResultT<F, T>> {
   using R = InvokeResultT<F, T>;
   if constexpr (IsParam<T>) {
     return invoke<R>(std::forward<F>(f), v);
@@ -189,6 +176,46 @@ struct Resolver {
   template <typename F, typename Next>
   static void Resolve(F&& f, PromiseValue<Input> resolved, Next& next) {
     next.Resolve(invoke_func<Input>(std::forward<F>(f), std::move(resolved.v)));
+  }
+};
+
+template <typename Input, typename F>
+struct Invoke {
+  struct BasicTag {};
+
+  struct PromiseTag {};
+
+  static const auto is_promise = IsPromise<typename detail::ThenResult<Input, F>::Type>::value;
+
+  using Output = typename detail::ThenResult<Input, F>::Unwraped;
+
+  static auto CreateThen(Promise<Output>& next, F&& f) {
+    using Tag = std::conditional_t<is_promise, PromiseTag, BasicTag>;
+    return CreateThenImpl(next, std::forward<F>(f), Tag{});
+  }
+
+  static auto CreateThenImpl(Promise<Output>& next, F&& f, BasicTag) {
+    return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
+      if (!v.error) {
+        detail::Resolver<Input, Output>::Resolve(std::forward<F>(f), std::move(v), next);
+      } else {
+        next.ResolveError(std::move(v.error));
+      }
+    };
+  }
+
+  static auto CreateThenImpl(Promise<Output>& next, F&& f, PromiseTag) {
+    return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
+      if (v.error) {
+        next.ResolveError(std::move(v.error));
+        return;
+      }
+
+      auto lazy = detail::invoke_func<Input>(std::move(f), std::move(v.v));
+
+      lazy.Then([next](Output val) mutable { next.Resolve(std::move(val)); })
+          .OnError(Tag<Error>{}, [next](Error& err) mutable { next.ResolveError(std::move(err)); });
+    };
   }
 };
 
@@ -323,51 +350,11 @@ void Promise<T>::Reject(E e) {
   this->ResolveError(Error::Make(std::move(e)));
 }
 
-template <typename Input, typename F>
-struct Invoke {
-  struct BasicTag {};
-
-  struct PromiseTag {};
-
-  static const auto is_promise = IsPromise<typename detail::ThenResult<Input, F>::Type>::value;
-
-  using Output = typename detail::ThenResult<Input, F>::Unwraped;
-
-  static auto CreateThen(Promise<Output>& next, F&& f) {
-    using Tag = std::conditional_t<is_promise, PromiseTag, BasicTag>;
-    return CreateThenImpl(next, std::forward<F>(f), Tag{});
-  }
-
-  static auto CreateThenImpl(Promise<Output>& next, F&& f, BasicTag) {
-    return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
-      if (!v.error) {
-        detail::Resolver<Input, Output>::Resolve(std::forward<F>(f), std::move(v), next);
-      } else {
-        next.ResolveError(std::move(v.error));
-      }
-    };
-  }
-
-  static auto CreateThenImpl(Promise<Output>& next, F&& f, PromiseTag) {
-    return [next, f = std::forward<F>(f)](detail::PromiseValue<Input> v) mutable {
-      if (v.error) {
-        next.ResolveError(std::move(v.error));
-        return;
-      }
-
-      auto lazy = detail::invoke_func<Input>(std::move(f), std::move(v.v));
-
-      lazy.Then([next](Output val) mutable { next.Resolve(std::move(val)); })
-          .OnError(Tag<Error>{}, [next](Error& err) mutable { next.ResolveError(std::move(err)); });
-    };
-  }
-};
-
 template <typename T>
 template <typename F>
 auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwraped> {
   auto next = detail::ThenResult<T, F>::CreatePromise();
-  auto then = Invoke<T, F>::CreateThen(next, std::forward<F>(f));
+  auto then = detail::Invoke<T, F>::CreateThen(next, std::forward<F>(f));
 
   detail::PromiseValue<T> resolved;
   bool                    should_then = false;
@@ -400,7 +387,8 @@ auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
 
   using RetType = detail::UnwrapPromiseT<std::invoke_result_t<std::decay_t<F>, E&>>;
 
-  static_assert(std::is_same<RetType, T>::value, "OnError callback must return T");
+  static_assert(std::is_same<RetType, T>::value,
+                "OnError callback must return T (the Promise value type)");
 
   Promise<Output> next;
 
