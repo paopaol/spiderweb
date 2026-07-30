@@ -411,7 +411,7 @@ auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
     }
     if (v.error.template Is<E>()) {
       auto ret = detail::invoke<Output>(std::move(f), v.error.template Get<E>());
-      next.ResolveError(Error::Make(std::move(ret)));
+      next.Resolve(std::move(ret));
       return;
     }
     next.ResolveError(std::move(v.error));
