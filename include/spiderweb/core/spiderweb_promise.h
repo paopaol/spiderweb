@@ -122,48 +122,73 @@ struct ThenResult {
   }
 };
 
-struct Empty {};
+struct Void {};
 
-template <typename T, typename = void>
-struct PromiseValue {
-  using Type = T;
-
-  template <typename F>
-  auto Call(F&& f) -> InvokeResultT<F, T> {
-    return std::forward<F>(f)(v);
-  }
-
-  T     v;
-  Error error;
+template <typename T>
+struct Wrapper {
+  using Wrape = T;
+  using UnWrape = T;
 };
 
 template <>
-struct PromiseValue<void, void> {
-  using Type = Empty;
-
-  template <typename F>
-  auto Call(F&& f) -> InvokeResultT<F, void> {
-    return std::forward<F>(f)();
-  }
-
-  Empty v;
-  Error error;
+struct Wrapper<void> {
+  using Wrape = Void;
+  using UnWrape = void;
 };
+
+template <typename T>
+using Wrap = typename Wrapper<T>::Wrape;
+
+template <typename T>
+using UnWrap = typename Wrapper<T>::UnWrape;
+
+template <typename T>
+struct PromiseValue {
+  Wrap<T> v;
+  Error   error;
+};
+
+template <typename T>
+inline constexpr bool IsParam = !std::is_void<T>::value;
+
+template <typename T>
+inline constexpr bool IsResult = !std::is_void<T>::value;
+
+template <typename T>
+Wrap<T> wrap_result(T&& v) {
+  return std::forward<T>(v);
+}
+
+inline Wrap<void> wrap_result() {
+  return Void{};
+}
+
+template <typename R, typename F, typename... Args, typename = std::enable_if_t<IsResult<R>>>
+Wrap<R> invoke(F&& f, Args&&... args) {
+  return std::forward<F>(f)(std::forward<Args>(args)...);
+}
+
+template <typename R, typename F, typename... Args, typename = std::enable_if_t<!IsResult<R>>>
+Void invoke(F&& f, Args&&... args) {
+  std::forward<F>(f)(std::forward<Args>(args)...);
+  return Void{};
+}
+
+template <typename T, typename F>
+auto invoke_func(F&& f, Wrap<T>&& v) -> Wrap<InvokeResultT<F, UnWrap<T>>> {
+  using R = InvokeResultT<F, T>;
+  if constexpr (IsParam<T>) {
+    return invoke<R>(std::forward<F>(f), v);
+  } else {
+    return invoke<R>(std::forward<F>(f));
+  }
+}
 
 template <typename Input, typename Output>
 struct Resolver {
   template <typename F, typename Next>
   static void Resolve(F&& f, PromiseValue<Input> resolved, Next& next) {
-    next.Resolve(resolved.Call(std::forward<F>(f)));
-  }
-};
-
-template <typename Input>
-struct Resolver<Input, void> {
-  template <typename F, typename Next>
-  static void Resolve(F&& f, PromiseValue<Input> resolved, Next& next) {
-    resolved.Call(std::forward<F>(f));
-    next.Resolve();
+    next.Resolve(invoke_func<Input>(std::forward<F>(f), std::move(resolved.v)));
   }
 };
 
@@ -264,7 +289,7 @@ void Promise<T>::Resolve(U&& v) {
 
 template <typename T>
 void Promise<T>::Resolve() {
-  Resolve(detail::Empty());
+  Resolve(detail::Void());
 }
 
 template <typename T>
@@ -330,7 +355,7 @@ struct Invoke {
         return;
       }
 
-      auto lazy = v.Call(std::forward<decltype(f)>(f));
+      auto lazy = detail::invoke_func<Input>(std::move(f), std::move(v.v));
 
       lazy.Then([next](Output val) mutable { next.Resolve(std::move(val)); })
           .OnError(Tag<Error>{}, [next](Error& err) mutable { next.ResolveError(std::move(err)); });
@@ -367,19 +392,6 @@ auto Promise<T>::Then(F&& f) -> Promise<typename detail::ThenResult<T, F>::Unwra
   return next;
 }
 
-namespace detail {
-template <typename F, typename E, typename Next>
-void do_resolve_error(F& f, E& e, Next& next, std::false_type) {
-  next.Resolve(f(e));
-}
-
-template <typename F, typename E, typename Next>
-void do_resolve_error(F& f, E& e, Next& next, std::true_type) {
-  f(e);
-  next.Resolve();
-}
-}  // namespace detail
-
 template <typename T>
 template <typename E, typename F>
 auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
@@ -398,7 +410,8 @@ auto Promise<T>::OnError(Tag<E>, F&& f) -> Promise<T> {
       return;
     }
     if (v.error.template Is<E>()) {
-      detail::do_resolve_error(f, v.error.template Get<E>(), next, std::is_void<Output>{});
+      auto ret = detail::invoke<Output>(std::move(f), v.error.template Get<E>());
+      next.ResolveError(Error::Make(std::move(ret)));
       return;
     }
     next.ResolveError(std::move(v.error));
