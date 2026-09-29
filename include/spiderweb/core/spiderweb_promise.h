@@ -140,8 +140,8 @@ using UnWrap = typename Wrapper<T>::UnWrape;
 
 template <typename T>
 struct PromiseValue {
-  Wrap<T> v;
-  Error   error;
+  Wrap<T> v{};
+  Error   error{};
 };
 
 template <typename T>
