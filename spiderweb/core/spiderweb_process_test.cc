@@ -71,11 +71,42 @@ TEST_F(ProcessTest, StdErr) {
             "ls: cannot access 'abc': No such file or directory\n");
 }
 
+static const char* safe_sigabbrev_np(int sig) {
+#if defined(__GLIBC__) && __GLIBC_PREREQ(2, 32)
+  return sigabbrev_np(sig);
+#else
+  switch (sig) {
+    case SIGINT:
+      return "INT";
+    case SIGKILL:
+      return "KILL";
+    case SIGTERM:
+      return "TERM";
+    case SIGSEGV:
+      return "SEGV";
+    case SIGABRT:
+      return "ABRT";
+    case SIGFPE:
+      return "FPE";
+    case SIGILL:
+      return "ILL";
+    case SIGPIPE:
+      return "PIPE";
+    case SIGQUIT:
+      return "QUIT";
+    case SIGHUP:
+      return "HUP";
+    default:
+      return "UNK";
+  }
+#endif
+}
+
 static std::string pstatus(int status) {
   if (WIFSIGNALED(status)) {
     int sig = WTERMSIG(status);
 
-    const char* abbrev = sigabbrev_np(sig);
+    const char* abbrev = safe_sigabbrev_np(sig);
 
     return abbrev;
   } else if (WIFEXITED(status)) {
