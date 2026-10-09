@@ -103,8 +103,7 @@ target_compile_definitions(
          ASIO_HAS_STD_ADDRESSOF
          ASIO_HAS_STD_SHARED_PTR
          ASIO_HAS_STD_FUNCTION
-         ASIO_DISABLE_STD_ALIGNED_ALLOC
-  PRIVATE SUBPROCESS_HAVE_CWD=0)
+         ASIO_DISABLE_STD_ALIGNED_ALLOC)
 if(MSVC)
   target_compile_definitions(
     spiderweb PUBLIC _WIN32_WINNT=0x0601
