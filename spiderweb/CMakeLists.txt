@@ -82,8 +82,7 @@ target_sources(
     $<$<PLATFORM_ID:Linux>:serial/spiderweb_socketcan.cc>
     $<$<PLATFORM_ID:Linux>:${PROJECT_SOURCE_DIR}/include/spiderweb/io/spiderweb_named_pipe.h>
     $<$<PLATFORM_ID:Linux>:io/spiderweb_named_pipe.cc>
-    $<$<PLATFORM_ID:Linux>:io/private/spiderweb_named_pipe_private.h>
-    )
+    $<$<PLATFORM_ID:Linux>:io/private/spiderweb_named_pipe_private.h>)
 
 target_include_directories(
   spiderweb PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
@@ -104,7 +103,8 @@ target_compile_definitions(
          ASIO_HAS_STD_ADDRESSOF
          ASIO_HAS_STD_SHARED_PTR
          ASIO_HAS_STD_FUNCTION
-         ASIO_DISABLE_STD_ALIGNED_ALLOC)
+         ASIO_DISABLE_STD_ALIGNED_ALLOC
+  PRIVATE SUBPROCESS_HAVE_CWD=0)
 if(MSVC)
   target_compile_definitions(
     spiderweb PUBLIC _WIN32_WINNT=0x0601
@@ -149,8 +149,8 @@ if(SPIDERWEB_ENABLE_TEST)
             core/spiderweb_bimap_test.cc
             core/spiderweb_tree_test.cc
             core/spiderweb_object_pool_test.cc
-	    core/spiderweb_process_test.cc
-	    core/spiderweb_promise_test.cc
+            core/spiderweb_process_test.cc
+            core/spiderweb_promise_test.cc
             io/spiderweb_binary_writer_test.cc
             io/spiderweb_bitmap_readwriter_test.cc
             net/spiderweb_tcp_socket_connector_test.cc
@@ -165,8 +165,7 @@ if(SPIDERWEB_ENABLE_TEST)
             reflect/pugixml_impl_test.cc
             reflect/yyjson_impl_test.cc
             $<$<PLATFORM_ID:Linux>:io/spiderweb_named_pipe_test.cc>
-            $<$<PLATFORM_ID:Linux>:serial/spiderweb_socketcan_test.cc>
-            )
+            $<$<PLATFORM_ID:Linux>:serial/spiderweb_socketcan_test.cc>)
   target_link_libraries(
     spiderweb_test PRIVATE spiderweb GTest::gtest_main GTest::gtest
                            GTest::gmock absl::flat_hash_map)
