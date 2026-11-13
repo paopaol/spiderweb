@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(
   spiderweb
-  VERSION 1.0.5
+  VERSION 1.0.6
   LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
@@ -80,6 +80,18 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND SPIDERWEB_ENABLE_ASAN)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address ")
 endif()
 
+execute_process(
+  COMMAND git rev-parse --short HEAD
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  OUTPUT_VARIABLE SPIDERWEB_GIT_REVISION
+  OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+if(NOT SPIDERWEB_GIT_REVISION)
+  set(SPIDERWEB_GIT_REVISION "unknown")
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/generated/spiderweb/version.h @ONLY)
+
 add_subdirectory(spiderweb)
 
 # ------------------------------------------------------------------------------
@@ -100,4 +112,7 @@ if(SPIDERWEB_INSTALL)
     NAMESPACE spiderweb::
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/spiderweb")
   install(DIRECTORY include/spiderweb DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generated/spiderweb/version.h"
+          DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/spiderweb")
 endif()

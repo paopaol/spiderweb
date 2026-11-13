@@ -85,7 +85,9 @@ target_sources(
     $<$<PLATFORM_ID:Linux>:io/private/spiderweb_named_pipe_private.h>)
 
 target_include_directories(
-  spiderweb PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+  spiderweb
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated>
+         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_include_directories(
   spiderweb
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
