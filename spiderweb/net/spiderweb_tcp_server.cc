@@ -26,6 +26,21 @@ ErrorCode TcpServer::ListenAndServ(const std::string& ip_v4) {
   return ec;
 }
 
+void TcpServer::SetOption(const TcpSocket::Options& option) {
+  SPIDERWEB_CALL_THREAD_CHECK(TcpServer::SetOption);
+  d->option = option;
+}
+
+uint16_t TcpServer::LocalPort() const {
+  std::error_code ec;
+  const auto      endpoint = d->acceptor.local_endpoint(ec);
+  if (ec) {
+    return 0;
+  }
+
+  return endpoint.port();
+}
+
 void TcpServer::Stop() {
   SPIDERWEB_CALL_THREAD_CHECK(TcpServer::~Stop);
   ErrorCode ec;

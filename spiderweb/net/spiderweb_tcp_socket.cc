@@ -21,21 +21,20 @@ TcpSocket::~TcpSocket() {
   d->impl.q = nullptr;
 }
 
-void TcpSocket::SetNoDelay(bool flag) {
-  std::error_code ec;
-  std::ignore = d->impl.socket.set_option(asio::ip::tcp::no_delay(flag), ec);
+void TcpSocket::SetOption(const Options& option) {
+  SPIDERWEB_CALL_THREAD_CHECK(TcpSocket::SetOption);
+
+  d->impl.MergeOption(option);
+
+  /**
+   * @brief socket 已经打开时就地应用（accept 出来的连接、运行期调参）
+   *
+   * 还没打开时只记录，等 ConnectToHost 时统一应用
+   */
+  const auto ec = d->impl.SetOptionWhenOpened();
   if (ec) {
     SetOptionError(ec);
   }
-}
-
-void TcpSocket::Bind(const std::string& local_ip, uint16_t port) {
-  d->impl.local_ip = local_ip;
-  d->impl.local_port = port;
-}
-
-void TcpSocket::SetSendBufferSize(uint16_t size) {
-  d->impl.send_buffer_size = size;
 }
 
 void TcpSocket::ConnectToHost(const std::string& ip, uint16_t port) {

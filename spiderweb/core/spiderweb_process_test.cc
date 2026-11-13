@@ -148,6 +148,12 @@ TEST_F(ProcessTest, Stop) {
   auto span = reader.SpanAt(0, reader.Len());
   puts(std::string(reinterpret_cast<char*>(span.data()), span.size()).c_str());
   proc.AsyncStop();
+
+  /**
+   * @brief 等进程真正退出：stdo/stde 依赖读事件清理，不等就会带着 fd 对象析构
+   */
+  spiderweb::NotifySpy stopped(&proc, &Process::Stopped);
+  stopped.Wait();
 }
 
 TEST_F(ProcessTest, ExitCode) {

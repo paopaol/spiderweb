@@ -9,7 +9,7 @@ TEST(SignalTest, Emit) {
   spiderweb::EventLoop loop;
   auto                 signals = spiderweb::MakeObject<spiderweb::Signals>(SIGINT);
 
-  bool called;
+  bool called = false;
   spiderweb::Object::Connect(signals.get(), &spiderweb::Signals::Triggered, signals.get(),
                              [&](int sig) {
                                called = true;
@@ -18,7 +18,7 @@ TEST(SignalTest, Emit) {
                                loop.Exit(0);
                              });
 
-  // loop.RunAfter(1000, []() { kill(getpid(), SIGINT); });
+  loop.RunAfter(100, []() { raise(SIGINT); });
 
   loop.ExecEx();
 

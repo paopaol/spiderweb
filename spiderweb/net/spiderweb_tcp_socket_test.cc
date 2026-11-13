@@ -101,7 +101,10 @@ TEST(spiderweb_tcp_socket, BindSuccess) {
   spiderweb::net::TcpSocket socket;
   spiderweb::NotifySpy      spy(&socket, &spiderweb::net::TcpSocket::SetOptionError);
 
-  socket.Bind("127.0.0.1", 0);
+  spiderweb::net::TcpSocket::Options option;
+  option.local = spiderweb::net::TcpSocket::LocalEndpoint{"127.0.0.1", 0};
+  socket.SetOption(option);
+
   socket.ConnectToHost("127.0.0.1", 1998);
   spy.Wait(100);
   EXPECT_EQ(spy.Count(), 0);
@@ -110,9 +113,15 @@ TEST(spiderweb_tcp_socket, BindSuccess) {
 TEST(spiderweb_tcp_socket, BindFailed) {
   spiderweb::EventLoop      loop;
   spiderweb::net::TcpSocket socket;
-  spiderweb::NotifySpy      spy(&socket, &spiderweb::net::TcpSocket::SetOptionError);
+  spiderweb::NotifySpy      spy(&socket, &spiderweb::net::TcpSocket::ConnectError);
 
-  socket.Bind("100.100.100.100", 0);
+  spiderweb::net::TcpSocket::Options option;
+  option.local = spiderweb::net::TcpSocket::LocalEndpoint{"100.100.100.100", 0};
+  socket.SetOption(option);
+
+  /**
+   * @brief 建连前选项失败：连接直接失败，不会带着错误的绑定继续连接
+   */
   socket.ConnectToHost("127.0.0.1", 1998);
   spy.Wait();
   EXPECT_EQ(spy.Count(), 1);

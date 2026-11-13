@@ -17,7 +17,25 @@ class TcpSocket::Private {
 
   template <typename AsyncStream, typename Handler>
   void Open(AsyncStream& stream, const asio::ip::tcp::endpoint& endpoint, Handler&& handler) {
-    TrySetOption(endpoint);
+    std::error_code ec;
+    if (!socket.is_open()) {
+      std::ignore = socket.open(endpoint.protocol(), ec);
+    }
+
+    if (!ec) {
+      ec = SetOptionWhenConnect();
+    }
+
+    /**
+     * @brief 选项应用失败时不再发起连接
+     *
+     * 否则 bind 失败会静默地从其它网卡连出去，比直接失败更难排查
+     */
+    if (ec) {
+      handler(ec);
+      return;
+    }
+
     stream.async_connect(endpoint, std::forward<Handler>(handler));
   }
 
@@ -60,46 +78,96 @@ class TcpSocket::Private {
     return "TcpSocket";
   }
 
-  void TrySetOption(const asio::ip::tcp::endpoint& endpoint) {
+  /**
+   * @brief 建连前应用：open 之后、bind/connect 之前调用一次
+   */
+  std::error_code SetOptionWhenConnect() {
     if (!socket.is_open()) {
-      std::error_code ec;
-      std::ignore = socket.open(endpoint.protocol(), ec);
-    }
-
-    SetSendBufferSize();
-    Bind();
-  }
-
-  void SetSendBufferSize() {
-    if (send_buffer_size == 0) {
-      return;
+      return {};
     }
 
     std::error_code ec;
-    std::ignore = socket.set_option(asio::socket_base::send_buffer_size(send_buffer_size), ec);
-    if (ec) {
-      q->SetOptionError(ec);
+
+    if (option.send_buffer_size && *option.send_buffer_size > 0) {
+      ec = Apply(asio::socket_base::send_buffer_size(*option.send_buffer_size));
+    }
+
+    /**
+     * @brief 接收缓冲必须在 connect 前设置：窗口缩放在 SYN 中协商
+     */
+    if (!ec && option.recv_buffer_size && *option.recv_buffer_size > 0) {
+      ec = Apply(asio::socket_base::receive_buffer_size(*option.recv_buffer_size));
+    }
+
+    if (!ec && option.local && !option.local->ip.empty() && !bound) {
+      asio::ip::tcp::endpoint local(asio::ip::make_address(option.local->ip), option.local->port);
+      ec = Bind(local);
+      bound = !ec;
+    }
+
+    if (!ec && option.no_delay) {
+      ec = Apply(asio::ip::tcp::no_delay(*option.no_delay));
+    }
+
+    return ec;
+  }
+
+  /**
+   * @brief 运行期应用：socket 已打开（含 accept）时随时可调，不含 bind
+   */
+  std::error_code SetOptionWhenOpened() {
+    if (!socket.is_open()) {
+      return {};
+    }
+
+    std::error_code ec;
+
+    if (option.no_delay) {
+      ec = Apply(asio::ip::tcp::no_delay(*option.no_delay));
+    }
+
+    if (!ec && option.send_buffer_size && *option.send_buffer_size > 0) {
+      ec = Apply(asio::socket_base::send_buffer_size(*option.send_buffer_size));
+    }
+
+    return ec;
+  }
+
+  void MergeOption(const Options& other) {
+    if (other.local) {
+      option.local = other.local;
+    }
+
+    if (other.send_buffer_size) {
+      option.send_buffer_size = other.send_buffer_size;
+    }
+
+    if (other.recv_buffer_size) {
+      option.recv_buffer_size = other.recv_buffer_size;
+    }
+
+    if (other.no_delay) {
+      option.no_delay = other.no_delay;
     }
   }
 
-  void Bind() {
-    if (local_ip.empty()) {
-      return;
-    }
+  template <typename T>
+  std::error_code Apply(const T& opt) {
+    std::error_code ec;
+    socket.set_option(opt, ec);
+    return ec;
+  }
 
-    std::error_code         ec;
-    asio::ip::tcp::endpoint local(asio::ip::make_address(local_ip), local_port);
-    std::ignore = socket.bind(local, ec);
-    if (ec) {
-      q->SetOptionError(ec);
-    }
+  std::error_code Bind(const asio::ip::tcp::endpoint& local) {
+    std::error_code ec;
+    socket.bind(local, ec);
+    return ec;
   }
 
   TcpSocket*            q = nullptr;
   asio::ip::tcp::socket socket;
-  std::string           local_ip;
-  uint16_t              local_port = 0;
-  uint32_t              send_buffer_size = 0;
+  Options               option;
+  bool                  bound = false;
 };
 }  // namespace net
 }  // namespace spiderweb

@@ -87,6 +87,11 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
     }
     StartAccept(tcp_acceptor);
 
+    /**
+     * @brief accept 出来的 socket 已经打开，选项在这里就地应用
+     */
+    client->SetOption(option);
+
     client->d->StartRead(client->d->impl.socket);
     spider_emit Object::Emit(q, &TcpServer::InComingConnection, std::forward<TcpSocket*>(client));
   }
@@ -94,6 +99,7 @@ class TcpServer::Private : public std::enable_shared_from_this<TcpServer::Privat
   TcpServer*              q = nullptr;
   uint16_t                port_;
   asio::ip::tcp::acceptor acceptor;
+  TcpSocket::Options      option;
 };
 
 }  // namespace net

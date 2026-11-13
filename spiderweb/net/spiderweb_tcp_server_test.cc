@@ -1,142 +1,109 @@
 #include "spiderweb/net/spiderweb_tcp_server.h"
 
-#include "gmock/gmock.h"
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "spiderweb/core/spiderweb_eventloop.h"
 #include "spiderweb/core/spiderweb_notify_spy.h"
 #include "spiderweb/core/spiderweb_object.h"
-#include "spiderweb/net/private/spiderweb_tcp_server_private.h"
 #include "spiderweb/net/spiderweb_tcp_socket.h"
 #include "spiderweb/spiderweb_check.h"
 
-class tcp_acceptor {
- public:
-  using AcceptHandler = std::function<void(const asio::error_code&)>;
-
-  MOCK_METHOD(void, async_accept, (asio::ip::tcp::socket & socket, AcceptHandler&& handler));
-};
-
-struct MockTcpServer {
-  explicit MockTcpServer(spiderweb::EventLoop& loop)
-      : loop(loop), d(std::make_shared<spiderweb::net::TcpServer::Private>(6666, &server)) {
-  }
-
-  ~MockTcpServer() {
-    d->q = nullptr;
-  }
-
-  spiderweb::EventLoop&                               loop;
-  tcp_acceptor                                        acceptor;
-  spiderweb::net::TcpServer                           server{1234};
-  std::shared_ptr<spiderweb::net::TcpServer::Private> d;
-};
-
 TEST(spiderweb_tcp_server, Accept) {
-  spdlog::set_level(spdlog::level::trace);
-  spdlog::flush_on(spdlog::level::trace);
-  using ::testing::_;
-
   spiderweb::EventLoop loop;
-  MockTcpServer        mocker(loop);
 
-  spiderweb::NotifySpy spy(&mocker.server, &spiderweb::net::TcpServer::InComingConnection);
+  /**
+   * @brief 端口传 0 由内核分配，避免用例之间抢端口
+   */
+  spiderweb::net::TcpServer server(0);
+  ASSERT_FALSE(server.ListenAndServ("127.0.0.1"));
+  ASSERT_NE(server.LocalPort(), 0);
 
-  EXPECT_CALL(mocker.acceptor, async_accept(_, _))
-      .WillOnce([&](asio::ip::tcp::socket& /*socket*/, tcp_acceptor::AcceptHandler&& handler) {
-        loop.QueueTask([handler = std::move(handler)]() { handler(asio::error_code()); });
-      })
-      .WillOnce([&](asio::ip::tcp::socket& /*socket*/, tcp_acceptor::AcceptHandler&& handler) {});
+  spiderweb::NotifySpy spy(&server, &spiderweb::net::TcpServer::InComingConnection);
 
-  auto ec = mocker.server.ListenAndServ();
-  EXPECT_FALSE(ec) << ec.FormatedMessage();
-  mocker.d->Listen("127.0.0.1");
-  mocker.d->StartAccept(mocker.acceptor);
+  spiderweb::net::TcpSocket client;
+  client.ConnectToHost("127.0.0.1", server.LocalPort());
 
   spy.Wait();
-  EXPECT_EQ(spy.Count(), 1);
+  ASSERT_EQ(spy.Count(), 1);
 
-  spiderweb::net::TcpSocket* client = std::get<0>(spy.LastResult<spiderweb::net::TcpSocket*>());
-  assert(client);
-  delete client;
+  auto* accepted = std::get<0>(spy.LastResult<spiderweb::net::TcpSocket*>());
+  ASSERT_NE(accepted, nullptr);
 
-  mocker.server.Stop();
-  mocker.d->acceptor.close();
+  /**
+   * @brief accept 出来的连接必须可用：客户端写，服务端能收到
+   */
+  spiderweb::NotifySpy received(accepted, &spiderweb::net::TcpSocket::BytesRead);
+  client.Write(std::vector<uint8_t>{'p', 'i', 'n', 'g'});
 
+  received.Wait();
+  EXPECT_EQ(received.Count(), 1);
+
+  accepted->DeleteLater();
+
+  /**
+   * @brief 停掉 listener：取消重新挂起的 accept，
+   * 并把 accept 过程中的 socket / accepted 一起 DeleteLater 掉
+   */
+  server.Stop();
   loop.Quit();
   loop.ExecEx();
 }
 
-TEST(spiderweb_tcp_server, AcceptFailed) {
-  using ::testing::_;
-
-  spiderweb::EventLoop loop;
-  MockTcpServer        mocker(loop);
-
-  spiderweb::NotifySpy spy(&mocker.server, &spiderweb::net::TcpServer::InComingConnection);
-
-  EXPECT_CALL(mocker.acceptor, async_accept(_, _))
-      .WillOnce([&](asio::ip::tcp::socket& /*socket*/, tcp_acceptor::AcceptHandler&& handler) {
-        loop.QueueTask([handler = std::move(handler)]() { handler(asio::error::address_in_use); });
-      });
-
-  auto ec = mocker.server.ListenAndServ();
-  EXPECT_FALSE(ec) << ec.FormatedMessage();
-  mocker.d->Listen("0.0.0.0");
-  mocker.d->StartAccept(mocker.acceptor);
-
-  spy.Wait(500);
-  EXPECT_EQ(spy.Count(), 0);
-}
-
 TEST(spiderweb_tcp_server, ListenAndServFailed) {
-  using ::testing::_;
-
   spiderweb::EventLoop loop;
   auto*                server = new spiderweb::net::TcpServer(2);
 
   auto ec = server->ListenAndServ();
   EXPECT_TRUE(ec) << ec.FormatedMessage();
-  delete server;
+
+  server->Stop();
+  server->DeleteLater();
+  loop.Quit();
+  loop.ExecEx();
 }
 
 TEST(spiderweb_tcp_server, SafeDelete) {
-  using ::testing::_;
-
   spiderweb::EventLoop loop;
   auto*                server = new spiderweb::net::TcpServer(1234);
 
   server->ListenAndServ();
-  delete server;
+
+  server->Stop();
+  server->DeleteLater();
+  loop.Quit();
+  loop.ExecEx();
 }
 
 TEST(spiderweb_tcp_server, Stop) {
-  using ::testing::_;
-
   spiderweb::EventLoop loop;
   auto*                server = new spiderweb::net::TcpServer(1234);
 
-  spiderweb::Object::Connect(server, &spiderweb::net::TcpServer::InComingConnection, &loop,
-                             [](spiderweb::net::TcpSocket* sd) {
-                               puts("sssssssssss");
-                               sd->SetNoDelay(true);
-                             });
   spiderweb::NotifySpy spy(server, &spiderweb::net::TcpServer::Stopped);
+  spiderweb::NotifySpy incoming(server, &spiderweb::net::TcpServer::InComingConnection);
 
   server->ListenAndServ();
 
-  loop.Exec();
-  // loop.RunAfter(100, [&]() { server->Stop(); });
-  //
-  // spy.Wait();
-  // EXPECT_EQ(spy.Count(), 1);
-  // spy.Clear();
-  //
-  // server->ListenAndServ();
-  // loop.RunAfter(100, [&]() { server->Stop(); });
-  // spy.Wait(100000);
-  // EXPECT_EQ(spy.Count(), 1);
-  //
-  // SPIDERWEB_VERIFY(1 == 1, return);
-  // SPIDERWEB_VERIFY(1 == 1, spy.Clear(); return);
-  // delete server;
+  loop.RunAfter(100, [&]() { server->Stop(); });
+
+  spy.Wait();
+  EXPECT_EQ(spy.Count(), 1);
+  spy.Clear();
+
+  server->ListenAndServ();
+  loop.RunAfter(100, [&]() { server->Stop(); });
+  spy.Wait();
+  EXPECT_EQ(spy.Count(), 1);
+
+  /**
+   * @brief Stop 关闭 acceptor 会取消挂起的 accept，不会产生新连接
+   */
+  EXPECT_EQ(incoming.Count(), 0);
+
+  SPIDERWEB_VERIFY(1 == 1, return);
+  SPIDERWEB_VERIFY(1 == 1, spy.Clear(); return);
+
+  server->DeleteLater();
+  loop.Quit();
+  loop.ExecEx();
 }

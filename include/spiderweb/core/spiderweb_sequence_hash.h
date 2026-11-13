@@ -155,6 +155,11 @@ class SequenceHash {
 
   void PushNode(node_type* before, node_type* node);
 
+  /**
+   * @brief 插入到链表头部
+   */
+  void PushNodeToHead(node_type* node);
+
   template <typename M, typename U>
   node_type* InsertHash(M&& key, U&& v);
 
@@ -328,12 +333,7 @@ bool SequenceHash<K, T, Map>::PushFront(key_type key, T v) {
     return false;
   }
 
-  if (head_) {
-    PushNode(node, head_);
-    head_ = node;
-  } else {
-    PushNode(node);
-  }
+  PushNodeToHead(node);
 
   return true;
 }
@@ -355,8 +355,7 @@ bool SequenceHash<K, T, Map>::PushBefore(key_type at, key_type key, T v) {
   if (before.ptr->p) {
     PushNode(before.ptr->p, node);
   } else {
-    PushNode(node, head_);
-    head_ = node;
+    PushNodeToHead(node);
   }
 
   return true;
@@ -404,6 +403,20 @@ void SequenceHash<K, T, Map>::PushNode(node_type* node) {
     head_ = node;
   }
   tail_ = node;
+}
+
+template <typename K, typename T, template <typename, typename, typename...> class Map>
+void SequenceHash<K, T, Map>::PushNodeToHead(node_type* node) {
+  node->p = nullptr;
+  node->n = head_;
+
+  if (head_) {
+    head_->p = node;
+  } else {
+    tail_ = node;
+  }
+
+  head_ = node;
 }
 
 template <typename K, typename T, template <typename, typename, typename...> class Map>

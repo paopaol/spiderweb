@@ -15,7 +15,7 @@ class TcpSocketConnector : public spiderweb::Object {
 
   void SetDeadline(int32_t timeout);
 
-  void Bind(const std::string& local_ip, uint16_t port);
+  void SetOption(const TcpSocket::Options& option);
 
   void ConnectToHost(const std::string& ip, uint16_t port);
 
